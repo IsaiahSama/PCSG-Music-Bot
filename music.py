@@ -27,7 +27,6 @@ class Music(commands.Cog):
                 break
         
         await self.chan.connect()
-        await self.playtune()
         self.reconnect.start()
 
     @tasks.loop(minutes=1)
@@ -44,13 +43,15 @@ class Music(commands.Cog):
         vc = self.guild.voice_client
         if vc == None:
             return
-        if not vc.is_playing() and vc:
+
+        if not vc.is_playing() and vc is not None:
             os.chdir("C:\\Users\\zelda\\desktop")
             for link in os.listdir():
                 if link.lower().startswith("pcsgtune"): break
             
             source = discord.FFmpegOpusAudio(link)
-            await vc.play(source)
+            print(type(vc))
+            vc.play(source)
 
 
 
