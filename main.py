@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-bot = commands.Bot(command_prefix='<<', case_insensitive=True)
+intent = discord.Intents.all()
+
+bot = commands.Bot(command_prefix='<<', case_insensitive=True, intents=intent)
 bot.help_command = None
 
 bot.load_extension("roles")
