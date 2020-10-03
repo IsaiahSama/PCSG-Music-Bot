@@ -19,6 +19,13 @@ bot.load_extension("music")
 @commands.is_owner()
 async def refresh(ctx):
     bot.reload_extension("roles")
+    bot.reload_extension("music")
+
+@bot.event
+async def on_ready():
+    print(f"And {bot.user.name} has arrived")
+    activity = discord.Activity(name='Lofi for PCSG', type=discord.ActivityType.playing)
+    await bot.change_presence(activity=activity)
 
 yes=os.getenv("key")
 bot.run(yes)
