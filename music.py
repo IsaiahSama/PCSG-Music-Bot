@@ -21,8 +21,14 @@ class Music(commands.Cog):
                 self.guild = g
                 break
 
+        if self.bot.id == 755685507907846144:
+            target = 762082834235654164
+        
+        elif self.bot.id == 756347306038657085:
+            target = 762150460651339806
+
         for chans in self.guild.voice_channels:
-            if chans.id == 762082834235654164:
+            if chans.id == target:
                 self.chan = chans
                 break
         
@@ -46,11 +52,17 @@ class Music(commands.Cog):
 
         if not vc.is_playing() and vc is not None:
             os.chdir("C:\\Users\\zelda\\desktop")
+            
+            if self.bot.id == 755685507907846144:
+                target = "pcsgtune.mp3"
+        
+            elif self.bot.id == 756347306038657085:
+                target = "pcsgtune2.mp3"
+
             for link in os.listdir():
-                if link.lower().startswith("pcsgtune"): break
+                if link.lower() == target: break
             
             source = discord.FFmpegOpusAudio(link)
-            print(type(vc))
             vc.play(source)
 
 
