@@ -9,7 +9,7 @@ load_dotenv()
 
 intent = discord.Intents.all()
 
-bot = commands.Bot(command_prefix='<<<', case_insensitive=True, intents=intent)
+bot = commands.Bot(command_prefix='<<<<', case_insensitive=True, intents=intent)
 bot.help_command = None
 
 bot.load_extension("roles")
@@ -23,10 +23,10 @@ async def refresh(ctx):
 
 @bot.event
 async def on_ready():
-    print(f"Tweet Tweet we're in")
-    activity = discord.Activity(name='Nature Music for PCSG', type=discord.ActivityType.playing)
+    print(f"Piano Noises... {bot.user.name} is here")
+    activity = discord.Activity(name='PCSG\'s secret piano', type=discord.ActivityType.playing)
     await bot.change_presence(activity=activity)
 
-yes=os.getenv("key2")
+yes=os.getenv("key3")
 bot.run(yes)
 

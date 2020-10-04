@@ -21,11 +21,14 @@ class Music(commands.Cog):
                 self.guild = g
                 break
 
-        if self.bot.id == 755685507907846144:
+        if self.bot.user.id == 755685507907846144:
             target = 762082834235654164
         
-        elif self.bot.id == 756347306038657085:
+        elif self.bot.user.id == 756347306038657085:
             target = 762150460651339806
+
+        elif self.bot.user.id == 762167641334218762:
+            target = 762171605244968990
 
         for chans in self.guild.voice_channels:
             if chans.id == target:
@@ -53,11 +56,14 @@ class Music(commands.Cog):
         if not vc.is_playing() and vc is not None:
             os.chdir("C:\\Users\\zelda\\desktop")
             
-            if self.bot.id == 755685507907846144:
+            if self.bot.user.id == 755685507907846144:
                 target = "pcsgtune.mp3"
         
-            elif self.bot.id == 756347306038657085:
+            elif self.bot.user.id == 756347306038657085:
                 target = "pcsgtune2.mp3"
+
+            elif self.bot.user.id == 762167641334218762:
+                target = "pcsgtune3.mp3"
 
             for link in os.listdir():
                 if link.lower() == target: break
