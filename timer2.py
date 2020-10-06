@@ -22,7 +22,7 @@ async def refresh(ctx):
 @bot.event
 async def on_ready():
     print(f"Timer for 45 mins, just for you")
-    activity = discord.Activity(name='Nature Music for PCSG', type=discord.ActivityType.playing)
+    activity = discord.Activity(name='Timing students for 45', type=discord.ActivityType.playing)
     await bot.change_presence(activity=activity)
 
 yes=os.getenv("key5")

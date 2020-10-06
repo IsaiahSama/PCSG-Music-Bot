@@ -2,67 +2,49 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 
-class TimerKing(commands.Cog):
+
+class Timer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())
 
-    channel = None
-    guild = None
-
     async def async_init(self):
         await self.bot.wait_until_ready()
-        self.guild = self.bot.get_guild(693608235835326464)
+        guild = self.bot.get_guild(693608235835326464)
+
+        await self.connect(guild)
+
+    async def connect(self, guild):
         if self.bot.user.id == 762840423965392906:
-            target = 762849851557675009
-
-        # Timer 25
+            channel = guild.get_channel(762849851557675009)
         elif self.bot.user.id == 762840289417101352:
-            target = 762849722712064031
+            channel = guild.get_channel(762849722712064031)
 
-        self.channel = discord.utils.get(self.guild.voice_channels, id=target)
-        await self.channel.connect()
-        await self.prepare()
-        await self.reconnect.start()
+        await channel.connect()
+        await self.prepare(guild, channel)
 
-
-    async def prepare(self):
-        channel = self.channel
-        if self.bot.user.id == 762840289417101352:
-            timer = 25
-        elif self.bot.user.id == 762840423965392906:
-            timer = 45
-
+    async def prepare(self, guild, channel):
         cname = channel.name.split(" ")
-        cnum = cname[-1]
-        if type(cnum) is not int: 
-            await channel.edit(name=f"{channel.name} Time: {timer}")
+        cname[-1] = cname[0]
+        await channel.edit(name=" ".join(cname))
+        await self.ticker(guild, channel, cname)       
 
-        await self.ticker.start()       
+    async def ticker(self, guild, channel, ogtime):
+        while True:
+            curname = channel.name.split(" ")
+            curtime = int(curname[-1])
+            while curtime > 0:
+                await asyncio.sleep(5)
+                curtime -= 1
 
-    @tasks.loop(minutes=1)
-    async def ticker(self):
-        if self.bot.user.id == 762840289417101352:
-            timer = 25
-        elif self.bot.user.id == 762840423965392906:
-            timer = 45
+                curname[-1] = str(curtime)
+                await channel.edit(name=" ".join(curname))
+                    
+            await channel.edit(name=f"{ogtime} Min Study: On Break")
+            await asyncio.sleep(20)
+            await channel.edit(name=f"{ogtime} Min Study Time: {ogtime}")
 
-        channel = self.channel
-        time = channel.name.split(" ")[-1]
-        time -= 1
-
-        if time == 0:
-            await channel.edit(name=f"{channel.name} Break Time")
-            await asyncio.sleep(300)
-            await channel.edit(name=f"{channel.name} Time: {timer}")
-
-
-    @tasks.loop(minutes=1)
-    async def reconnect(self):
-        if self.guild.voice_client == None:
-            await self.channel.connect()
-
-
+                  
 
 def setup(bot):
-    bot.add_cog(TimerKing(bot))
+    bot.add_cog(Timer(bot))
