@@ -23,11 +23,10 @@ class TimerKing(commands.Cog):
         self.channel = discord.utils.get(self.guild.voice_channels, id=target)
         await self.channel.connect()
         await self.prepare()
-        await self.ticker.start()
         await self.reconnect.start()
 
 
-    async def prepare():
+    async def prepare(self):
         channel = self.channel
         if self.bot.user.id == 762840289417101352:
             timer = 25
