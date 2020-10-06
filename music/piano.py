@@ -7,18 +7,16 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-intent = discord.Intents.all()
+intent = discord.Intents.default()
 
 bot = commands.Bot(command_prefix='<<<<', case_insensitive=True, intents=intent)
 bot.help_command = None
 
-bot.load_extension("roles")
 bot.load_extension("music")
 
 @bot.command()
 @commands.is_owner()
 async def refresh(ctx):
-    bot.reload_extension("roles")
     bot.reload_extension("music")
 
 @bot.event
