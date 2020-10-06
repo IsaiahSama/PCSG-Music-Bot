@@ -36,28 +36,19 @@ class Leveling(commands.Cog):
     users = []
     roles = []
 
+    # Set up
     async def async_init(self):
         await self.bot.wait_until_ready()
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS Users (
-                Name TEXT NOT NULL,
-                ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
-                Level INTEGER NOT NULL,
-                Exp INTEGER NOT NULL,
-                ExpThresh INTEGER NOT NULL
-                );""")
-
         await self.setup()
         await self.saving.start()
 
     async def setup(self):
         guild = self.bot.get_guild(693608235835326464)
         self.roles = [role.name for role in guild.roles if role.name.endswith("Learner")]
-        print(self.roles)
+
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
-                
                 await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
                 (member.name, member.id, 0, 0, 50))
 
@@ -69,6 +60,8 @@ class Leveling(commands.Cog):
                     self.users.append(x)
 
                 print("All users have been added")
+
+    # Commands
 
     @commands.command()
     async def profile(self, ctx):
@@ -87,6 +80,35 @@ class Leveling(commands.Cog):
         probed.add_field(name="Exp:", value=f"{person.exp}/{person.expthresh}")
 
         await ctx.send(embed=probed)
+
+    @commands.command()
+    async def rank(self, ctx):
+        person = await self.getperson(ctx)
+        x = self.users
+        x = sorted(x, key= lambda item: (item.level, item.exp), reverse=True)
+
+        rk = x.index(person)
+        await ctx.send(f"You are ranked {rk + 1} of {len(x)} members")
+
+
+    @commands.command()
+    async def top(self, ctx):
+        x = self.users
+        x = sorted(x, key= lambda item: (item.level, item.exp), reverse=True)
+
+        y = x[:5]
+
+        embed = discord.Embed(
+            title=f"Showing top 5 Studious Learners",
+            color=randint(0, 0xffffff)
+        )
+
+        embed.set_thumbnail(url=ctx.guild.icon_url)
+        for u in y:
+            embed.add_field(name=u.name, value=f"Level: {u.level} Exp: {u.exp}", inline=False)
+
+        await ctx.send(embed=embed)
+    # Listeners
 
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
@@ -114,14 +136,16 @@ class Leveling(commands.Cog):
                 color=randint(0, 0xffffff)
             )
             if person.didrole():
-                role_to_give = self.roles[person.level / 20]
+                role_to_give = self.roles[(person.level / 20) - 1]
+                if person.level / 20 >= len(self.roles):
+                    return
                 await message.author.add_role(role_to_give)
 
                 embed.add_field(name="New role", value=f"Congrats {message.author.name}. You now have the role of {role_to_give.name}")
 
             await message.channel.send(embed=embed)
-        
-        
+    
+    # Tasks    
     @tasks.loop(minutes=5)
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
@@ -131,10 +155,11 @@ class Leveling(commands.Cog):
 
         print("Saved")
 
+    # Functions
     async def getperson(self, m):
         toreturn = [x for x in self.users if m.author.id == x.tag]
         if not toreturn:
-            await m.channel.send("Something went wrong getting your user")
+            await m.channel.send(f"Something went wrong getting your user. Try again later or contact {self.bot.owner.name}")
             return None
         return toreturn[0]
 
