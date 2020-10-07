@@ -132,9 +132,17 @@ class OnlySFW(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)", (member.name, member.id, 0))
+            await db.execute("INSERT OR IGNORE INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)", (member.name, member.id, 0))
 
             await db.commit()
+
+        user = await self.getuser(member)
+        if user:
+            if user.warnlevel >= 4:
+                role = discord.utils.get(member.guild.roles, name="Muted")
+                await member.add_roles(role)
+                await member.send("As your offenses have not been wiped, you are muted.")
+        
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -158,7 +166,7 @@ class OnlySFW(commands.Cog):
             toreturn = [x for x in self.users if m.id == x.tag]
         if toreturn:
             return toreturn[0]
-        await m.channel.send("Something went wrong")
+        print("Something went wrong")
         return None
 
 def setup(bot):
