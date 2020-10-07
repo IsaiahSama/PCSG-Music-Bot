@@ -119,11 +119,17 @@ class OnlySFW(commands.Cog):
                 user.warn()
                 await message.channel.send(f"You have been warned for using NSFW content. You are on your {user.warnlevel} / 4 strikes")
                 await message.delete()
+        
+        tempmsg = message.content.lower().split(" ")
+        for l in tempmsg:
+            if l in self.profane:
 
-        for x in self.profane:
-            if x in message.content.lower():
                 user.warnlevel += 0.5
-                await message.channel.send(f"You have been warned for using profanity. WarnState: {user.warnlevel} / 4 strikes")
+                msg = await message.channel.send(f"You have been warned for saying {l}. WarnState: {user.warnlevel} / 4 strikes")
+                await message.delete()
+                await asyncio.sleep(5)
+                await msg.delete()
+                break
 
         if user.warnlevel >= 4: 
             await message.author.kick(reason="Disobeyed laws")
