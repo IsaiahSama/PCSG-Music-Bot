@@ -177,7 +177,7 @@ class Leveling(commands.Cog):
     # Functions
     async def getperson(self, m):
         toreturn = [x for x in self.users if m.author.id == x.tag]
-        if toreturn:
+        if not toreturn:
             await m.channel.send(f"Something went wrong getting your user. Try again later or contact Mods")
             return None
         return toreturn[0]
