@@ -20,25 +20,6 @@ async def on_ready():
     print(f"Right...")
     activity = discord.Activity(name='for p.help', type=discord.ActivityType.watching)
     await bot.change_presence(activity=activity)
-
-    async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS WarnUser(
-                Name Text NOT NULL
-                ID INTEGER PRIMARY KEY UNIQUE NOT NULL
-                WarnLevel INTEGER NOT NULL
-            )""")
-        
-            await db.execute("""CREATE TABLE IF NOT EXISTS Users (
-                Name TEXT NOT NULL,
-                ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
-                Level INTEGER NOT NULL,
-                Exp INTEGER NOT NULL,
-                ExpThresh INTEGER NOT NULL
-                );""")
-
-        await db.commit()
-
-
     
 
 @bot.command()
@@ -60,6 +41,15 @@ async def help(ctx):
     embed.add_field(name="p.profile", value="Shows your profile for this server", inline=False)
     embed.add_field(name="p.top", value="Shows top 5 active users", inline=False)
     embed.add_field(name="p.rank", value="Shows your rank for this server", inline=False)
+
+    role = [x for x in ctx.guild.roles if x.name.lower() in ["admin", "mod", "team"]]
+
+    if ctx.author.top_role in role:
+        embed.add_field(name="p.ban @mention reason", value="Bans a user", inline=False)
+        embed.add_field(name="p.kick @mention reason", value="Kicks a user", inline=False)
+        embed.add_field(name="p.mute @mention reason", value="Mutes a user", inline=False)
+        embed.add_field(name="p.warn @mention reason", value="Increases a user's warning level by 1", inline=False)
+        embed.add_field(name="p.resetwarn @mention", value="Resets a user's warning level", inline=False)
     
     await ctx.send(embed=embed)
 

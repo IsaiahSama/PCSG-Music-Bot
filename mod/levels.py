@@ -39,6 +39,16 @@ class Leveling(commands.Cog):
     # Set up
     async def async_init(self):
         await self.bot.wait_until_ready()
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            await db.execute("""CREATE TABLE IF NOT EXISTS Users (
+                Name TEXT NOT NULL,
+                ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
+                Level INTEGER NOT NULL,
+                Exp INTEGER NOT NULL,
+                ExpThresh INTEGER NOT NULL
+                );""")
+
+            await db.commit()
         await self.setup()
         await self.saving.start()
 
@@ -116,6 +126,13 @@ class Leveling(commands.Cog):
             await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
             (member.name, member.id, 0, 0, 50))
 
+    @commands.Cog.listener()
+    async def on_memeber_remove(self, member:discord.Member):
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            await db.execute("DELETE * FROM Users WHERE ID = ?", (member.id,))
+
+            await db.commit()
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -150,16 +167,18 @@ class Leveling(commands.Cog):
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in self.users:
-                await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
+                await db.execute("INSERT OR REPLACE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
                 (member.name, member.tag, member.level, member.exp, member.expthresh))
+
+            await db.commit()
 
         print("Saved")
 
     # Functions
     async def getperson(self, m):
         toreturn = [x for x in self.users if m.author.id == x.tag]
-        if not toreturn:
-            await m.channel.send(f"Something went wrong getting your user. Try again later or contact {self.bot.owner.name}")
+        if toreturn:
+            await m.channel.send(f"Something went wrong getting your user. Try again later or contact Mods")
             return None
         return toreturn[0]
 
