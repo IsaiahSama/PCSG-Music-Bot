@@ -157,12 +157,13 @@ class OnlySFW(commands.Cog):
     # Tasks
     @tasks.loop(minutes=5)
     async def saving(self):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for user in self.users:
-                await db.execute("INSERT OR REPLACE INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)", 
-                (user.name, user.tag, user.warnlevel))
+        # async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+        #     for user in self.users:
+        #         await db.execute("INSERT OR REPLACE INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)", 
+        #         (user.name, user.tag, user.warnlevel))
 
-            await db.commit()
+        #     await db.commit()
+        pass
 
     # Functions
     async def getuser(self, m):

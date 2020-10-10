@@ -165,14 +165,15 @@ class Leveling(commands.Cog):
     # Tasks    
     @tasks.loop(minutes=5)
     async def saving(self):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for member in self.users:
-                await db.execute("INSERT OR REPLACE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
-                (member.name, member.tag, member.level, member.exp, member.expthresh))
+        # async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+        #     for member in self.users:
+        #         await db.execute("INSERT OR REPLACE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
+        #         (member.name, member.tag, member.level, member.exp, member.expthresh))
 
-            await db.commit()
+        #     await db.commit()
 
-        print("Saved")
+        # print("Saved")
+        pass
 
     # Functions
     async def getperson(self, m):

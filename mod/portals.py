@@ -13,11 +13,8 @@ class Portaling(commands.Cog):
         channel = [chan.mention for chan in channels if channame.lower() in chan.name.lower()]
         if not channel: await ctx.send(f"Channel with {channame} could not be found"); return
         
-        msg = await ctx.send(''.join(channel[:49]))
+        await ctx.send(''.join(channel[:49]))
 
-        await asyncio.sleep(10)
-        await msg.delete()
-        print(len(channel))
 
     @commands.command()
     @commands.is_owner()
