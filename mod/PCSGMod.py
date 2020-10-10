@@ -66,6 +66,7 @@ async def modhelp(ctx):
         embed.add_field(name="p.warn @mention reason", value="Increases a user's warning level by 1", inline=False)
         embed.add_field(name="p.resetwarn @mention", value="Resets a user's warning level", inline=False)
         embed.add_field(name="p.warnstate @mention", value="Shows how many warns a user has", inline=False)
+        embed.add_field(name="p.slow duration", value="Sets a slowmode on channel for x seconds", inline=False)
 
         await ctx.send(embed=embed)
         return

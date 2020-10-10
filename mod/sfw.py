@@ -101,6 +101,12 @@ class OnlySFW(commands.Cog):
         await member.ban(reason=reason)
         await ctx.send(f"{member.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
     
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def slow(self, ctx, duration: int):
+        await ctx.channel.edit(slowmode_delay=duration)
+        await ctx.send(f"Messages from same user will be in {duration} second intervals")
+
     # Events
 
     with open("swearWords.txt") as f:

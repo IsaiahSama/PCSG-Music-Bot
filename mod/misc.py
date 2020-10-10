@@ -42,7 +42,7 @@ class Misc(commands.Cog):
     async def serverinfo(self, ctx):
         guild = ctx.guild
         guilded = discord.Embed(
-            title="Showing server info for {ctx.guild.name}",
+            title=f"Showing server info for {ctx.guild.name}",
             color=random.randint(0, 0xffffff)
         )        
         humans = [member for member in ctx.guild.members if not member.bot]
