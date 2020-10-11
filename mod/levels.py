@@ -60,7 +60,7 @@ class Leveling(commands.Cog):
             for member in guild.members:
                 if member.bot: continue
                 await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
-                (member.name, member.id, 0, 0, 50))
+                (str(member), member.id, 0, 0, 50))
 
             await db.commit()
 
