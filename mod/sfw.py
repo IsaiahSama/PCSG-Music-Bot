@@ -139,6 +139,8 @@ class OnlySFW(commands.Cog):
         for user in self.users:
             user.warnlevel = 0
 
+        await ctx.send("Cleared everyone's crimes")
+
 
     # Events
 
@@ -159,12 +161,12 @@ class OnlySFW(commands.Cog):
                 await message.channel.send(f"You have been warned for using NSFW content. You are on your {user.warnlevel} / 4 strikes")
                 await message.delete()
         
-        tempmsg = message.content.lower()
-        for bad_word in self.profane:
-            if bad_word in tempmsg:
+        tempmsg = message.content.lower().split(" ")
+        for word in tempmsg:
+            if word in self.profane:
 
                 user.warnlevel += 0.5
-                msg = await message.channel.send(f"You have been warned for saying {bad_word}. WarnState: {user.warnlevel} / 4 strikes")
+                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user.warnlevel} / 4 strikes")
                 await message.delete()
                 await asyncio.sleep(5)
                 await msg.delete()

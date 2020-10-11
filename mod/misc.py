@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import random
+import wikipedia as wp
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -61,6 +62,19 @@ class Misc(commands.Cog):
         guilded.add_field(name="Number of roles", value=f"{len(ctx.guild.roles)}")
 
         await ctx.send(embed=guilded)
+
+    
+    # @commands.command(aliases=["wiki"])
+    # async def wikipedia(self, ctx, *, tosearch):
+    #     results = wp.search(tosearch)
+    #     data = None
+    #     for result in results:
+    #         try:
+    #             data = await wp.summary(result, sentences=5)
+    #         except: continue
+
+    #     if not data: await ctx.send("Could not find that result"); return
+    #     await ctx.send(data)
 
 
     
