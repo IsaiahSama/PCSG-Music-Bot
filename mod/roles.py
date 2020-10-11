@@ -14,7 +14,11 @@ class Rolling(commands.Cog):
 
     capedict = {}
     csecdict = {}
-    dictcapesec = {}
+    daydict = {}
+    cxcdict = {}
+    
+    ids = [754573710974779443, 754561589163589743, 764787663776645140, 764790530181300244]
+    roleids = [764795950979088384, 764795982713061397, 764795923858587648, 764795955689291817, 764795892904755200, 764796084316667945]
 
     async def async_init(self):
         await self.bot.wait_until_ready() 
@@ -22,89 +26,110 @@ class Rolling(commands.Cog):
 
     async def thing(self):
         guild = self.bot.get_guild(693608235835326464)
-        await self.getcapes(guild)
-        await self.getcsecs(guild)
-        await self.getpart2(guild)
+        await self.getroles(guild)
         print("Done")
 
-    async def getcapes(self, guild):
-        cate = guild.get_channel(754573710974779443)
-        channels = cate.text_channels
-        for chan in channels:
-            emoji = chan.name[0]
-            name = chan.name[1:]
-            self.capedict[emoji] = name
+    async def getroles(self, guild):
+        dicts = [self.capedict, self.csecdict, self.daydict, self.cxcdict]
+        for i, v in enumerate(self.ids):
+            cate = guild.get_channel(v)
+            channels = cate.text_channels
+            for chan in channels:
+                emoji = chan.name[0]
+                name = chan.name[1:]
+                t = dicts[i]
+                t[emoji] = name
 
-    async def getcsecs(self, guild):
-        cate = guild.get_channel(754561589163589743)
-        channels = cate.text_channels
-        for chan in channels:
-            emoji = chan.name[0]
-            name = chan.name[1:]
-            self.csecdict[emoji] = name
+    @commands.command()
+    @commands.is_owner()
+    async def roleselect(self, ctx, mode):
+        await ctx.send(f"React with the appropiate emoji for your role")
+        tosend = []
+        ab = []
+        if mode == "cape": check = self.capedict.items()
+        elif mode == "csec": check = self.csecdict.items()
+        elif mode == "days": check = self.daydict.items()
+        elif mode == "cxc": check = self.cxcdict.items()
+        else: print("Bad mode"); return
+        for k, v in check: 
+            tdict = {}
+            tdict[k] = v
+            ab.append(tdict)
 
-    async def getpart2(self, guild):
-        chan = guild.get_channel(762068938686595152)
-        msg = await chan.fetch_message(764689348444291132)
-        print(msg)
-        results = re.findall(r"(.+:.+)`?", msg.content)
-        for item in results:
-            temp = item.split(":")
-            emoji = temp[0]
-            name = item[1]
-            print(emoji, name)
-            self.dictcapesec[emoji] = name
+        if len(ab) > 20:
+            a = ab[:20]
+            b = ab[21:]
+        else: a, b = ab, None
+        for d in a:
+            for k, v in d.items():
+                tmsg = f"{k}: `{v}`"
+                tosend.append(tmsg)
+            
+        tosend = '\n'.join(tosend)
+        msg = await ctx.send(tosend)
 
+        for d in a:
+            for v in d.keys():
+                await msg.add_reaction(v)
+
+        if not b: return
+        
+        tosend = []
+        for d in b:
+            for k, v in d.items():
+                tmsg = f"{k}: `{v}`"
+                tosend.append(tmsg)
+        tosend = '\n'.join(tosend)
+        msg = await ctx.send(tosend)
+        for d in b:
+            for v in d.keys():
+                await msg.add_reaction(v)
 
     # Events
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        towatch = [764358056233926686, 764358088802828299, 764358029151174656, 764358062118535208, 764661637364973588]
-        if not payload.message_id in towatch: return
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = guild.get_channel(payload.channel_id)
-        emoji = payload.emoji
-        print(type(payload.emoji))
-        emoji = str(emoji)
-        msg = await channel.fetch_message(payload.message_id)
-        print(msg)
-        results = re.findall(r"(.+:.+)`?", msg.content)
-        print(results)
+        if payload.message_id in self.roleids:
         
-        for r in results:
-            temp = r.split(":")
-            emoji2 = temp[0]
-            print(emoji2)
-            if emoji == emoji2:
-                name = temp[1]
-                name = name.replace("`", "")
-                name = name.replace("-", " ")
-                name = name.strip()
-                break
-            name = None
+            guild = self.bot.get_guild(payload.guild_id)
+            channel = guild.get_channel(payload.channel_id)
+            msg = await channel.fetch_message(payload.message_id)
+            emoji = payload.emoji
+            emoji = str(emoji)
         
-        if not name: print("STILL FAILED")
+            results = re.findall(r"(.+:.+)`?", msg.content)
+        
+            for r in results:
+                temp = r.split(":")
+                emoji2 = temp[0]
+                print(emoji2)
+                if emoji == emoji2:
+                    name = temp[1]
+                    name = name.replace("`", "")
+                    name = name.replace("-", " ")
+                    name = name.strip()
+                    break
+                name = None
+            
+            if not name: print("STILL FAILED")
 
-        print(name)
-
-        role = discord.utils.get(guild.roles, name=name)
-        if not role: return
-        user = guild.get_member(payload.user_id)
-        await user.add_roles(role)
-        await user.send(f"Congrats. You now have the {role.name} role")
+            role = discord.utils.get(guild.roles, name=name)
+            if not role: print("can't find role"); return
+            user = guild.get_member(payload.user_id)
+            await user.add_roles(role)
+            await user.send(f"Congrats. You now have the {role.name} role")
+        else:
+            print("Nope")
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        towatch = [764358056233926686, 764358088802828299, 764358029151174656, 764358062118535208]
-
-        if not payload.message_id in towatch: return
+        print("I also activated")
+        if not payload.message_id in self.roleids: return
         guild = self.bot.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)
         emoji = payload.emoji
         emoji = str(emoji)
         msg = await channel.fetch_message(payload.message_id)
         results = re.findall(r"(.+:.+)`?", msg.content)
-        print(results)
         
         for r in results:
             temp = r.split(":")
@@ -118,7 +143,7 @@ class Rolling(commands.Cog):
             name = None
         
         if not name: print("STILL FAILED")
-        
+
         role = discord.utils.get(guild.roles, name=name)
         if not role: return
         user = guild.get_member(payload.user_id)
