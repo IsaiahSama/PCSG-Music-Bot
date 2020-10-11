@@ -16,6 +16,7 @@ bot.load_extension("levels")
 bot.load_extension("sfw")
 bot.load_extension("portals")
 bot.load_extension("misc")
+bot.load_extension("isaiah")
 
 @bot.event
 async def on_ready():
@@ -32,6 +33,8 @@ async def rc(ctx):
     bot.reload_extension("sfw")
     bot.reload_extension("portals")
     bot.reload_extension("misc")
+    bot.reload_extension("isaiah")
+
     await ctx.send("Cogs Have been reloaded")
 
 @bot.command()
