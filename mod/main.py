@@ -17,6 +17,7 @@ bot.load_extension("sfw")
 bot.load_extension("portals")
 bot.load_extension("misc")
 bot.load_extension("isaiah")
+bot.load_extension("schedule")
 
 @bot.event
 async def on_ready():
@@ -27,15 +28,17 @@ async def on_ready():
 
 @bot.command()
 @commands.is_owner()
-async def rc(ctx):
-    bot.reload_extension("roles")
-    bot.reload_extension("levels")
-    bot.reload_extension("sfw")
-    bot.reload_extension("portals")
-    bot.reload_extension("misc")
-    bot.reload_extension("isaiah")
+async def rc(ctx, *, cog=None):
+    if not cog:
+        for extension in bot.extensions(): bot.reload_extension(extension)
+        await ctx.send("Cogs Have been reloaded")
 
-    await ctx.send("Cogs Have been reloaded")
+    else:
+        try:
+            bot.reload_extension(cog)    
+            await ctx.send(f"{cog} has been reloaded")
+        except discord.ext.commands.ExtensionNotLoaded:
+            await ctx.send("Extension could not be found")
 
 @bot.command()
 async def help(ctx):
