@@ -30,8 +30,15 @@ async def on_ready():
 @commands.is_owner()
 async def rc(ctx, *, cog=None):
     if not cog:
-        for extension in bot.extensions(): bot.reload_extension(extension)
-        await ctx.send("Cogs Have been reloaded")
+        bot.reload_extension("roles")
+        bot.reload_extension("levels")
+        bot.reload_extension("sfw")
+        bot.reload_extension("portals")
+        bot.reload_extension("misc")
+        bot.reload_extension("isaiah")
+        bot.reload_extension("schedule")
+
+        await ctx.send("Reloaded Cogs")
 
     else:
         try:
@@ -53,6 +60,10 @@ async def help(ctx):
     embed.add_field(name="p.rank", value="Shows your rank for this server", inline=False)
     embed.add_field(name="p.serverinfo", value="Shows basic server information", inline=False)
     embed.add_field(name="p.portal channelName", value="Opens a 'portal' to the channel whose name you specify. Emojis not needed", inline=False)
+    embed.add_field(name="p.scheduleset", value="Allows you to set your schedule", inline=False)
+    embed.add_field(name="p.myschedule", value="Shows your schedule for the day", inline=False)
+    embed.add_field(name="p.clrschedule day", value="Shows your schedule for the day", inline=False)
+    embed.add_field(name="p.rules", value="Shows the rules", inline=False)
 
     await ctx.send(embed=embed)
 

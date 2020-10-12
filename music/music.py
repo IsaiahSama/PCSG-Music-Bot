@@ -56,13 +56,13 @@ class Music(commands.Cog):
         if not vc.is_playing() and vc is not None:
             
             if self.bot.user.id == 755685507907846144:
-                target = "./pcsgtune.mp3"
+                target = "pcsgtune.mp3"
         
             elif self.bot.user.id == 756347306038657085:
-                target = "./pcsgtune2.mp3"
+                target = "pcsgtune2.mp3"
 
             elif self.bot.user.id == 762167641334218762:
-                target = "./pcsgtune3.mp3"
+                target = "pcsgtune3.mp3"
 
             for link in os.listdir():
                 if link.lower() == target: break

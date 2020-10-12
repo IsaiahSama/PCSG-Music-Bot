@@ -63,6 +63,22 @@ class Misc(commands.Cog):
 
         await ctx.send(embed=guilded)
 
+    @commands.command()
+    async def rules(self, ctx):
+        embed = discord.Embed(
+            title="Rules for this server",
+            color=random.randint(0, 0xffffff)
+        )
+
+        embed.set_thumbnail(url=ctx.guild.icon_url)
+        embed.add_field(name=f"1)", value=f"It is mandatory to go to the Roles category and select the roles which concern you", inline=False)
+        embed.add_field(name=f"2)", value=f"Be respectful to everyone. If you encounter any issues, inform the mods before taking other actions", inline=False)
+        embed.add_field(name=f"3)", value=f"Keep channel discussions to their respective channels", inline=False)
+        embed.add_field(name=f"4)", value=f"In order to take part in classes. Zoom and a Google account and required as classes will be hosted on those 2 platforms", inline=False)
+        embed.add_field(name=f"5)", value=f"Follow the rules", inline=False)
+
+        await ctx.send(embed=embed)
+
     
     # @commands.command(aliases=["wiki"])
     # async def wikipedia(self, ctx, *, tosearch):

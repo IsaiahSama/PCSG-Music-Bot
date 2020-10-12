@@ -44,9 +44,11 @@ class Timer(commands.Cog):
         ogtime = curname[0]
         curtime = int(curname[-1])
         curtime -= 5
+        guild = self.bot.get_guild(693608235835326464)
 
         if curtime <= 0:                
             await channel.edit(name=f"{ogtime} Min Study: On Break")
+            guild.voice_client.play(discord.FFmpegOpusAudio("Ping!.mp3"), after=guild.voice_client.play(discord.FFmpegOpusAudio("chill.mp3")))
             await asyncio.sleep(300)
             await channel.edit(name=f"{ogtime} Min Study Time: {ogtime}")
 
