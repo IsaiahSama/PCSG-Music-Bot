@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import asyncio
+import random
 
 
 class Timer(commands.Cog):
@@ -45,10 +46,12 @@ class Timer(commands.Cog):
         curtime = int(curname[-1])
         curtime -= 5
         guild = self.bot.get_guild(693608235835326464)
+        songs = ["ping!.mp3", "chill.mp3"]
 
         if curtime <= 0:                
             await channel.edit(name=f"{ogtime} Min Study: On Break")
-            guild.voice_client.play(discord.FFmpegOpusAudio("Ping!.mp3"), after=guild.voice_client.play(discord.FFmpegOpusAudio("chill.mp3")))
+            if not guild.voice_client.is_playing():
+                guild.voice_client.play(discord.FFmpegOpusAudio(random.choice(songs)))
             await asyncio.sleep(300)
             await channel.edit(name=f"{ogtime} Min Study Time: {ogtime}")
 
