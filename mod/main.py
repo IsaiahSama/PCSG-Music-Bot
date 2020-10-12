@@ -64,6 +64,7 @@ async def help(ctx):
     embed.add_field(name="p.myschedule", value="Shows your schedule for the day", inline=False)
     embed.add_field(name="p.clrschedule day", value="Shows your schedule for the day", inline=False)
     embed.add_field(name="p.rules", value="Shows the rules", inline=False)
+    embed.add_field(name="p.wiki tosearch", value="Searches the wide wikipedia for your requests", inline=False)
 
     await ctx.send(embed=embed)
 

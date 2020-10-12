@@ -55,7 +55,7 @@ class MySchedule(commands.Cog):
         if not user: await ctx.send("An error occured. Contact a mod if the error persists")
         await ctx.author.send("Did you know that you can do p.scheduleset monday to set a schedule for monday etc?")
         def check(m):
-            return m.author == ctx.author and m.channel == ctx.author.channel
+            return m.author == ctx.author and m.channel == ctx.author.dm_channel
 
         skipped = False
         dsotw = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -67,11 +67,11 @@ class MySchedule(commands.Cog):
 
         for day in dotw:
             while True:
-                await ctx.author.send(f"Tell me a list of tasks you generally do on {day}. Say Skip to move onto the next day, and exit to exit")
+                await ctx.author.send(f"Tell me a list of tasks you generally do on {day}. Say Skip to move onto the next day, and exit to exit. Seperate each item in your list by , before sending")
                 try: 
                     msg = await self.bot.wait_for('message', timeout=400, check=check)   
-                    if msg.content.lower() == "exit": await ctx.send("Exiting"); return
-                    if msg.content.lower() == "skip": await ctx.send("Skipping"); skipped = True; break
+                    if msg.content.lower() == "exit": await ctx.author.send("Exiting"); return
+                    if msg.content.lower() == "skip": await ctx.author.send("Skipping"); skipped = True; break
                 
                 except TimeoutError: await ctx.author.send("Could have just said no instead of leaving me hanging...")
                 
@@ -87,14 +87,12 @@ class MySchedule(commands.Cog):
                 
                 except TimeoutError: await ctx.author.send("Took to long. I'm leaving"); return
 
-            if skipped: 
+            if skipped:
                 skipped = False
                 if len(dotw) == 1: break
                 else: continue
 
-            async with aiosqlite.connect("PCSGDB.sqlite") as db:
-                await db.execute("INSERT OR REPLACE INTO User_Schedules (?) WHERE ID = ? VALUES(?)", (day, ctx.author.id, msg.content.lower()))
-                setattr(user, day, msg.content)
+            setattr(user, day, msg.content)
 
         await ctx.author.send("Completed. Thank you for taking time out to do this. :bowing: View it with p.myschedule")
 
@@ -112,6 +110,7 @@ class MySchedule(commands.Cog):
             if day not in dotw: await ctx.send("Invalid day"); return
 
         user = await self.getuser(ctx)
+
         value = getattr(user, day, None)
         if not value: await ctx.send("You don't seem to have anything for that day."); return
         embed = discord.Embed(

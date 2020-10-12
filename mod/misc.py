@@ -79,18 +79,24 @@ class Misc(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    
-    # @commands.command(aliases=["wiki"])
-    # async def wikipedia(self, ctx, *, tosearch):
-    #     results = wp.search(tosearch)
-    #     data = None
-    #     for result in results:
-    #         try:
-    #             data = await wp.summary(result, sentences=5)
-    #         except: continue
+    def sync_func(self, results):
+        for result in results:
+            try:
+                data = wp.summary(result, sentences=5)
+                return data
+            except wp.exceptions.PageError: continue
 
-    #     if not data: await ctx.send("Could not find that result"); return
-    #     await ctx.send(data)
+        return None
+
+    
+    @commands.command(aliases=["wiki"])
+    async def wikipedia(self, ctx, *, tosearch):
+        results = wp.search(tosearch)
+
+        data = await self.bot.loop.run_in_executor(None, self.sync_func, results)       
+
+        if not data: await ctx.send("Could not find that result"); return
+        await ctx.send(data)
 
 
     

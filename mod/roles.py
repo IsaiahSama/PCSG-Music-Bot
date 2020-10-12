@@ -16,9 +16,10 @@ class Rolling(commands.Cog):
     csecdict = {}
     daydict = {}
     cxcdict = {}
+    group = {}
     
-    ids = [754573710974779443, 754561589163589743, 764787663776645140, 764790530181300244]
-    roleids = [764795950979088384, 764795982713061397, 764795923858587648, 764795955689291817, 764795892904755200, 764796084316667945]
+    ids = [754573710974779443, 754561589163589743, 764787663776645140, 764790530181300244, 765008580143087617]
+    roleids = [764795950979088384, 764795982713061397, 764795923858587648, 764795955689291817, 764795892904755200, 764796084316667945, 765013168846012458]
 
     async def async_init(self):
         await self.bot.wait_until_ready() 
@@ -30,7 +31,7 @@ class Rolling(commands.Cog):
         print("Done")
 
     async def getroles(self, guild):
-        dicts = [self.capedict, self.csecdict, self.daydict, self.cxcdict]
+        dicts = [self.capedict, self.csecdict, self.daydict, self.cxcdict, self.group]
         for i, v in enumerate(self.ids):
             cate = guild.get_channel(v)
             channels = cate.text_channels
@@ -50,6 +51,7 @@ class Rolling(commands.Cog):
         elif mode == "csec": check = self.csecdict.items()
         elif mode == "days": check = self.daydict.items()
         elif mode == "cxc": check = self.cxcdict.items()
+        elif mode == "group": check = self.group.items()
         else: print("Bad mode"); return
         for k, v in check: 
             tdict = {}
@@ -156,7 +158,15 @@ class Rolling(commands.Cog):
         role = discord.utils.get(member.guild.roles, name="Family")
         role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
         await member.add_roles(role, role2)
+        file = discord.File("logo.png")
 
+        await member.send("Welcome to the PCSG Family Server <3. Be sure to follow the rules located in the rules channel, and check out the how-to-help for more information", file=file)
+
+    # @commands.command()
+    # async def test(self, member):
+    #     file = discord.File("logo.png")
+
+    #     await member.send(file=file)
 
 def setup(bot):
     bot.add_cog(Rolling(bot))
