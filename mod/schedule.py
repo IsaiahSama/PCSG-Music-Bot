@@ -17,6 +17,18 @@ class Scheduler:
     friday: str=None
     saturday: str=None
     sunday: str=None
+    task: str="False"
+
+    def has_schedule(self):
+        dotw = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        day = [d for d in dotw if d.startswith(ctime().split(" ")[0].lower())]
+        day = day[0]
+        x = getattr(self, day, None)
+        return x
+
+    def resetday(self):
+        self.task = "False"
+        
 
 class MySchedule(commands.Cog):
 
@@ -38,13 +50,15 @@ class MySchedule(commands.Cog):
                 thursday TEXT,
                 friday TEXT,
                 saturday TEXT,
-                sunday TEXT
+                sunday TEXT,
+                task TEXT
             )""")
 
             await db.commit()
         
         await self.setup()
-        #self.saving.start()
+        print("Begin saving")
+        self.saving.start()
 
     # Commands
     @commands.command()
@@ -142,6 +156,14 @@ class MySchedule(commands.Cog):
         if not conf: await ctx.send(f"To confirm that you want to clear your schedule for {day} do p.clrschedule {day} True"); return
         setattr(user, day.lower(), None)
         await ctx.send(f"Cleared your schedule for {day}")
+
+    @commands.command()
+    @commands.is_owner()
+    async def resetday(self, ctx):
+        for user in self.users:
+            user.resetday()
+
+        await ctx.send("It's a new day I daresay")
         
 
     # Functions
@@ -158,28 +180,47 @@ class MySchedule(commands.Cog):
 
             async with db.execute("SELECT * FROM User_Schedules") as cursor:
                 async for row in cursor:
-                    self.users.append(Scheduler(row[0], row[1], row[2], row[3], row[4]))
+                    self.users.append(Scheduler(*row))
 
         print("Setup for Scheduling Complete")
 
+        self.notify.start()
 
+    @tasks.loop(hours=12)
+    async def notify(self):
+        guild = self.bot.get_guild(693608235835326464)
+        for user in self.users:
+            x = user.has_schedule()
+            if not x: continue
+            to_send = await self.getmember(guild, user)
+            if not to_send: continue
+            print(bool(user.task))
+            if bool(user.task): continue
+            await to_send.send(f"Here are your tasks for today: {x}")
+            user.task = "True"
+            print(bool(user.task))
+                    
     async def getuser(self, ctx):
         user = [x for x in self.users if x.tag == ctx.author.id]
         if not user: return None
         return user[0]
 
+    async def getmember(self, guild, user):
+        member = [x for x in guild.members if x.id == user.tag]
+        if not member: return None
+        return member[0]
+
 
     # Saving
-    @tasks.loop(minutes=5)
+    @tasks.loop(seconds=30)
     async def saving(self):
-        # async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-        #     for user in self.users:
-        #         await db.execute("""INSERT OR REPLACE INTO User_Schedules (name, id, monday, tuesday, wednesday, thursday, friday, 
-        #         saturday, sunday) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", (user.name, user.tag, user.monday, user.tuesday, user.wednesday,
-        #         user.thursday, user.friday, user.saturday, user.sunday))
-
-        #     await db.commit()
-        pass
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            for user in self.users:
+                await db.execute("""INSERT OR REPLACE INTO User_Schedules (name, id, monday, tuesday, wednesday, thursday, friday, 
+                saturday, sunday, task) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", (user.name, user.tag, user.monday, user.tuesday, user.wednesday, user.thursday, user.friday, 
+                user.saturday, user.sunday, user.task))
+            await db.commit()
+        # pass
 
     
 def setup(bot):

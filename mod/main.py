@@ -80,6 +80,7 @@ async def modhelp(ctx):
 
         embed.add_field(name="p.ban @mention reason", value="Bans a user", inline=False)
         embed.add_field(name="p.kick @mention reason", value="Kicks a user", inline=False)
+        embed.add_field(name="p.timeout @mention duration reason", value="Mutes a user", inline=False)
         embed.add_field(name="p.mute @mention reason", value="Mutes a user", inline=False)
         embed.add_field(name="p.unmute @mention", value="Unmutes a user", inline=False)
         embed.add_field(name="p.warn @mention reason", value="Increases a user's warning level by 1", inline=False)

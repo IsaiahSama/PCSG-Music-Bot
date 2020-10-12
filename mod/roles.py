@@ -19,7 +19,7 @@ class Rolling(commands.Cog):
     group = {}
     
     ids = [754573710974779443, 754561589163589743, 764787663776645140, 764790530181300244, 765008580143087617]
-    roleids = [764795950979088384, 764795982713061397, 764795923858587648, 764795955689291817, 764795892904755200, 764796084316667945, 765013168846012458]
+    roleids = [765345502907596840, 765345536244318220, 765345755505360937, 765345790616141874, 764795892904755200, 764796084316667945, 765013168846012458]
 
     async def async_init(self):
         await self.bot.wait_until_ready() 
@@ -103,7 +103,6 @@ class Rolling(commands.Cog):
             for r in results:
                 temp = r.split(":")
                 emoji2 = temp[0]
-                print(emoji2)
                 if emoji == emoji2:
                     name = temp[1]
                     name = name.replace("`", "")
@@ -113,18 +112,16 @@ class Rolling(commands.Cog):
                 name = None
             
             if not name: print("STILL FAILED")
-
+        
             role = discord.utils.get(guild.roles, name=name)
-            if not role: print("can't find role"); return
+            if not role: print(f"can't find role for {name}"); return
             user = guild.get_member(payload.user_id)
             await user.add_roles(role)
             await user.send(f"Congrats. You now have the {role.name} role")
-        else:
-            print("Nope")
+
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        print("I also activated")
         if not payload.message_id in self.roleids: return
         guild = self.bot.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)

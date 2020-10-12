@@ -82,6 +82,7 @@ class Misc(commands.Cog):
     def sync_func(self, results):
         for result in results:
             try:
+                print(result)
                 data = wp.summary(result, sentences=5)
                 return data
             except wp.exceptions.PageError: continue
@@ -92,11 +93,14 @@ class Misc(commands.Cog):
     @commands.command(aliases=["wiki"])
     async def wikipedia(self, ctx, *, tosearch):
         results = wp.search(tosearch)
+        if results: await ctx.send(f"Here are results for {tosearch}.\n {results}")
+        async with ctx.channel.typing():
 
-        data = await self.bot.loop.run_in_executor(None, self.sync_func, results)       
+            data = await self.bot.loop.run_in_executor(None, self.sync_func, results)       
 
-        if not data: await ctx.send("Could not find that result"); return
-        await ctx.send(data)
+            if not data: await ctx.send("Could not find that result"); return
+            await ctx.send(f"Here you go {ctx.author.mention}:\n{data}")
+
 
 
     
