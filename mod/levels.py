@@ -50,7 +50,7 @@ class Leveling(commands.Cog):
 
             await db.commit()
         await self.setup()
-        await self.saving.start()
+        self.saving.start()
 
     async def setup(self):
         guild = self.bot.get_guild(693608235835326464)
@@ -126,12 +126,19 @@ class Leveling(commands.Cog):
             await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
             (member.name, member.id, 0, 0, 50))
 
+        self.users.append(Person(member.name, member.id, 0, 0, 50))
+
     @commands.Cog.listener()
     async def on_memeber_remove(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("DELETE * FROM Users WHERE ID = ?", (member.id,))
 
             await db.commit()
+
+        user = await self.getperson(member)
+        self.users.remove(user)
+
+        
 
 
     @commands.Cog.listener()
@@ -176,11 +183,14 @@ class Leveling(commands.Cog):
 
     # Functions
     async def getperson(self, m):
-        toreturn = [x for x in self.users if m.author.id == x.tag]
-        if not toreturn:
-            await m.channel.send(f"Something went wrong getting your user. Try again later or contact Mods")
-            return None
-        return toreturn[0]
+        if hasattr(m, "author"):
+            toreturn = [x for x in self.users if m.author.id == x.tag]
+        else:
+            toreturn = [x for x in self.users if m.id == x.tag]
+        if toreturn:
+            return toreturn[0]
+        return None
+
 
 
 def setup(bot):

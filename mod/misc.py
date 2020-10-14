@@ -79,11 +79,10 @@ class Misc(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    def sync_func(self, results):
+    def sync_func(self, results, x):
         for result in results:
             try:
-                print(result)
-                data = wp.summary(result, sentences=5)
+                data = wp.summary(result, sentences=x)
                 return data
             except wp.exceptions.PageError: continue
 
@@ -95,11 +94,23 @@ class Misc(commands.Cog):
         results = wp.search(tosearch)
         if results: await ctx.send(f"Here are results for {tosearch}.\n {results}")
         async with ctx.channel.typing():
-
-            data = await self.bot.loop.run_in_executor(None, self.sync_func, results)       
+            data = await self.bot.loop.run_in_executor(None, self.sync_func, results, 5)       
 
             if not data: await ctx.send("Could not find that result"); return
             await ctx.send(f"Here you go {ctx.author.mention}:\n{data}")
+
+    @commands.command()
+    async def fact(self, ctx):
+        fact = wp.random()
+        async with ctx.channel.typing():
+            result = wp.search(fact)
+            data = await self.bot.loop.run_in_executor(None, self.sync_func, result, 1) 
+            await ctx.send(f"Your fact is: {data}")   
+
+    @commands.command()
+    async def find(self, ctx, member: discord.Member):
+        if not member.voice: await ctx.send(f"{member.name} is not in a voice channel")
+        else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")       
 
 
 

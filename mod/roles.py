@@ -155,9 +155,6 @@ class Rolling(commands.Cog):
         role = discord.utils.get(member.guild.roles, name="Family")
         role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
         await member.add_roles(role, role2)
-        file = discord.File("logo.png")
-
-        await member.send("Welcome to the PCSG Family Server <3. Be sure to follow the rules located in the rules channel, and check out the how-to-help for more information", file=file)
 
     # @commands.command()
     # async def test(self, member):

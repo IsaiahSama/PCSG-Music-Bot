@@ -216,7 +216,6 @@ class OnlySFW(commands.Cog):
             toreturn = [x for x in self.users if m.id == x.tag]
         if toreturn:
             return toreturn[0]
-        print("Something went wrong")
         return None
 
 def setup(bot):

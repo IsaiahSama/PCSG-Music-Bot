@@ -57,7 +57,6 @@ class MySchedule(commands.Cog):
             await db.commit()
         
         await self.setup()
-        print("Begin saving")
         self.saving.start()
 
     # Commands
@@ -141,7 +140,6 @@ class MySchedule(commands.Cog):
     async def clrschedule(self, ctx, day, conf=False):
         user = await self.getuser(ctx)
         dotw = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "all"]
-        print(day)
         if day.lower() not in dotw:
             await ctx.send("Invalid value")
             return
@@ -194,11 +192,10 @@ class MySchedule(commands.Cog):
             if not x: continue
             to_send = await self.getmember(guild, user)
             if not to_send: continue
-            print(bool(user.task))
             if bool(user.task): continue
             await to_send.send(f"Here are your tasks for today: {x}")
             user.task = "True"
-            print(bool(user.task))
+
                     
     async def getuser(self, ctx):
         user = [x for x in self.users if x.tag == ctx.author.id]
@@ -212,7 +209,7 @@ class MySchedule(commands.Cog):
 
 
     # Saving
-    @tasks.loop(seconds=30)
+    @tasks.loop(minutes=5)
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for user in self.users:
