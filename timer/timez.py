@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import asyncio
-import random
+import random, re, os
 
 
 class Timer(commands.Cog):
@@ -31,33 +31,38 @@ class Timer(commands.Cog):
         await self.prepare(guild, channel)
 
     async def prepare(self, guild, channel):
-        cname = channel.name.split(" ")
-        cname[-1] = cname[0]
-        await channel.edit(name=" ".join(cname))
+        value = self.bot.user.name.split(" ")[0].replace("min", "")
+        await channel.edit(name=f"({value})Study Time: {value}")
         await asyncio.sleep(300)
-        await self.ticker.start()  
+        self.ticker.start()  
             
 
     @tasks.loop(minutes=5)
     async def ticker(self):
-        channel = self.channel
-        curname = channel.name.split(" ")
-        ogtime = curname[0]
-        curtime = int(curname[-1])
-        curtime -= 5
         guild = self.bot.get_guild(693608235835326464)
+        channel = self.channel
+        value = self.bot.user.name.split(" ")[0].replace("min", "")
+        current_time = re.findall(r": ([0-9]+)", channel.name)
+        if current_time: current_time = int(current_time[0])
+        else: 
+            print("Something went wrong")
+            await channel.edit(name=f"({value})Study Time: {value}")
+            return
+
+        current_time -= 5
+
         songs = ["ping!.mp3", "chill.mp3"]
 
-        if curtime <= 0:                
-            await channel.edit(name=f"{ogtime} Min Study: On Break")
+        if current_time <= 0:                
+            await channel.edit(name=f"On Break")
             if not guild.voice_client.is_playing():
                 guild.voice_client.play(discord.FFmpegOpusAudio(random.choice(songs)))
             await asyncio.sleep(300)
-            await channel.edit(name=f"{ogtime} Min Study Time: {ogtime}")
+            await channel.edit(name=f"({value})Study Time: {value}")
 
         else:
-            curname[-1] = str(curtime)
-            await channel.edit(name=" ".join(curname))
+            await channel.edit(name=f"({value})Study Time: {current_time}")
+
 
 
     @tasks.loop(seconds=45)
@@ -67,13 +72,11 @@ class Timer(commands.Cog):
 
     @ticker.after_loop
     async def rentick(self):
-        await self.ticker.start()
+        self.ticker.start()
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        print(error)
-
-                  
+        print(error)    
 
 def setup(bot):
     bot.add_cog(Timer(bot))
