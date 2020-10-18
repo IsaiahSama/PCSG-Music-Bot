@@ -25,6 +25,7 @@ async def on_ready():
     activity = discord.Activity(name='Lofi for PCSG', type=discord.ActivityType.playing)
     await bot.change_presence(activity=activity)
 
+
 yes=os.getenv("key")
 bot.run(yes)
 

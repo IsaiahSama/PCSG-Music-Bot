@@ -110,10 +110,8 @@ class Misc(commands.Cog):
     @commands.command()
     async def find(self, ctx, member: discord.Member):
         if not member.voice: await ctx.send(f"{member.name} is not in a voice channel")
-        else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")       
+        else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")  
 
 
-
-    
 def setup(bot):
     bot.add_cog(Misc(bot))

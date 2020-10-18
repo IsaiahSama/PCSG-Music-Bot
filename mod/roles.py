@@ -146,6 +146,7 @@ class Rolling(commands.Cog):
         role = discord.utils.get(guild.roles, name=name)
         if not role: return
         user = guild.get_member(payload.user_id)
+        if role not in user.roles: return
         await user.remove_roles(role)
         await user.send(f"Removed {role.name} role")
 
@@ -155,6 +156,8 @@ class Rolling(commands.Cog):
         role = discord.utils.get(member.guild.roles, name="Family")
         role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
         await member.add_roles(role, role2)
+        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designated to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face:")
+
 
     # @commands.command()
     # async def test(self, member):

@@ -24,9 +24,8 @@ bot.load_extension("notes")
 @bot.event
 async def on_ready():
     print(f"Right...")
-    activity = discord.Activity(name='for p.help', type=discord.ActivityType.watching)
-    await bot.change_presence(activity=activity)
-    
+    activity = discord.Activity(name='for p.help', type=discord.ActivityType.listening)
+    await bot.change_presence(activity=activity)    
 
 @bot.command()
 @commands.is_owner()
