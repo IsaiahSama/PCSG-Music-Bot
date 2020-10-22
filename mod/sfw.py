@@ -6,8 +6,7 @@ from random import randint
 import aiosqlite
 
 class WarnUser:
-    def __init__(self, name, tag, warnlevel):
-        self.name = name
+    def __init__(self, tag, warnlevel):
         self.tag = tag
         self.warnlevel = warnlevel
 
@@ -25,7 +24,6 @@ class OnlySFW(commands.Cog):
 
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS WarnUser(
-                Name Text NOT NULL,
                 ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
                 WarnLevel INTEGER NOT NULL
             )""")
@@ -41,14 +39,14 @@ class OnlySFW(commands.Cog):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
-                await db.execute("INSERT OR IGNORE INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)",
-                (str(member), member.id, 0))
+                await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)",
+                (member.id, 0))
 
             await db.commit()
 
             async with db.execute("SELECT * FROM WarnUser") as cursor:
                 async for row in cursor:
-                    x = WarnUser(row[0], row[1], row[2])
+                    x = WarnUser(row[0], row[1])
                     self.users.append(x)
 
         self.saving.start()
@@ -127,7 +125,9 @@ class OnlySFW(commands.Cog):
     async def warned(self, ctx):
         warned = []
         for user in self.users:
-            if user.warnlevel > 0: warned.append(f"Name: {user.name}, Warns: {user.warnlevel}")
+            temp = discord.utils.get(ctx.guild.members, id=user.tag)
+            if not temp: continue
+            if user.warnlevel > 0: warned.append(f"Name: {temp.name}, Warns: {user.warnlevel}")
 
         if not warned: await ctx.send("Everyone seems to be innocent. Excellent"); return
         await ctx.send("Showing 10 members with highest warns")
@@ -154,6 +154,7 @@ class OnlySFW(commands.Cog):
         if message.author.bot: return
         
         user = await self.getuser(message)
+        if not user: return
 
         for x in ["hentai", "porn"]:
             if x in message.content.lower():
@@ -178,10 +179,12 @@ class OnlySFW(commands.Cog):
             await message.author.add_roles(role)
             await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
 
+        if message.content.startswith("P."): await message.channel.send("If you are meaning me, my prefix is p. not P.")
+
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT OR IGNORE INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)", (member.name, member.id, 0))
+            await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", (member.id, 0))
 
             await db.commit()
 
@@ -198,15 +201,14 @@ class OnlySFW(commands.Cog):
         await ctx.send(error)
 
     # Tasks
-    @tasks.loop(minutes=5)
+    @tasks.loop(seconds=30)
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for user in self.users:
-                await db.execute("INSERT OR REPLACE INTO WarnUser (Name, ID, WarnLevel) VALUES (?, ?, ?)", 
-                (user.name, user.tag, user.warnlevel))
-
+                await db.execute("INSERT OR REPLACE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", 
+                (user.tag, user.warnlevel))
             await db.commit()
-        # pass
+        
 
     # Functions
     async def getuser(self, m):

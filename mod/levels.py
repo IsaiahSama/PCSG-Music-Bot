@@ -7,8 +7,7 @@ import aiosqlite
 
 
 class Person:
-    def __init__(self, name, tag, level, exp, expthresh):
-        self.name = name
+    def __init__(self, tag, level, exp, expthresh):
         self.tag = tag
         self.level = level
         self.exp = exp
@@ -41,7 +40,6 @@ class Leveling(commands.Cog):
         await self.bot.wait_until_ready()
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS Users (
-                Name TEXT NOT NULL,
                 ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
                 Level INTEGER NOT NULL,
                 Exp INTEGER NOT NULL,
@@ -59,14 +57,14 @@ class Leveling(commands.Cog):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
-                await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
-                (str(member), member.id, 0, 0, 50))
+                await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+                (member.id, 0, 0, 50))
 
             await db.commit()
 
             async with db.execute("SELECT * FROM Users") as cursor:
                 async for row in cursor:
-                    x = Person(row[0], row[1], row[2], row[3], row[4])
+                    x = Person(row[0], row[1], row[2], row[3])
                     self.users.append(x)
 
                 print("All users have been added")
@@ -85,7 +83,7 @@ class Leveling(commands.Cog):
         )
 
         probed.set_thumbnail(url=ctx.author.avatar_url)
-        probed.add_field(name="Name:", value=person.name)
+        probed.add_field(name="Name:", value=ctx.author.name)
         probed.add_field(name="Level:", value=person.level)
         probed.add_field(name="Exp:", value=f"{person.exp}/{person.expthresh}")
 
@@ -106,16 +104,15 @@ class Leveling(commands.Cog):
         x = self.users
         x = sorted(x, key= lambda item: (item.level, item.exp), reverse=True)
 
-        y = x[:5]
-
         embed = discord.Embed(
             title=f"Showing top 5 Studious Learners",
             color=randint(0, 0xffffff)
         )
 
         embed.set_thumbnail(url=ctx.guild.icon_url)
-        for u in y:
-            embed.add_field(name=u.name, value=f"Level: {u.level} Exp: {u.exp}", inline=False)
+        for u in x[:5]:
+            name = ctx.guild.get_member(u.tag).name
+            embed.add_field(name=name, value=f"Level: {u.level} Exp: {u.exp}", inline=False)
 
         await ctx.send(embed=embed)
     # Listeners
@@ -123,15 +120,15 @@ class Leveling(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT OR IGNORE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
-            (member.name, member.id, 0, 0, 50))
+            await db.execute("INSERT OR IGNORE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+            (member.id, 0, 0, 50))
 
-        self.users.append(Person(member.name, member.id, 0, 0, 50))
+        self.users.append(Person(member.id, 0, 0, 50))
 
     @commands.Cog.listener()
     async def on_memeber_remove(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("DELETE * FROM Users WHERE ID = ?", (member.id,))
+            await db.execute("DELETE FROM Users WHERE ID = ?", (member.id,))
 
             await db.commit()
 
@@ -139,7 +136,6 @@ class Leveling(commands.Cog):
         self.users.remove(user)
 
         
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -174,10 +170,29 @@ class Leveling(commands.Cog):
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in self.users:
-                await db.execute("INSERT OR REPLACE INTO Users (Name, ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?, ?)",
-                (member.name, member.tag, member.level, member.exp, member.expthresh))
+                await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+                (member.tag, member.level, member.exp, member.expthresh))
 
             await db.commit()
+
+    @commands.command()
+    @commands.is_owner()
+    async def savelevel(self, ctx):
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            for member in self.users:
+                await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+                (member.tag, member.level, member.exp, member.expthresh))
+
+            await db.commit()
+
+        await ctx.send("SAVED")
+
+    @commands.command()
+    @commands.is_owner()
+    async def givelevel(self, ctx, member:discord.Member, amount:int):
+        user = await self.getperson(member)
+        user.level += amount
+        await ctx.send("Successful")
 
         # pass
 

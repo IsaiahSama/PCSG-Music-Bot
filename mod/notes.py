@@ -2,8 +2,7 @@ import discord, asyncio, aiosqlite, random, re
 from discord.ext import commands, tasks
 
 class Notes:
-    def __init__(self, name=None, user_id=None, title=None, content=None, tags=None, post_id=None):
-        self.name = name
+    def __init__(self, user_id=None, title=None, content=None, tags=None, post_id=None):
         self.user_id = user_id
         self.title = title
         self.content = content
@@ -20,7 +19,6 @@ class Noting(commands.Cog):
     async def async_init(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS Notes (
-                name TEXT,
                 user_id INTEGER,
                 title TEXT UNIQUE NOT NULL,
                 content TEXT NOT NULL,
@@ -78,18 +76,16 @@ class Noting(commands.Cog):
             for check in self.notes:
                 if check.title.lower() == title.lower(): await ctx.send("A note with this Title already exists"); return
         
-        mylist = ["name", "user_id", "title", "content", "tags"]
-        value = [str(ctx.author), ctx.author.id, title, content, tags]
+        mylist = ["user_id", "title", "content", "tags"]
+        value = [ctx.author.id, title, content, tags]
         
         note = Notes()
         for i, v in enumerate(mylist):
             setattr(note, v, value[i])
 
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT INTO Notes (name, user_id, title, content, tags) VALUES (?, ?, ?, ?, ?)",
-            (str(ctx.author), ctx.author.id, title, content, tags))
-
-            await db.commit()
+            await db.execute("INSERT INTO Notes (user_id, title, content, tags) VALUES (?, ?, ?, ?)",
+            (ctx.author.id, title, content, tags))
 
             async with db.execute("SELECT post_id from Notes WHERE title = ? and user_id = ?", (title, ctx.author.id)) as cur:
                 async for row in cur:
@@ -103,6 +99,7 @@ class Noting(commands.Cog):
     @commands.command()
     async def allnotes(self, ctx):
         to_send = [note.title for note in self.notes]
+        if not to_send: await ctx.send("No notes exist as yet. Make one with p.takenote. Use p.note for an example")
         await ctx.send(', '.join(to_send))
 
     @commands.command()
@@ -132,15 +129,20 @@ class Noting(commands.Cog):
             return
 
         to_send = to_send[0]
+        person = discord.utils.get(ctx.guild.members, id=to_send.user_id)
+        if person:
+            name = person.name
+        else:
+            name = "Unknown User"
         embed = discord.Embed(
-            title=f"Showing note by {to_send.name}.\nTitle: {to_send.title}",
+            title=f"Showing note by {name}.\nTitle: {to_send.title}",
             description=f"Content: {to_send.content}",
             color=random.randint(0, 0xffffff)
         )
 
         embed.set_thumbnail(url=self.bot.user.avatar_url)
-        embed.add_field(name="Tags", value=to_send.tags)
-        embed.add_field(name="ID", value=to_send.post_id)
+        embed.add_field(name="Tags:", value=to_send.tags)
+        embed.add_field(name="ID:", value=to_send.post_id)
 
         await ctx.send(embed=embed)
 
@@ -152,18 +154,28 @@ class Noting(commands.Cog):
             if note.post_id == idtodel: to_del = note; break
 
         if not to_del: await ctx.send("Could not find a note with that id"); return
-        await ctx.send(f"Deleted {to_del.name}'s note on {to_del.title}")      
+        your_moderators = [352461326800519169, 493839592835907594, 691653525335441428, 315856223130091520, 693241262915977236, to_del.user_id]
+        if not ctx.author.id in your_moderators: 
+            await ctx.send("You do not have permission to delete this note.")
+
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            await db.execute("DELETE FROM Notes WHERE post_id = ?", (note.post_id,))
+            await db.commit()
+        person = discord.utils.get(ctx.guild.members, id=to_del.user_id)
+        if person: name = person.name
+        else: name = "Unknown User"
+        await ctx.send(f"Deleted {name}'s note on {to_del.title}")      
         self.notes.remove(to_del)
         del to_del   
 
     # Saving
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=2)
     async def saving(self):
         if len(self.notes) > 1:
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:
                 for note in self.notes:
-                    await db.execute("INSERT OR REPLACE INTO Notes (name, user_id, title, content, tags, post_id) VALUES (?, ?, ?, ?, ?, ?)",
-                    (note.name, note.user_id, note.title, note.content, note.tags, note.post_id))
+                    await db.execute("INSERT OR REPLACE INTO Notes (user_id, title, content, tags, post_id) VALUES (?, ?, ?, ?, ?)",
+                    (note.user_id, note.title, note.content, note.tags, note.post_id))
 
                 await db.commit()
     
