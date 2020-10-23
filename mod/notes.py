@@ -102,7 +102,7 @@ class Noting(commands.Cog):
         if not to_send: await ctx.send("No notes exist as yet. Make one with p.takenote. Use p.note for an example")
         await ctx.send(', '.join(to_send))
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def deldbnotes(self, ctx):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:

@@ -9,7 +9,7 @@ import aiosqlite
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="p.", case_insensitive=True, intents=intents)
-bot.help_command = None
+
 
 bot.load_extension("roles")
 bot.load_extension("levels")
@@ -18,8 +18,9 @@ bot.load_extension("portals")
 bot.load_extension("misc")
 bot.load_extension("isaiah")
 bot.load_extension("schedule")
-bot.load_extension("help")
+# bot.load_extension("help")
 bot.load_extension("notes")
+bot.load_extension("poll")
 
 @bot.event
 async def on_ready():
@@ -27,7 +28,7 @@ async def on_ready():
     activity = discord.Activity(name='for p.help', type=discord.ActivityType.listening)
     await bot.change_presence(activity=activity)    
 
-@bot.command()
+@bot.command(hidden=True)
 @commands.is_owner()
 async def rc(ctx, *, cog=None):
     if not cog:
@@ -38,8 +39,9 @@ async def rc(ctx, *, cog=None):
         bot.reload_extension("misc")
         bot.reload_extension("isaiah")
         bot.reload_extension("schedule")
-        bot.reload_extension("help")
+        # bot.reload_extension("help")
         bot.reload_extension("notes")
+        bot.reload_extension("poll")
 
         await ctx.send("Reloaded Cogs")
 
@@ -50,7 +52,7 @@ async def rc(ctx, *, cog=None):
         except discord.ext.commands.ExtensionNotLoaded:
             await ctx.send("Extension could not be found")
 
-@bot.command()
+@bot.command(hidden=True)
 @commands.is_owner()
 async def uc(ctx, *, cog):
     try:

@@ -155,7 +155,7 @@ class MySchedule(commands.Cog):
         setattr(user, day.lower(), None)
         await ctx.send(f"Cleared your schedule for {day}")
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def resetday(self, ctx):
         for user in self.users:

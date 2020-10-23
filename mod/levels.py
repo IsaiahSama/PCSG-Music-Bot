@@ -175,7 +175,7 @@ class Leveling(commands.Cog):
 
             await db.commit()
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def savelevel(self, ctx):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
@@ -187,7 +187,7 @@ class Leveling(commands.Cog):
 
         await ctx.send("SAVED")
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def givelevel(self, ctx, member:discord.Member, amount:int):
         user = await self.getperson(member)

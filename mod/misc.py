@@ -110,7 +110,58 @@ class Misc(commands.Cog):
     @commands.command()
     async def find(self, ctx, member: discord.Member):
         if not member.voice: await ctx.send(f"{member.name} is not in a voice channel")
-        else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")  
+        else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")
+
+    @commands.command()
+    async def seeschedule(self, ctx):
+        dayrole = [x for x in ctx.guild.roles if x.name.endswith("day")]
+        caperole = [x for x in ctx.guild.roles if "cape " in x.name]
+        csecrole = [x for x in ctx.guild.roles if "csec " in x.name]
+        profrole = [x for x in ctx.guild.roles if x.name in ["csec", "cape"]]
+
+        user_profic = [proficiency for proficiency in profrole if proficiency in ctx.author.roles]
+        if not user_profic: await ctx.send("You have not selected your role for csec/cape"); return
+        user_days = [day.name for day in dayrole if day in ctx.author.roles]
+        if not user_days: await ctx.send("You have not selected your role for which days you are available"); return
+        if user_profic[0].name == "csec":
+            user_subjects = [subject.name for subject in csecrole if subject in ctx.author.roles]
+        else:
+            user_subjects = [subject.name for subject in caperole if subject in ctx.author.roles]
+
+        if not user_subjects: await ctx.send("You don't have any subject roles"); return
+        
+        await ctx.send("Searching for people doing your subjects whose available days matches yours")
+        members = []
+        for member in ctx.guild.members:
+            if member == ctx.author: continue
+            if member.status == discord.Status.offline: continue
+            days = [day.name for day in dayrole if day in member.roles and day in ctx.author.roles]
+
+            if not days: continue
+            profic = [proficiency for proficiency in profrole if proficiency in member.roles and proficiency in ctx.author.roles]
+
+            if not profic: continue
+            if profic[0].name == "csec":
+                subjects = [subject.name for subject in csecrole if subject in member.roles and subject in ctx.author.roles]
+            else:
+                subjects = [subject.name for subject in caperole if subject in member.roles and subject in ctx.author.roles]
+
+            if not subjects: continue
+            members.append(member)
+
+        if len(members) == 0: await ctx.send("Could not find anyone matching your criteria"); return
+        await ctx.send(len(members))
+        embed = discord.Embed(
+            title=f"Showing members that meet {ctx.author.name}'s criteria",
+            color=random.randint(0, 0xffffff)
+        )
+        
+        embed.set_thumbnail(url=self.bot.user.avatar_url)
+
+        for member in members[:25]:
+            embed.add_field(name="Available:", value=member)
+
+        await ctx.send(embed=embed)  
 
 
 def setup(bot):
