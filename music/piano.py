@@ -22,8 +22,8 @@ async def refresh(ctx):
 @bot.event
 async def on_ready():
     print(f"Piano Noises... {bot.user.name} is here")
-    activity = discord.Activity(name='No', type=discord.ActivityType.playing)
-    await bot.change_presence(activity=activity, status=discord.Status.idle)
+    activity = discord.Activity(name='Piano music for kiddies', type=discord.ActivityType.playing)
+    await bot.change_presence(activity=activity)
 
 
 yes=os.getenv("key3")
