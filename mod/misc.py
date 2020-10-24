@@ -39,7 +39,7 @@ class Misc(commands.Cog):
         name = temp[0]
         await studycount.edit(name=f"{name}: {total}")
 
-    @commands.command()
+    @commands.command(brief="Used to see information on the server", help="Reveals some basic information on the PCSG server")
     async def serverinfo(self, ctx):
         guild = ctx.guild
         guilded = discord.Embed(
@@ -63,7 +63,7 @@ class Misc(commands.Cog):
 
         await ctx.send(embed=guilded)
 
-    @commands.command()
+    @commands.command(brief="Shows the rules for the server", help="Shows the rules for the server")
     async def rules(self, ctx):
         embed = discord.Embed(
             title="Rules for this server",
@@ -89,8 +89,8 @@ class Misc(commands.Cog):
         return None
 
     
-    @commands.command(aliases=["wiki"])
-    async def wikipedia(self, ctx, *, tosearch):
+    @commands.command(aliases=["wikipedia"], brief="Instantly search the wikipedia for whatever you want", help="Searches the wikipedia for what you asked. Wikipedia is a bit... difficult at times however.", usage="something")
+    async def wiki(self, ctx, *, tosearch):
         results = wp.search(tosearch)
         if results: await ctx.send(f"Here are results for {tosearch}.\n {results}")
         async with ctx.channel.typing():
@@ -99,7 +99,7 @@ class Misc(commands.Cog):
             if not data: await ctx.send("Could not find that result"); return
             await ctx.send(f"Here you go {ctx.author.mention}:\n{data}")
 
-    @commands.command()
+    @commands.command(brief="Gives you a random fact.", help="Tells you a random potentially interesting fact, yeeted right from Wikipedia")
     async def fact(self, ctx):
         fact = wp.random()
         async with ctx.channel.typing():
@@ -107,12 +107,12 @@ class Misc(commands.Cog):
             data = await self.bot.loop.run_in_executor(None, self.sync_func, result, 1) 
             await ctx.send(f"Your fact is: {data}")   
 
-    @commands.command()
+    @commands.command(brief="Shows you which voice channel someone is in.", help="Use this to find someone who you know is in a voice channel, but not sure as to which one they are in", usage="@user")
     async def find(self, ctx, member: discord.Member):
         if not member.voice: await ctx.send(f"{member.name} is not in a voice channel")
         else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")
 
-    @commands.command()
+    @commands.command(brief="See who's available when you are so you can study with them", help="Looking for a study buddy of sorts? Use this command to see who's online and doing your same subjects and available when you are")
     async def seeschedule(self, ctx):
         dayrole = [x for x in ctx.guild.roles if x.name.endswith("day")]
         caperole = [x for x in ctx.guild.roles if "cape " in x.name]

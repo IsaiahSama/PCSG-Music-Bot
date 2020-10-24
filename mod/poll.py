@@ -7,8 +7,8 @@ class Polling(commands.Cog):
 
     active_polls = []
 
-    @commands.command(help="Make a poll for users to vote on. Options for the poll must first start with an emoji of your choice, then the poll option. Each option must go on a new line.")
-    async def makepoll(self, ctx, *, pollmsg):
+    @commands.command(help="Make a poll for users to vote on. Options for the poll must first start with an emoji of your choice, then the poll option. Each option must go on a new line.", brief="Used to make a poll", usage="poll_options")
+    async def poll(self, ctx, *, pollmsg):
         poll = pollmsg.split("\n")
         if not len(poll) > 1:
             await ctx.send("You must have at least 2 options to have a valid poll.")

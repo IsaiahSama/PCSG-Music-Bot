@@ -71,7 +71,7 @@ class Leveling(commands.Cog):
 
     # Commands
 
-    @commands.command()
+    @commands.command(brief="Used to view your profile.", help="Shows your levels and highest role")
     async def profile(self, ctx):
         person = await self.getperson(ctx)
         if not person:
@@ -86,10 +86,11 @@ class Leveling(commands.Cog):
         probed.add_field(name="Name:", value=ctx.author.name)
         probed.add_field(name="Level:", value=person.level)
         probed.add_field(name="Exp:", value=f"{person.exp}/{person.expthresh}")
+        probed.add_field(name="Highest Role:", value=ctx.author.top_role)
 
         await ctx.send(embed=probed)
 
-    @commands.command()
+    @commands.command(brief="Shows your rank", help="Shows your rank in terms of leveling with your fellow students")
     async def rank(self, ctx):
         person = await self.getperson(ctx)
         x = self.users
@@ -99,7 +100,7 @@ class Leveling(commands.Cog):
         await ctx.send(f"You are ranked {rk + 1} of {len(x)} members")
 
 
-    @commands.command()
+    @commands.command(brief="Shows top 5 studious learners", help="Used to see the top 5 most active users")
     async def top(self, ctx):
         x = self.users
         x = sorted(x, key= lambda item: (item.level, item.exp), reverse=True)

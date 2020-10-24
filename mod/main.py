@@ -9,7 +9,7 @@ import aiosqlite
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="p.", case_insensitive=True, intents=intents)
-
+# bot.help_command = None
 
 bot.load_extension("roles")
 bot.load_extension("levels")
@@ -18,7 +18,7 @@ bot.load_extension("portals")
 bot.load_extension("misc")
 bot.load_extension("isaiah")
 bot.load_extension("schedule")
-# bot.load_extension("help")
+bot.load_extension("help")
 bot.load_extension("notes")
 bot.load_extension("poll")
 
@@ -39,7 +39,7 @@ async def rc(ctx, *, cog=None):
         bot.reload_extension("misc")
         bot.reload_extension("isaiah")
         bot.reload_extension("schedule")
-        # bot.reload_extension("help")
+        bot.reload_extension("help")
         bot.reload_extension("notes")
         bot.reload_extension("poll")
 

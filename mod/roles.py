@@ -41,7 +41,7 @@ class Rolling(commands.Cog):
                 t = dicts[i]
                 t[emoji] = name
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def roleselect(self, ctx, mode):
         await ctx.send(f"React with the appropiate emoji for your role")

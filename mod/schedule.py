@@ -60,7 +60,7 @@ class MySchedule(commands.Cog):
         self.saving.start()
 
     # Commands
-    @commands.command()
+    @commands.command(brief="Used to set your schedule", help="Use this to create your general weekly scehdule")
     async def scheduleset(self, ctx, dayset=None):
         await ctx.send("For privacy, let's go to dms >:)")
         _ = ctx.author
@@ -109,7 +109,7 @@ class MySchedule(commands.Cog):
 
         await ctx.author.send("Completed. Thank you for taking time out to do this. :bowing: View it with p.myschedule")
 
-    @commands.command()
+    @commands.command(brief="Shows you your schedule for the day", help="Use this to view your set schedule for the current day. You can also enter the name of a day to view your schedule for that day.", usage="day_of_the_week (optional)")
     async def myschedule(self, ctx, day=None):
         dotw = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
@@ -136,20 +136,21 @@ class MySchedule(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(brief="This clears your schedule for a given day", help="You can use this to delete a schedule for a given day, or you can clear your entire weekly schedule with p.clrschedule all True", usage="[day or all] True")
     async def clrschedule(self, ctx, day, conf=False):
         user = await self.getuser(ctx)
         dotw = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "all"]
-        if day.lower() not in dotw:
-            await ctx.send("Invalid value")
-            return
-
         if day.lower() == "all":
             if not conf: await ctx.send("If you are sure that you wish to clear all of your schedules, do p.clrschedule all True"); return
             for d in dotw:
                 setattr(user, d, None)
 
             await ctx.send("Cleared all of your schedules")
+            return
+
+        if day.lower() not in dotw:
+            await ctx.send("Invalid value")
+            return
 
         if not conf: await ctx.send(f"To confirm that you want to clear your schedule for {day} do p.clrschedule {day} True"); return
         setattr(user, day.lower(), None)

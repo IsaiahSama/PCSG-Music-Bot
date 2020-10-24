@@ -13,7 +13,7 @@ class WarnUser:
     def warn(self):
         self.warnlevel += 1
 
-class OnlySFW(commands.Cog):
+class Moderator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())
@@ -53,74 +53,84 @@ class OnlySFW(commands.Cog):
 
     # Commands
 
-    @commands.command()
+    @commands.command(brief="Checks how many warns the mentioned person has", help="Use this to view the warnstate of a member", usage="@user")
     @commands.has_permissions(administrator=True)
     async def warnstate(self, ctx, member: discord.Member):
         user = await self.getuser(member)
         await ctx.send(f"{member.name} has {user.warnlevel}/4 warns")
 
-    @commands.command()
+    @commands.command(brief="Applies +1 warn to the user mentioned", help="This can be used to warn a user about something that the bot did not catch. Use with disgression", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
         user = await self.getuser(member)
         user.warn()
         await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user.warnlevel} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
+        await self.log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
         
-    @commands.command()
+    @commands.command(brief="This resets the warns that a person has back to 0", help="This sets the warns of a user back to 0.", usage="@user")
     @commands.has_permissions(administrator=True)
     async def resetwarn(self, ctx, member: discord.Member):
         user = await self.getuser(member)
         user.warnlevel = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
+        await self.log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
 
-    @commands.command()
+    @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
-    async def timeout(self, ctx, member: discord.Member, time=5):
+    async def timeout(self, ctx, member: discord.Member, time, *, reason):
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         await member.add_roles(role)
-        await ctx.send(f"{member.mention} has been timed out for {time} minutes")
+        await ctx.send(f"{member.mention} has been timed out for {time} minutes for {reason} by {ctx.author.name}")
         time *= 60
 
         await asyncio.sleep(time)
 
         await ctx.send(f"{member.mention}. Your timeout has come to an end. Refrain from having to be timed out again")
         await member.remove_roles(role)
+        await self.log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
 
-    @commands.command()
+    @commands.command(brief="Mutes a user until unmuted", help="Mutes a user until unmuted", usage="@user duration_in_seconds")
     @commands.has_permissions(administrator=True)
     async def mute(self, ctx, member: discord.Member, *, reason):
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         await member.add_roles(role)
-        await ctx.send(f"{member.mention} has been muted. Reason: {reason}")
+        await ctx.send(f"{member.mention} has been muted by {ctx.author}. Reason: {reason}")
+        await self.log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
 
-    @commands.command()
+    @commands.command(brief="Unmutes a user that has been muted.", help="Unmutes a muted user", usage="@user")
     @commands.has_permissions(administrator=True)
     async def unmute(self, ctx, member: discord.Member):
         role = discord.utils.get(member.roles, name="Muted")
         if not role: await ctx.send("User isn't muted"); return
         await member.remove_roles(role)
         await ctx.send(f"Unmuted {member.mention}. Refrain from having to be muted again")
+        await self.log("Unmute", f"{str(member)} was unmuted", str(ctx.author), reason="Null")
 
-    @commands.command()
+        
+
+    @commands.command(brief="Kicks a user", help="Kicks a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def kick(self, ctx, member: discord.Member, *, reason):
         await member.kick(reason=reason)
         await ctx.send(f"{member.name} was kicked from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
+        await self.log("Kick", f"{str(member)} was kicked", str(ctx.author), reason)
 
-    @commands.command()
+    @commands.command(brief='Bans a user', help="Bans a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def ban(self, ctx, member:discord.Member, *, reason):
         await member.ban(reason=reason)
         await ctx.send(f"{member.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
+        await self.log("Ban", f"{str(member)} was banned", str(ctx.author), reason)
     
-    @commands.command()
+    @commands.command(brief="Puts channel in slowmode", help="Use this to apply or disable a channel's slowmode", usage="duration")
     @commands.has_permissions(administrator=True)
     async def slow(self, ctx, duration: int):
         await ctx.channel.edit(slowmode_delay=duration)
         await ctx.send(f"Messages from same user will be in {duration} second intervals")
+        await self.log("SLOW", f"{ctx.channel.name} has been slowed to {duration}", str(ctx.author), reason="None")
 
-    @commands.command()
+    @commands.command(brief="Shows the 10 members with the highest warnstate", help="Shows the naughtiest 10 members in the server who have a warnstate")
     @commands.has_permissions(administrator=True)
     async def warned(self, ctx):
         warned = []
@@ -133,13 +143,14 @@ class OnlySFW(commands.Cog):
         await ctx.send("Showing 10 members with highest warns")
         await ctx.send('\n'.join(warned[:10]))
 
-    @commands.command()
+    @commands.command(brief="Resets the warnstate of EVERYONE in the server", help="Clears the warnstate of everyone in the server")
     @commands.has_permissions(administrator=True)
     async def warnreset(self, ctx):
         for user in self.users:
             user.warnlevel = 0
 
         await ctx.send("Cleared everyone's crimes")
+        await self.log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
 
 
     # Events
@@ -180,6 +191,7 @@ class OnlySFW(commands.Cog):
             await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
 
         if message.content.startswith("P."): await message.channel.send("If you are meaning me, my prefix is p. not P.")
+        if message.content == "p.": await message.channel.send("Use p.help for a list of my commands.")
 
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
@@ -220,5 +232,19 @@ class OnlySFW(commands.Cog):
             return toreturn[0]
         return None
 
+    async def log(self, modcmd, action, culprit, reason):
+        logbed = discord.Embed(
+            title="ModLog",
+            description="A mod command was used",
+            color=randint(0, 0xffffff)
+        )
+        logbed.add_field(name="Command:", value=modcmd)
+        logbed.add_field(name="Action", value=action)
+        logbed.add_field(name="Done By:", value=culprit)
+        logbed.add_field(name="Reason:", value=reason)
+
+        me = self.bot.fetch_user(493839592835907594)
+        await me.send(embed=logbed)
+
 def setup(bot):
-    bot.add_cog(OnlySFW(bot))
+    bot.add_cog(Moderator(bot))

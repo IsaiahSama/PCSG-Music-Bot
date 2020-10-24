@@ -43,7 +43,7 @@ class Noting(commands.Cog):
         print("Setup was successful")
 
     # Commands
-    @commands.command()
+    @commands.command(brief="Gives a quick tutorial on how to use p.takenote", help="Shows you how to use the p.takenote command to take notes for yourself and your fellow students")
     async def note(self, ctx):
         embed = discord.Embed(
             title="Here is an example on how to use p.takenote",
@@ -58,7 +58,7 @@ class Noting(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(brief="Used to take notes for future reference", help="You can put up notes of your choice using this command so it can be accessed by any and all of your fellow students here in the hub. For usage information refer to p.note", usage="title, tags, content")
     async def takenote(self, ctx, *, noted):
         noted = noted.split("\n")
         try:
@@ -96,10 +96,18 @@ class Noting(commands.Cog):
 
         self.notes.append(note)
 
-    @commands.command()
+    @commands.command(brief="Shows the titles for all available notes.", help="Shows a list of notes created by your fellow users")
     async def allnotes(self, ctx):
         to_send = [note.title for note in self.notes]
-        if not to_send: await ctx.send("No notes exist as yet. Make one with p.takenote. Use p.note for an example")
+        if not to_send: await ctx.send("No notes exist as yet. Make one with p.takenote. Use p.note for an example"); return
+        to_send = list(set(to_send))
+        await ctx.send(', '.join(to_send))
+
+    @commands.command(brief="Shows the titles of all of your notes", help="Used to view a list of notes created by you")
+    async def mynotes(self, ctx):
+        to_send = [note.title for note in self.notes if note.user_id == ctx.author.id]
+        if not to_send: await ctx.send("I didn't seem to be able to find any notes created by you. Make some with p.takenote"); return
+        to_send = list(set(to_send))
         await ctx.send(', '.join(to_send))
 
     @commands.command(hidden=True)
@@ -112,7 +120,7 @@ class Noting(commands.Cog):
 
         await ctx.send("Deleted Notes table")
 
-    @commands.command()
+    @commands.command(brief="Used to view a note", usage="[title of note] or [ID of note]", help="Use this to read a note created by you, or one of your fellow students here in the PCSG server.")
     async def getnote(self, ctx, *, tofind):
         if len(self.notes) == 0: await ctx.send("No notes have been made as yet"); return
         #to_send = [note for note in self.notes if tofind.lower() in [note.title.lower(), note.tags.lower()]]
@@ -146,7 +154,7 @@ class Noting(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(brief="Deletes a note created by yourself", help="Wish to take down a note belonging to you (or anyone if you are a mod), then you can use this command to do it.", usage="id_of_note")
     async def delnote(self, ctx, idtodel: int):
         if len(self.notes) == 0: await ctx.send("No notes have been made as yet"); return
         to_del = None

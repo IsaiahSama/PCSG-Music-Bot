@@ -7,7 +7,7 @@ class Portaling(commands.Cog):
         self.bot = bot
 
 
-    @commands.command()
+    @commands.command(brief="This is used to go to any text channel within the server", help="This command creates a 'portal' of sorts that you can press to go to any text channel within the PCSG server.", usage="name_of_channel")
     async def portal(self, ctx, *, channame):
         channels = ctx.guild.text_channels
         channel = [chan.mention for chan in channels if channame.lower() in chan.name.lower()]
@@ -16,7 +16,7 @@ class Portaling(commands.Cog):
         await ctx.send(''.join(channel[:49]))
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def countall(self, ctx):
         allcount = 0
