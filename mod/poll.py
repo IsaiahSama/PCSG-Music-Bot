@@ -17,9 +17,12 @@ class Polling(commands.Cog):
 
         if len(poll) > 10: await ctx.send("You have too many values for this poll."); return
 
+
         content = {}
         for line in poll:
+            if len(line[1:].strip()) == 0: await ctx.send("Not a valid poll option"); return
             content[line[0]] = line[1:].strip()
+            if len(content[line[0]]) > 250: await ctx.send("Option is far too long. shorten it and try again"); return
 
         pollbed = discord.Embed(
             title=f"Poll Created by {ctx.author}",

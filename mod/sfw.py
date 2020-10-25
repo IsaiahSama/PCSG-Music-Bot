@@ -211,7 +211,23 @@ class Moderator(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        await ctx.send(error)
+        if isinstance(error, commands.CommandNotFound):
+            all_cogs = self.bot.cogs
+            msg = ctx.message.content.lower().split(" ")[1]
+            potential = []
+            for v in all_cogs.values():
+                mycommands = v.get_commands()
+                if not mycommands: continue
+                yes = [name.name for name in mycommands if msg in name.name.lower()]
+                if yes:
+                    for i in yes: potential.append(i)
+
+            if potential:
+                await ctx.send(f"I don't know that command, maybe one of these: {', '.join(potential)}")
+            else:
+                await ctx.send("Uhm... Try p.help for a list of my commands because I don't know that one")
+        else:
+            await ctx.send(error)
 
     # Tasks
     @tasks.loop(seconds=30)

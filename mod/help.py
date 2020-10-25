@@ -69,7 +69,7 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         return f'{self.clean_prefix}{command.name}'
 
     def command_not_found(self, string):
-        return f"Strange... I don't seem to have a command called **{string}**"
+        raise commands.CommandNotFound
 
     async def send_command_help(self, command):
         embed = discord.Embed(
@@ -85,6 +85,8 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         embed.add_field(name="Help:", value=f"```{command.help}```", inline=False)
         if command.aliases:
             embed.add_field(name="Aliases", value=f"```{command.aliases}```")
+        if command.cog:
+            embed.add_field(name="Cog:", value=f"```{command.cog.qualified_name}```")
     
         destination = self.get_destination()
         await destination.send(embed=embed)
