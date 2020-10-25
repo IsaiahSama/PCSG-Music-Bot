@@ -2,6 +2,7 @@ import discord, asyncio, random
 from discord.ext import commands
 
 class Polling(commands.Cog):
+    """The poll command to start a poll"""
     def __init__(self, bot):
         self.bot = bot
 

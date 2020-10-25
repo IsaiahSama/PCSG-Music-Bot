@@ -14,6 +14,7 @@ class WarnUser:
         self.warnlevel += 1
 
 class Moderator(commands.Cog):
+    """Moderators only... A list of mod commands for mods to moderate"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())

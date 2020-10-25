@@ -1,4 +1,4 @@
-import discord, asyncio
+import discord, asyncio, random
 from discord.ext import commands
 from random import randint
 
@@ -76,16 +76,58 @@ class MyHelpCommand(commands.MinimalHelpCommand):
             title=f"Showing help for {command.qualified_name}",
             color=randint(0, 0xffffff)
         )
+        if command.usage:
+            embed.add_field(name="Usage:", value=f"```{self.clean_prefix}{command.name} {command.usage}```", inline=False)
+        else:
+            embed.add_field(name="Usage:", value=f"```{self.clean_prefix}{command.name}```", inline=False)
 
-        embed.add_field(name="Usage:", value=f"```{self.clean_prefix}{command.usage}```", inline=False)
         embed.add_field(name="Brief:", value=f"```{command.brief}```", inline=False)
         embed.add_field(name="Help:", value=f"```{command.help}```", inline=False)
+        if command.aliases:
+            embed.add_field(name="Aliases", value=f"```{command.aliases}```")
     
         destination = self.get_destination()
         await destination.send(embed=embed)
 
+    async def send_cog_help(self, cog):
+        embed = discord.Embed(
+            title=f"Showing information on {cog.qualified_name}",
+            description=cog.description,
+            color=randint(0, 0xffffff)
+        )
+
+        symbols = ["+", "-", "---", "***", "!"]
+        to_loop = await self.filter_commands(cog.get_commands())
+        if not to_loop: await self.get_destination().send("This Cog has no commands."); return
+        for command in to_loop:
+            embed.add_field(name=f"{self.clean_prefix}{command.qualified_name}", value=f"```diff\n{random.choice(symbols)} {command.brief}```", inline=False)
+        embed.set_footer(text=self.get_opening_note())
+
+        
+        await self.get_destination().send(embed=embed)
+
+
+    async def send_bot_help(self, mapping):
+        embed = discord.Embed(
+            title="Showing help for you",
+            color=randint(0, 0xffffff)
+        )
+
+        symbols = ["+", "-", "---", "***", "!"]
+        to_loop = [k for k in mapping.keys() if k]
+
+        to_loop = list(set(to_loop))
+        for cog in to_loop:
+            if cog.description:
+                embed.add_field(name=cog.qualified_name, value=f"```diff\n{random.choice(symbols)} {cog.description}```", inline=False)
+            
+
+        await self.get_destination().send(embed=embed)
+
     
-class MyCog(commands.Cog):
+class MyHelp(commands.Cog):
+    """Shows this help message"""
+
     def __init__(self, bot):
         self._original_help_command = bot.help_command
         bot.help_command = MyHelpCommand()
@@ -93,4 +135,4 @@ class MyCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MyCog(bot))
+    bot.add_cog(MyHelp(bot))

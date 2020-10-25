@@ -10,6 +10,7 @@ class Notes:
         self.post_id = post_id
 
 class Noting(commands.Cog):
+    """All commands relating to notes"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())

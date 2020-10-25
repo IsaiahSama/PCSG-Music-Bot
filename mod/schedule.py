@@ -31,6 +31,7 @@ class Scheduler:
         
 
 class MySchedule(commands.Cog):
+    """For all things relating to your schedules"""
 
     users = []
 

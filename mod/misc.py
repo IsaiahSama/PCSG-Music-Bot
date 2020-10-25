@@ -5,6 +5,7 @@ import random
 import wikipedia as wp
 
 class Misc(commands.Cog):
+    """For the use of commands that don't have their own category."""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())

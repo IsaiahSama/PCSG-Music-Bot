@@ -28,6 +28,7 @@ class Person:
 
 
 class Leveling(commands.Cog):
+    """Commands dealing with the leveling system of this server"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())
