@@ -230,7 +230,7 @@ class Moderator(commands.Cog):
             await ctx.send(error)
 
     # Tasks
-    @tasks.loop(seconds=30)
+    @tasks.loop(minutes=5)
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for user in self.users:

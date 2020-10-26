@@ -24,7 +24,7 @@ bot.load_extension("poll")
 @bot.event
 async def on_ready():
     print(f"Right...")
-    activity = discord.Activity(name='for p.help', type=discord.ActivityType.listening)
+    activity = discord.Activity(name='p.help', type=discord.ActivityType.listening)
     await bot.change_presence(activity=activity)    
 
 @bot.command(hidden=True)
