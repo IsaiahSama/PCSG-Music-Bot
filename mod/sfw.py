@@ -213,7 +213,8 @@ class Moderator(commands.Cog):
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             all_cogs = self.bot.cogs
-            msg = ctx.message.content.lower().split(" ")[1]
+            msg = ctx.message.content.lower().split(".")[1]
+            
             potential = []
             for v in all_cogs.values():
                 mycommands = v.get_commands()
@@ -255,12 +256,12 @@ class Moderator(commands.Cog):
             description="A mod command was used",
             color=randint(0, 0xffffff)
         )
-        logbed.add_field(name="Command:", value=modcmd)
-        logbed.add_field(name="Action", value=action)
-        logbed.add_field(name="Done By:", value=culprit)
-        logbed.add_field(name="Reason:", value=reason)
+        logbed.add_field(name="Command:", value=modcmd, inline=False)
+        logbed.add_field(name="Action", value=action, inline=False)
+        logbed.add_field(name="Done By:", value=culprit, inline=False)
+        logbed.add_field(name="Reason:", value=reason, inline=False)
 
-        me = self.bot.fetch_user(493839592835907594)
+        me = await self.bot.fetch_user(493839592835907594)
         await me.send(embed=logbed)
 
 def setup(bot):
