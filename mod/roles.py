@@ -87,6 +87,47 @@ class Rolling(commands.Cog):
             for v in d.keys():
                 await msg.add_reaction(v)
 
+    async def check(self, ctx, mid):
+        msg = await ctx.fetch_message(mid)
+        reactions = msg.reactions
+        for reaction in reactions:
+            users = await reaction.users().flatten()
+            for user in users:
+                if type(user) == discord.User:
+                    await reaction.remove(user)
+
+    @commands.command(hidden=True)
+    async def reroll(self, ctx, mid:int):
+        msg = await ctx.fetch_message(mid)
+        await self.check(ctx, mid)
+        reactions = msg.reactions
+        for reaction in reactions:
+            users = await reaction.users().flatten()
+            results = re.findall(r"(.+:.+)`?", msg.content)
+            emoji = str(reaction.emoji)
+        
+            for r in results:
+                temp = r.split(":")
+                emoji2 = temp[0]
+                if emoji == emoji2:
+                    name = temp[1]
+                    name = name.replace("`", "").replace("-", " ").strip()
+                    break
+
+            role = discord.utils.get(ctx.guild.roles, name=name)
+            for user in users:
+                if user.bot: continue
+                if role in user.roles: continue
+                await user.add_roles(role)
+                await user.send(f"Sorry for being late, Here's your {role.name} role")
+
+        msg2 = await ctx.send("Done... Probably")
+        await asyncio.sleep(5)
+        await ctx.message.delete()
+        await msg2.delete()
+
+
+
     # Events
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -105,9 +146,7 @@ class Rolling(commands.Cog):
                 emoji2 = temp[0]
                 if emoji == emoji2:
                     name = temp[1]
-                    name = name.replace("`", "")
-                    name = name.replace("-", " ")
-                    name = name.strip()
+                    name = name.replace("`", "").replace("-", " ").strip()
                     break
                 name = None
             
@@ -135,9 +174,7 @@ class Rolling(commands.Cog):
             emoji2 = temp[0]
             if emoji == emoji2:
                 name = temp[1]
-                name = name.replace("`", "")
-                name = name.replace("-", " ")
-                name = name.strip()
+                name = name.replace("`", "").replace("-", " ").strip()
                 break
             name = None
         
@@ -156,7 +193,7 @@ class Rolling(commands.Cog):
         role = discord.utils.get(member.guild.roles, name="Family")
         role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
         await member.add_roles(role, role2)
-        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designated to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face:")
+        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face:")
 
 
     # @commands.command()
