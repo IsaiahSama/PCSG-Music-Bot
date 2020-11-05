@@ -114,7 +114,7 @@ class Misc(commands.Cog):
         else: await ctx.send(f"{member.name} is in {member.voice.channel.name}")
 
     @commands.command(brief="See who's available when you are so you can study with them", help="Looking for a study buddy of sorts? Use this command to see who's online and doing your same subjects and available when you are")
-    async def seeschedule(self, ctx):
+    async def matchfind(self, ctx):
         dayrole = [x for x in ctx.guild.roles if x.name.endswith("day")]
         caperole = [x for x in ctx.guild.roles if "cape " in x.name]
         csecrole = [x for x in ctx.guild.roles if "csec " in x.name]

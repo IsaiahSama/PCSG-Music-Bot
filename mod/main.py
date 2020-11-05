@@ -20,6 +20,7 @@ bot.load_extension("schedule")
 bot.load_extension("help")
 bot.load_extension("notes")
 bot.load_extension("poll")
+bot.load_extension("isaiah")
 
 @bot.event
 async def on_ready():
@@ -59,12 +60,6 @@ async def uc(ctx, *, cog):
         await ctx.send(f"{cog} has been unloaded")
     except discord.ext.commands.ExtensionNotLoaded:
         await ctx.send("Extension could not be found")
-
-@bot.command(hidden=True)
-@commands.is_owner()
-async def dev_time(ctx):
-    bot.load_extension("isaiah")
-    await ctx.send("Cog has been loaded in.")
 
 
 yes = os.getenv("keymod")
