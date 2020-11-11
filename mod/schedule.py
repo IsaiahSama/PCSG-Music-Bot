@@ -8,7 +8,6 @@ from time import ctime
 
 @dataclass
 class Scheduler:
-    name: str
     tag: int
     monday: str=None
     tuesday: str=None
@@ -48,7 +47,6 @@ class MySchedule(commands.Cog):
         await self.bot.wait_until_ready()
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS User_Schedules(
-                name TEXT,
                 id INTEGER PRIMARY KEY UNIQUE,
                 monday TEXT,
                 tuesday TEXT,
@@ -124,7 +122,7 @@ class MySchedule(commands.Cog):
 
             setattr(user, day, msg.content)
 
-        await to_send.send("Completed. Thank you for taking time out to do this. :bowing: View it with p.myschedule")
+        await to_send.send("Completed. Thank you for taking time out to do this. :man_bowing: View it with p.myschedule")
 
     @commands.command(brief="Shows you your schedule for the day", help="Use this to view your set schedule for the current day. You can also enter the name of a day to view your schedule for that day.", usage="day_of_the_week (optional)")
     async def myschedule(self, ctx, day=None):
@@ -191,8 +189,8 @@ class MySchedule(commands.Cog):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
-                await db.execute("INSERT OR IGNORE INTO User_Schedules (Name, ID) VALUES (?, ?)",
-                (str(member), member.id))
+                await db.execute("INSERT OR IGNORE INTO User_Schedules (ID) VALUES (?)",
+                (member.id,))
 
             await db.commit()
 
@@ -235,8 +233,8 @@ class MySchedule(commands.Cog):
     async def saving(self):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for user in self.users:
-                await db.execute("""INSERT OR REPLACE INTO User_Schedules (name, id, monday, tuesday, wednesday, thursday, friday, 
-                saturday, sunday, task) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", (user.name, user.tag, user.monday, user.tuesday, user.wednesday, user.thursday, user.friday, 
+                await db.execute("""INSERT OR REPLACE INTO User_Schedules (id, monday, tuesday, wednesday, thursday, friday, 
+                saturday, sunday, task) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", (user.tag, user.monday, user.tuesday, user.wednesday, user.thursday, user.friday, 
                 user.saturday, user.sunday, user.task))
             await db.commit()
         # pass

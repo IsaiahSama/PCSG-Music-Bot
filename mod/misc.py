@@ -72,11 +72,43 @@ class Misc(commands.Cog):
         )
 
         embed.set_thumbnail(url=ctx.guild.icon_url)
-        embed.add_field(name=f"1)", value=f"It is mandatory to go to the Roles category and select the roles which concern you", inline=False)
-        embed.add_field(name=f"2)", value=f"Be respectful to everyone. If you encounter any issues, inform the mods before taking other actions", inline=False)
-        embed.add_field(name=f"3)", value=f"Keep channel discussions to their respective channels", inline=False)
-        embed.add_field(name=f"4)", value=f"In order to take part in classes. Zoom and a Google account and required as classes will be hosted on those 2 platforms", inline=False)
-        embed.add_field(name=f"5)", value=f"Follow the rules", inline=False)
+        embed.add_field(name=f"Rule 1:", value=f"It is mandatory to go to the Roles category and select the roles which concern you", inline=False)
+        embed.add_field(name=f"Rule 2:", value=f"Be respectful to everyone. If you encounter any issues, inform the mods before taking other actions", inline=False)
+        embed.add_field(name=f"Rule 3:", value=f"Keep channel discussions to their respective channels", inline=False)
+        embed.add_field(name=f"Rule 4:", value=f"In order to take part in classes. Zoom and a Google account and required as classes will be hosted on those 2 platforms", inline=False)
+        embed.add_field(name=f"Rule 5:", value=f"Follow the rules", inline=False)
+        embed.set_footer(text="Check with p.rules")
+
+        await ctx.send(embed=embed)
+
+    @commands.command(brief="Shows Rules for Classes", help="Shows the rules to be followed for classes")
+    async def classrules(self, ctx):
+        embed= discord.Embed(
+            title="Showing Rules For Online Classes",
+            color=random.randint(0, 0xffffff)
+        )
+        #RULES FOR PCSG ZOOM CLASSES: 
+
+        # 1. Students must be respectful to Student-Hosts and fellow students.
+
+        # 2. Students MUST have an appropriate name in order to enter the class (full name). This will be recorded in the roll book with your contact number.
+
+        # 3. Profanity (inappropriate language, behaviour or images) and unnecessary noise is forbidden in class. 
+
+        # 4. If students have any questions, they must first raise their hand and then the Student-Host will unmute the student who wishes to speak.
+
+        # 5. READ THE RULES.
+
+        embed.set_thumbnail(url=ctx.guild.icon_url)
+        embed.add_field(name="Rule 1:", value="Students must be respectful to Student-Hosts and fellow students", inline=False)
+        embed.add_field(name="Rule 2:", value="Students MUST have their real name in order to be accepted into the class. This will be recorded in the roll book along with your contact number.")
+        embed.add_field(name="Rule 3:", value="Profanity of any kind and unnecessary noise is forbidden in class", inline=False)
+        embed.add_field(name="Rule 4:", value="If students have any questions, they will be expected to raise their hand to alert the Student-Host who will then unmute the student who wishes to speak.")
+        embed.add_field(name="Rule 5:", value="Students will be expected to give their full focus to the class at hand. If you wish to not do so, ensure that you do not affect the other students in any way or form.", inline=False)
+        embed.add_field(name="Rule 6:", value="If for any reason, a student has to leave their device for any period of time, they will be expected to alert the Student-Host in an appropiate manner")
+        embed.add_field(name="Rule 7:", value="Failure to comply to the above rules will result in a warning. Several offenses will result in immediate dismissal from the class, and potentially being banned.", inline=False)
+        embed.add_field(name="Rule 8:", value="Follow the rules and good studying to all of you.")
+        embed.set_footer(text="Can be viewed at anytime with p.classrules")
 
         await ctx.send(embed=embed)
 
