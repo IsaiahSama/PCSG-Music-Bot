@@ -1,3 +1,3 @@
 import os
-os.system("start timer1.py")
-os.system("start timer2.py")
+os.system("timer1.py")
+os.system("timer2.py")
