@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 import asyncio
 import random
 from random import randint
-import aiosqlite
+import aiosqlite, os, json
 
 class WarnUser:
     def __init__(self, tag, warnlevel):
@@ -227,8 +227,10 @@ class Moderator(commands.Cog):
                 await ctx.send(f"I don't know that command, maybe one of these: {', '.join(potential)}")
             else:
                 await ctx.send("Uhm... Try p.help for a list of my commands because I don't know that one")
-        else:
-            await ctx.send(error)
+            return
+        
+        await ctx.send(error)
+        print(error)
 
     # Tasks
     @tasks.loop(minutes=5)
@@ -250,6 +252,15 @@ class Moderator(commands.Cog):
             return toreturn[0]
         return None
 
+    logs = []
+
+    if os.path.exists("logs.json"):
+        with open("logs.json") as f:
+            try:
+                logs = json.load(f)
+            except json.JSONDecodeError:
+                pass
+
     async def log(self, modcmd, action, culprit, reason):
         logbed = discord.Embed(
             title="ModLog",
@@ -261,8 +272,12 @@ class Moderator(commands.Cog):
         logbed.add_field(name="Done By:", value=culprit, inline=False)
         logbed.add_field(name="Reason:", value=reason, inline=False)
 
-        me = await self.bot.fetch_user(493839592835907594)
-        await me.send(embed=logbed)
+        mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason}
+        
+        self.logs.append(mydict)
+
+        with open("logs.json", "w") as f:
+            json.dump(self.logs, f, indent=4) 
 
 def setup(bot):
     bot.add_cog(Moderator(bot))

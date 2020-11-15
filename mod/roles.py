@@ -119,7 +119,9 @@ class Rolling(commands.Cog):
                 if user.bot: continue
                 if role in user.roles: continue
                 await user.add_roles(role)
-                await user.send(f"Sorry for being late, Here's your {role.name} role")
+                try:
+                    await user.send(f"Sorry for being late, Here's your {role.name} role")
+                except: continue
 
         msg2 = await ctx.send("Done... Probably")
         await asyncio.sleep(5)
@@ -156,7 +158,9 @@ class Rolling(commands.Cog):
             if not role: print(f"can't find role for {name}"); return
             user = guild.get_member(payload.user_id)
             await user.add_roles(role)
-            await user.send(f"Congrats. You now have the {role.name} role")
+            try:
+                await user.send(f"Congrats. You now have the {role.name} role")
+            except: pass
 
 
     @commands.Cog.listener()
@@ -185,7 +189,9 @@ class Rolling(commands.Cog):
         user = guild.get_member(payload.user_id)
         if role not in user.roles: return
         await user.remove_roles(role)
-        await user.send(f"Removed {role.name} role")
+        try:
+            await user.send(f"Removed {role.name} role")
+        except: pass
 
     @commands.Cog.listener()
     async def on_member_join(self, member):

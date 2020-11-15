@@ -45,9 +45,9 @@ class Polling(commands.Cog):
                 await ctx.send(f"{v} is an invalid emoji. So your poll has been cancelled")
                 return
 
-        await ctx.send("I'll let you know results in 30 minutes")
+        await ctx.send("I'll let you know results in 1 hour")
 
-        await asyncio.sleep(1800)
+        await asyncio.sleep(3600)
         
         msg = await ctx.channel.fetch_message(old_msg.id)
         allreactions = msg.reactions

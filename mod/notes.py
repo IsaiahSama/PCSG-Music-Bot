@@ -13,9 +13,10 @@ class Noting(commands.Cog):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("""CREATE TABLE IF NOT EXISTS Notes (
                 user_id INTEGER,
+                subject TEXT NOT NULL,
                 title TEXT PRIMARY KEY UNIQUE NOT NULL,
-                content TEXT NOT NULL,
-                tags TEXT NOT NULL
+                tags TEXT NOT NULL,
+                content TEXT NOT NULL
                 )""")
 
             await db.commit()
@@ -24,12 +25,12 @@ class Noting(commands.Cog):
         self.saving.start()
 
     async def setup(self):
-        keys = ['user_id', 'title', 'content', 'tags']
+        keys = ['user_id', 'subject', 'title', 'tags', 'content']
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             async with db.execute("SELECT * FROM Notes") as cursor:
                 if not cursor: print("No Data to set up with"); return
                 async for row in cursor:
-                    values = [row[0], row[1], row[2], row[3]]
+                    values = [row[0], row[1], row[2], row[3], row[4]]
                     note = dict(zip(keys, values))
 
                     self.notes.append(note)
@@ -46,21 +47,23 @@ class Noting(commands.Cog):
         )
 
         embed.set_thumbnail(url=self.bot.user.avatar_url)
-        embed.add_field(name="The Basic", value="The title of your note goes on the first line. The tags which it can be referenced by goes on the second line, and your content can have all the rest.", inline=False)
-        embed.add_field(name="Example:", value="p.takenote\nTitle: Momentum\nTags: physics, momentum, motion\nContent: Momentum is a part of physics which relates to movement")
-        embed.set_footer(text="Then you just press enter and send the message. Easy isn't it. The Content is the last thing you should do")
+        embed.add_field(name="The Basic", value="The title of your note goes on the first line. The name of the subject the note refers to goes on the second line. The tags which it can be referenced by goes on the third line, and your content can have all the rest.", inline=False)
+        embed.add_field(name="Format:", value="```p.takenote\nSubject Name goes here\nYour Title goes here\nTags will go here.\nAnything this line and under is your content/note```",inline=False)
+        embed.add_field(name="Example:", value="```p.takenote\nPhysics\nMomentum\nmomentum, motion\nMomentum is a part of physics which relates to movement.\nMake sure that your notes are meaningful```")
+        embed.set_footer(text="Then you just press enter and send the message. Easy isn't it. PS: It only counts as a new line once you press shift + enter (on pc) or move to the next line by pressing enter (on mobile)")
 
         await ctx.send(embed=embed)
 
-    @commands.command(brief="Used to take notes for future reference", help="You can put up notes of your choice using this command so it can be accessed by any and all of your fellow students here in the hub. For usage information refer to p.note", usage="title, tags, content")
-    async def takenote(self, ctx, *, noted):
-        noted = noted.split("\n")
+    @commands.command(brief="Used to take notes for future reference", help="You can put up notes of your choice using this command so it can be accessed by any and all of your fellow students here in the hub. For usage information refer to p.note", usage="Subject, title, tags, content")
+    async def takenote(self, ctx, *, your_note):
+        your_note = your_note.split("\n")
         try:
-            title = noted.pop(0)
-            tags = noted.pop(0)
-            content = '\n'.join(noted)
+            subject = your_note.pop(0)
+            title = your_note.pop(0)
+            tags = your_note.pop(0)
+            content = '\n'.join(your_note)
         except IndexError:
-            await ctx.send("Your note is invalid. Remember to put your title, tags and content on separate lines as shown in p.note")
+            await ctx.send("Your note is invalid. Remember to put your Subject name, title, tags and content on separate lines as shown in p.note")
             return
     
         if len(content) < 5: await ctx.send("Your content is too short"); return
@@ -70,8 +73,8 @@ class Noting(commands.Cog):
             for check in self.notes:
                 if check['title'].lower() == title.lower(): await ctx.send("A note with this Title already exists"); return
         
-        mylist = ["user_id", "title", "content", "tags"]
-        value = [ctx.author.id, title, content, tags]
+        mylist = ["user_id", 'subject', "title", "tags", "content"]
+        value = [ctx.author.id, subject.strip(), title.strip(), tags.strip(), content.strip()]
         
         # Before knowing about dict comprehensions
         # note = {}
@@ -83,12 +86,15 @@ class Noting(commands.Cog):
             
 
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT INTO Notes (user_id, title, content, tags) VALUES (?, ?, ?, ?)",
-            (ctx.author.id, title, content, tags))
+            await db.execute("INSERT INTO Notes (user_id, subject, title, tags, content) VALUES (?, ?, ?, ?, ?)",
+            (ctx.author.id, subject, title, tags, content))
 
         await ctx.send("Success")
 
         self.notes.append(note)
+
+        await asyncio.sleep(5)
+        await ctx.message.delete()
 
     @commands.command(brief="Shows the titles for all available notes.", help="Shows a list of notes created by your fellow users")
     async def allnotes(self, ctx):
@@ -114,12 +120,14 @@ class Noting(commands.Cog):
 
         await ctx.send("Deleted Notes table")
 
-    @commands.command(brief="Used to view a note", usage="[title of note] or [ID of note]", help="Use this to read a note created by you, or one of your fellow students here in the PCSG server.")
+    @commands.command(brief="Used to view a note", usage="[title of note]", help="Use this to read a note created by you, or one of your fellow students here in the PCSG server.")
     async def getnote(self, ctx, *, tofind):
         if len(self.notes) == 0: await ctx.send("No notes have been made as yet"); return
         #to_send = [note for note in self.notes if tofind.lower() in [note.title.lower(), note.tags.lower()]]
         tofind = tofind.lower()
-        to_send = [note for note in self.notes if tofind in note['title'].lower() or tofind in note['tags'].lower()]
+        to_send = [note for note in self.notes if tofind == note['title'].lower().strip()]
+        if not to_send:
+            to_send = [note for note in self.notes if tofind in note['title'].lower() or tofind in note['tags'].lower() or tofind == note['subject'].lower()]
 
         # to_send = []
         # for note in self.notes:
@@ -140,7 +148,7 @@ class Noting(commands.Cog):
         else:
             name = "Forgotten User"
         embed = discord.Embed(
-            title=f"Title: {to_send['title']}",
+            title=f"Subject: {to_send['subject']}\nTitle: {to_send['title']}",
             description=f"Content: {to_send['content']}",
             color=random.randint(0, 0xffffff)
         )
@@ -152,24 +160,27 @@ class Noting(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(brief="Deletes a note created by yourself", help="Wish to take down a note belonging to you (or anyone if you are a mod), then you can use this command to do it.", usage="Title of note")
-    async def delnote(self, ctx, notetodel):
+    async def delnote(self, ctx, *, notetodel):
         if len(self.notes) == 0: await ctx.send("No notes have been made as yet"); return
         
-        to_del = [note for note in self.notes if note['title'].lower() == notetodel.lower()]
-
-        if not to_del: await ctx.send("Could not find a note with that id"); return
-        your_moderators = [352461326800519169, 493839592835907594, 691653525335441428, 315856223130091520, 693241262915977236, to_del.user_id]
+        to_del = [note for note in self.notes if note['title'].lower().strip() == notetodel.lower().strip()]
+        
+        if not to_del: await ctx.send("Could not find a note with that title"); return
+        
+        to_del = to_del[0]
+        your_moderators = [352461326800519169, 493839592835907594, 691653525335441428, 315856223130091520, 693241262915977236, to_del['user_id']]
         if not ctx.author.id in your_moderators: 
             await ctx.send("You do not have permission to delete this note.")
             return
 
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("DELETE FROM Notes WHERE title = ?", (to_del['title'],))
+            await db.execute("DELETE FROM Notes WHERE title = ?", (str(to_del['title']),))
             await db.commit()
+
         person = discord.utils.get(ctx.guild.members, id=to_del['user_id'])
         if person: name = person.name
         else: name = "Unknown User"
-        await ctx.send(f"Deleted {name}'s note on {to_del.title}")      
+        await ctx.send(f"Deleted {name}'s note on {to_del['title']}")      
         self.notes.remove(to_del)
         del to_del   
 
@@ -179,10 +190,20 @@ class Noting(commands.Cog):
         if len(self.notes) > 1:
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:
                 for note in self.notes:
-                    await db.execute("INSERT OR REPLACE INTO Notes (user_id, title, content, tags) VALUES (?, ?, ?, ?)",
-                    (note['user_id'], note['title'], note['content'], note['tags']))
+                    await db.execute("INSERT OR REPLACE INTO Notes (user_id, subject, title, tags, content) VALUES (?, ?, ?, ?, ?)",
+                    (note['user_id'], note['subject'], note['title'], note['tags'], note['content']))
 
                 await db.commit()
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def cleanup(self, ctx):
+        for note in self.notes:
+            for v in note.values():
+                if not type(v) == str: continue
+                v = v.strip()
+
+        await ctx.send("Stripping complete")
     
 
 def setup(bot):
