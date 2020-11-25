@@ -48,8 +48,8 @@ class Noting(commands.Cog):
 
         embed.set_thumbnail(url=self.bot.user.avatar_url)
         embed.add_field(name="The Basic", value="The title of your note goes on the first line. The name of the subject the note refers to goes on the second line. The tags which it can be referenced by goes on the third line, and your content can have all the rest.", inline=False)
-        embed.add_field(name="Format:", value="```p.takenote\nSubject Name goes here\nYour Title goes here\nTags will go here.\nAnything this line and under is your content/note```",inline=False)
-        embed.add_field(name="Example:", value="```p.takenote\nPhysics\nMomentum\nmomentum, motion\nMomentum is a part of physics which relates to movement.\nMake sure that your notes are meaningful```")
+        embed.add_field(name="Format:", value="```\np.takenote\nSubject Name goes here\nYour Title goes here\nTags will go here.\nAnything this line and under is your content/note```",inline=False)
+        embed.add_field(name="Example:", value="```\np.takenote\nPhysics\nMomentum\nmomentum, motion\nMomentum is a part of physics which relates to movement.\nMake sure that your notes are meaningful```")
         embed.set_footer(text="Then you just press enter and send the message. Easy isn't it. PS: It only counts as a new line once you press shift + enter (on pc) or move to the next line by pressing enter (on mobile)")
 
         await ctx.send(embed=embed)
@@ -89,7 +89,7 @@ class Noting(commands.Cog):
             await db.execute("INSERT INTO Notes (user_id, subject, title, tags, content) VALUES (?, ?, ?, ?, ?)",
             (ctx.author.id, subject, title, tags, content))
 
-        await ctx.send("Success")
+        await ctx.send(f"Success. Saved your note as {title}")
 
         self.notes.append(note)
 
@@ -157,7 +157,15 @@ class Noting(commands.Cog):
         embed.add_field(name="Tags:", value=to_send['tags'])
         embed.set_footer(text=f"Showing note by {name}.")
 
-        await ctx.send(embed=embed)
+        msg = await ctx.send(embed=embed)
+        await msg.add_reaction("🥱")
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) == '🥱'
+        try:
+            _, _ = await self.bot.wait_for("reaction_add", timeout=300, check=check)
+        except asyncio.TimeoutError:
+            pass
+        await msg.delete()
 
     @commands.command(brief="Deletes a note created by yourself", help="Wish to take down a note belonging to you (or anyone if you are a mod), then you can use this command to do it.", usage="Title of note")
     async def delnote(self, ctx, *, notetodel):

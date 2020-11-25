@@ -1,9 +1,6 @@
-import discord
+import discord, time, asyncio, random, aiosqlite, os, json, sqlite3
 from discord.ext import commands, tasks
-import asyncio
-import random
 from random import randint
-import aiosqlite, os, json
 
 class WarnUser:
     def __init__(self, tag, warnlevel):
@@ -235,11 +232,16 @@ class Moderator(commands.Cog):
     # Tasks
     @tasks.loop(minutes=5)
     async def saving(self):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for user in self.users:
-                await db.execute("INSERT OR REPLACE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", 
-                (user.tag, user.warnlevel))
-            await db.commit()
+        try:
+            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+                for user in self.users:
+                    await db.execute("INSERT OR REPLACE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", 
+                    (user.tag, user.warnlevel))
+                await db.commit()
+        except sqlite3.OperationalError:
+            print("Database is in use.")
+            await asyncio.sleep(120)
+            self.saving.restart()
         
 
     # Functions
@@ -262,22 +264,13 @@ class Moderator(commands.Cog):
                 pass
 
     async def log(self, modcmd, action, culprit, reason):
-        logbed = discord.Embed(
-            title="ModLog",
-            description="A mod command was used",
-            color=randint(0, 0xffffff)
-        )
-        logbed.add_field(name="Command:", value=modcmd, inline=False)
-        logbed.add_field(name="Action", value=action, inline=False)
-        logbed.add_field(name="Done By:", value=culprit, inline=False)
-        logbed.add_field(name="Reason:", value=reason, inline=False)
 
-        mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason}
+        mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason, "Time": time.ctime()}
         
         self.logs.append(mydict)
 
         with open("logs.json", "w") as f:
-            json.dump(self.logs, f, indent=4) 
+            json.dump(self.logs, f, indent=4)
 
 def setup(bot):
     bot.add_cog(Moderator(bot))

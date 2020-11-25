@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 import asyncio
 import random
 from dataclasses import dataclass
-import aiosqlite
+import aiosqlite, sqlite3
 from time import ctime
 
 @dataclass
@@ -231,12 +231,17 @@ class MySchedule(commands.Cog):
     # Saving
     @tasks.loop(minutes=5)
     async def saving(self):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for user in self.users:
-                await db.execute("""INSERT OR REPLACE INTO User_Schedules (id, monday, tuesday, wednesday, thursday, friday, 
-                saturday, sunday, task) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", (user.tag, user.monday, user.tuesday, user.wednesday, user.thursday, user.friday, 
-                user.saturday, user.sunday, user.task))
-            await db.commit()
+        try:
+            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+                for user in self.users:
+                    await db.execute("""INSERT OR REPLACE INTO User_Schedules (id, monday, tuesday, wednesday, thursday, friday, 
+                    saturday, sunday, task) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", (user.tag, user.monday, user.tuesday, user.wednesday, user.thursday, user.friday, 
+                    user.saturday, user.sunday, user.task))
+                await db.commit()
+        except sqlite3.OperationalError:
+            print("Database is in use.")
+            await asyncio.sleep(120)
+            self.saving.restart()
         # pass
 
     

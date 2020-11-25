@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import random
 from random import randint
-import asyncio
-import aiosqlite
+import asyncio, aiosqlite, sqlite3
 
 
 class Person:
@@ -170,12 +169,18 @@ class Leveling(commands.Cog):
     # Tasks    
     @tasks.loop(minutes=5)
     async def saving(self):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for member in self.users:
-                await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
-                (member.tag, member.level, member.exp, member.expthresh))
+        try:
+            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+                for member in self.users:
+                    await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+                    (member.tag, member.level, member.exp, member.expthresh))
 
-            await db.commit()
+                await db.commit()
+
+        except sqlite3.OperationalError:
+            print("Database is in use.")
+            await asyncio.sleep(120)
+            self.saving.restart()
 
     @commands.command(hidden=True)
     @commands.is_owner()
