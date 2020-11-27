@@ -169,7 +169,10 @@ class Moderator(commands.Cog):
             if x in message.content.lower():
                 user.warn()
                 await message.channel.send(f"You have been warned for using NSFW content. You are on your {user.warnlevel} / 4 strikes")
-                await message.delete()
+                try:
+                    await message.delete()
+                except discord.errors.NotFound:
+                    pass
         
         tempmsg = message.content.lower().split(" ")
         for word in tempmsg:
@@ -177,7 +180,10 @@ class Moderator(commands.Cog):
 
                 user.warnlevel += 0.5
                 msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user.warnlevel} / 4 strikes")
-                await message.delete()
+                try:
+                    await message.delete()
+                except discord.errors.NotFound:
+                    pass
                 await asyncio.sleep(5)
                 await msg.delete()
                 break
@@ -230,7 +236,7 @@ class Moderator(commands.Cog):
         print(error)
 
     # Tasks
-    @tasks.loop(minutes=5)
+    @tasks.loop(seconds=250)
     async def saving(self):
         try:
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:

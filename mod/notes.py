@@ -193,7 +193,7 @@ class Noting(commands.Cog):
         del to_del   
 
     # Saving
-    @tasks.loop(minutes=2)
+    @tasks.loop(seconds=120)
     async def saving(self):
         if len(self.notes) > 1:
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:

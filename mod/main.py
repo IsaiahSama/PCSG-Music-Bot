@@ -26,24 +26,15 @@ bot.load_extension("isaiah")
 async def on_ready():
     print(f"Right...")
     activity = discord.Activity(name='p.help', type=discord.ActivityType.listening)
-    await bot.change_presence(activity=activity)    
+    await bot.change_presence(activity=activity, status=discord.Status.dnd)    
 
 @bot.command(hidden=True)
 @commands.is_owner()
 async def rc(ctx, *, cog=None):
     if not cog:
-        bot.reload_extension("roles")
-        bot.reload_extension("levels")
-        bot.reload_extension("sfw")
-        bot.reload_extension("portals")
-        bot.reload_extension("misc")
-        bot.reload_extension("isaiah")
-        bot.reload_extension("schedule")
-        bot.reload_extension("help")
-        bot.reload_extension("notes")
-        bot.reload_extension("poll")
-
-        await ctx.send("Reloaded Cogs")
+        for cog in bot.extensions.keys():
+            bot.reload_extension(cog)
+        await ctx.send("Reloaded all cogs")    
 
     else:
         try:

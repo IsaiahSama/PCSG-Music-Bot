@@ -167,7 +167,7 @@ class Leveling(commands.Cog):
             await message.channel.send(embed=embed)
     
     # Tasks    
-    @tasks.loop(minutes=5)
+    @tasks.loop(seconds=270)
     async def saving(self):
         try:
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:
