@@ -1,0 +1,6 @@
+discord
+asyncio
+python-dotenv
+aiosqlite
+wikipedia
+dataclasses

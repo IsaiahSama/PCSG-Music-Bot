@@ -195,13 +195,19 @@ class Noting(commands.Cog):
     # Saving
     @tasks.loop(seconds=120)
     async def saving(self):
-        if len(self.notes) > 1:
-            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-                for note in self.notes:
-                    await db.execute("INSERT OR REPLACE INTO Notes (user_id, subject, title, tags, content) VALUES (?, ?, ?, ?, ?)",
-                    (note['user_id'], note['subject'], note['title'], note['tags'], note['content']))
+        try:
+            if len(self.notes) > 1:
+                async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+                    for note in self.notes:
+                        await db.execute("INSERT OR REPLACE INTO Notes (user_id, subject, title, tags, content) VALUES (?, ?, ?, ?, ?)",
+                        (note['user_id'], note['subject'], note['title'], note['tags'], note['content']))
 
-                await db.commit()
+                    await db.commit()
+
+        except sqlite3.OperationalError:
+            print("Database is in use.")
+            await asyncio.sleep(30)
+            self.saving.restart()
 
     @commands.command(hidden=True)
     @commands.is_owner()
