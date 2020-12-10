@@ -1,4 +1,4 @@
-import discord, time, asyncio, random, aiosqlite, os, json, sqlite3
+import discord, time, asyncio, random, aiosqlite, os, json, sqlite3, time
 from discord.ext import commands, tasks
 from random import randint
 
@@ -105,8 +105,6 @@ class Moderator(commands.Cog):
         await ctx.send(f"Unmuted {member.mention}. Refrain from having to be muted again")
         await self.log("Unmute", f"{str(member)} was unmuted", str(ctx.author), reason="Null")
 
-        
-
     @commands.command(brief="Kicks a user", help="Kicks a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def kick(self, ctx, member: discord.Member, *, reason):
@@ -150,8 +148,84 @@ class Moderator(commands.Cog):
         await ctx.send("Cleared everyone's crimes")
         await self.log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
 
+    @commands.command(brief="Deletes x amount of messages", help="Used to bulk delete messages")
+    @commands.has_permissions(administrator=True)
+    async def purge(self, ctx, amount):
+        pass
 
     # Events
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        changed, embed = await self.was_changed(before, after)
+        if not embed: return
+
+        if changed == "nickname":
+            channel = before.guild.get_channel(785986850736963675)
+        elif changed == "roles":
+            channel = before.guild.get_channel(785986876531015711)
+
+        embed.set_footer(text=f"User ID: {before.id}")
+
+        await channel.send(embed=embed)
+        
+
+    async def was_changed(self, before, after):
+        if not before.nick == after.nick:
+            if not after.nick: after.nick = after.name
+            embed = discord.Embed(
+                title="Wait... so they want to have a nickname?",
+                description=f"{str(before)} would like to be known as {after.nick}",
+                color=randint(0, 0xffffff)
+            )
+            return "nickname", embed
+
+        if not before.roles == after.roles:
+            value = await before.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update).flatten()
+            value = value[0]
+            try:
+                initial = value.before.roles[0].name
+            except IndexError:
+                initial = "Received the role"
+            try:
+                final = value.after.roles[0].name
+            except IndexError:
+                final = "was removed"
+            
+            embed = discord.Embed(
+                title=f"Role updates for {before.name}/{before.nick}",
+                description=f"{str(value.user)} changed {value.target}'s roles. {initial} {final}",
+                color=randint(0, 0xffffff)
+            )
+
+            return "roles", embed
+
+        return None, None
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.author.bot: return
+        embed = discord.Embed(
+            title=f"{message.author} had a deleted message in {message.channel.name}",
+            description=message.content,
+            color=randint(0, 0xffffff)
+        )
+        channel = message.guild.get_channel(785993210522107925)
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_bulk_message_delete(self, messagelist):
+        embed = discord.Embed(
+            title="Bulk Deletion",
+            description=f"{len(messagelist)} messages were bulk deleted.",
+            color=randint(0, 0xffffff)
+        )
+
+        for msg in messagelist[:24]:
+            embed.add_field(name=f"Deleted from {msg.channel.name}", value=f"{msg.content[:550]} ...")
+
+        await messagelist[0].guild.get_channel(786003742813192233).send(embed=embed)
+    
 
     with open("swearWords.txt") as f:
         words = f.read()
@@ -210,6 +284,64 @@ class Moderator(commands.Cog):
                 role = discord.utils.get(member.guild.roles, name="Muted")
                 await member.add_roles(role)
                 await member.send("As your offenses have not been wiped, you are muted.")
+
+        embed = discord.Embed(
+            title="Member join",
+            description=f"{str(member.name)} has just joined the server.",
+            color=randint(0, 0xffffff)
+        )
+
+        embed.add_field(name="Account Creation Date", value=member.created_at.strftime("%d/%m/%y"))
+        embed.add_field(name="Joined at", value=time.ctime())
+        await member.guild.get_channel(786016910668070952).send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_ban(self, member):
+        bann = await member.guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+        ban = bann[0]
+
+        embed = discord.Embed(
+            title="I see... Now you're banned",
+            description=f"{str(ban.target)} has been banned by {str(ban.user)}",
+            color=randint(0, 0xffffff)
+        )
+
+        embed.add_field(name="Reason", value=ban.reason)
+        embed.set_footer(text=f"Target ID {ban.target.id}. Banner ID {ban.user.id}")
+
+        await member.guild.get_channel(786016910668070952).send(embed=embed)
+
+    
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        embed = discord.Embed(
+            title="Leaving",
+            description=f"It would seem as though {str(member)} has left the server",
+            color=randint(0, 0xffffff)
+        )
+
+        entry = member.guild.audit_logs(limit=1).flatten()
+        entry = entry[0]
+        if isinstance(entry.action, discord.AuditLogAction.kick):
+            embed.add_field(name=":o , It was a kick", value=f"{str(entry.target)} was kicked by {str(entry.user)} for {entry.reason}")
+        
+        await member.guild.get_channel(786016910668070952).send(embed=embed)
+
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        embed = discord.Embed(
+            description=f"{str(before.author)} made an edit to a message in {after.channel.name}",
+            title="A message has been edited.",
+            color=randint(0, 0xffffff)
+        )
+
+        embed.add_field(name="Before", value=before.content)
+        embed.add_field(name="After", value=after.content, inline=False)
+        embed.add_field(name="Jump URL", value=after.jump_url)
+        embed.set_footer(text=f"User ID: {before.author.id}")
+
+        await before.guild.get_channel(785993210522107925).send(embed=embed)
         
 
     @commands.Cog.listener()
@@ -234,6 +366,7 @@ class Moderator(commands.Cog):
         
         await ctx.send(error)
         print(error)
+
 
     # Tasks
     @tasks.loop(seconds=250)
