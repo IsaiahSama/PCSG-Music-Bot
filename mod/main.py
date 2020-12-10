@@ -8,7 +8,7 @@ from random import randint
 import aiosqlite
 
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix="p.", case_insensitive=True, intents=intents)
+bot = commands.Bot(command_prefix=["p.","P."], case_insensitive=True, intents=intents)
 # bot.help_command = None
 
 bot.load_extension("roles")

@@ -268,7 +268,6 @@ class Moderator(commands.Cog):
             await message.author.add_roles(role)
             await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
 
-        if message.content.startswith("P."): await message.channel.send("If you are meaning me, my prefix is p. not P.")
         if message.content == "p.": await message.channel.send("Use p.help for a list of my commands.")
 
     @commands.Cog.listener()
@@ -336,14 +335,15 @@ class Moderator(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
+        if before.embeds: return
         embed = discord.Embed(
             description=f"{str(before.author)} made an edit to a message in {after.channel.name}",
             title="A message has been edited.",
             color=randint(0, 0xffffff)
         )
 
-        embed.add_field(name="Before", value=before.content)
-        embed.add_field(name="After", value=after.content, inline=False)
+        embed.add_field(name="Before", value=before.content or "Unknown")
+        embed.add_field(name="After", value=after.content or "Unknown", inline=False)
         embed.add_field(name="Jump URL", value=after.jump_url)
         embed.set_footer(text=f"User ID: {before.author.id}")
 
