@@ -193,15 +193,6 @@ class Rolling(commands.Cog):
             await user.send(f"Removed {role.name} role")
         except: pass
 
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        if member.bot: return
-        role = discord.utils.get(member.guild.roles, name="Family")
-        role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
-        await member.add_roles(role, role2)
-        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face:")
-
-
     # @commands.command()
     # async def test(self, member):
     #     file = discord.File("logo.png")

@@ -273,6 +273,7 @@ class Moderator(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
+        if member.bot: return
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", (member.id, 0))
 
@@ -294,6 +295,11 @@ class Moderator(commands.Cog):
         embed.add_field(name="Account Creation Date", value=member.created_at.strftime("%d/%m/%y"))
         embed.add_field(name="Joined at", value=time.ctime())
         await member.guild.get_channel(786016910668070952).send(embed=embed)
+        role = discord.utils.get(member.guild.roles, name="Family")
+        role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
+        await member.add_roles(role, role2)
+        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face:")
+
 
     @commands.Cog.listener()
     async def on_member_ban(self, member):
