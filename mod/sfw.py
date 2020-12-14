@@ -325,9 +325,9 @@ class Moderator(commands.Cog):
             color=randint(0, 0xffffff)
         )
 
-        entry = member.guild.audit_logs(limit=1).flatten()
+        entry = await member.guild.audit_logs(limit=1).flatten()
         entry = entry[0]
-        if isinstance(entry.action, discord.AuditLogAction.kick):
+        if entry.action is discord.AuditLogAction.kick:
             embed.add_field(name=":o , It was a kick", value=f"{str(entry.target)} was kicked by {str(entry.user)} for {entry.reason}")
         
         await member.guild.get_channel(786016910668070952).send(embed=embed)
