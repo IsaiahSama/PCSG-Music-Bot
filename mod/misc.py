@@ -4,6 +4,8 @@ import asyncio
 import random
 import wikipedia as wp
 
+
+
 class Misc(commands.Cog):
     """For the use of commands that don't have their own category."""
     def __init__(self, bot):
@@ -147,15 +149,12 @@ class Misc(commands.Cog):
 
     @commands.command(brief="See who's available when you are so you can study with them", help="Looking for a study buddy of sorts? Use this command to see who's online and doing your same subjects and available when you are")
     async def matchfind(self, ctx):
-        dayrole = [x for x in ctx.guild.roles if x.name.endswith("day")]
         caperole = [x for x in ctx.guild.roles if "cape " in x.name]
         csecrole = [x for x in ctx.guild.roles if "csec " in x.name]
         profrole = [x for x in ctx.guild.roles if x.name in ["csec", "cape"]]
 
         user_profic = [proficiency for proficiency in profrole if proficiency in ctx.author.roles]
         if not user_profic: await ctx.send("You have not selected your role for csec/cape"); return
-        user_days = [day.name for day in dayrole if day in ctx.author.roles]
-        if not user_days: await ctx.send("You have not selected your role for which days you are available"); return
         if user_profic[0].name == "csec":
             user_subjects = [subject.name for subject in csecrole if subject in ctx.author.roles]
         else:
@@ -168,9 +167,6 @@ class Misc(commands.Cog):
         for member in ctx.guild.members:
             if member == ctx.author: continue
             if member.status == discord.Status.offline: continue
-            days = [day.name for day in dayrole if day in member.roles and day in ctx.author.roles]
-
-            if not days: continue
             profic = [proficiency for proficiency in profrole if proficiency in member.roles and proficiency in ctx.author.roles]
 
             if not profic: continue
@@ -192,7 +188,7 @@ class Misc(commands.Cog):
         embed.set_thumbnail(url=self.bot.user.avatar_url)
 
         for member in members[:25]:
-            embed.add_field(name="Available:", value=member)
+            embed.add_field(name="Available:", value=member.mention)
 
         await ctx.send(embed=embed)  
 

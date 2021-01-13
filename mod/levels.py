@@ -57,7 +57,7 @@ class Leveling(commands.Cog):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
-                await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+                await db.execute("INSERT OR IGNORE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
                 (member.id, 0, 0, 50))
 
             await db.commit()
@@ -167,7 +167,7 @@ class Leveling(commands.Cog):
             await message.channel.send(embed=embed)
     
     # Tasks    
-    @tasks.loop(seconds=270)
+    @tasks.loop(minutes=5)
     async def saving(self):
         try:
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:
