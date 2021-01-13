@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
 import asyncio
-import random
-from random import randint
 from dotenv import load_dotenv
 import os
 load_dotenv()

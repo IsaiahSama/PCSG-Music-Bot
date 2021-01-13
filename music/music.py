@@ -30,6 +30,8 @@ class Music(commands.Cog):
         elif self.bot.user.id == 762167641334218762:
             target = 762171605244968990
 
+        else: print("That's not right"); raise SystemExit
+
         for chans in self.guild.voice_channels:
             if chans.id == target:
                 self.chan = chans
