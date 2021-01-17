@@ -120,7 +120,7 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         for cog in to_loop:
             if cog.description:
                 embed.add_field(name=cog.qualified_name, value=f"```{cog.description}```")
-                embed.set_footer(text="PS: These are Case Sensitive")
+                embed.set_footer(text=f"PS: These are Case Sensitive\n{self.get_opening_note()}")
 
         await self.get_destination().send(embed=embed)
 

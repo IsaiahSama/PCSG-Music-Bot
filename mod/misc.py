@@ -162,7 +162,7 @@ class Misc(commands.Cog):
 
         if not user_subjects: await ctx.send("You don't have any subject roles"); return
         
-        await ctx.send("Searching for people doing your subjects whose available days matches yours")
+        await ctx.send("Searching for people with subjects similar to yours that are currently not offline")
         members = []
         for member in ctx.guild.members:
             if member == ctx.author: continue
@@ -179,7 +179,7 @@ class Misc(commands.Cog):
             members.append(member)
 
         if len(members) == 0: await ctx.send("Could not find anyone matching your criteria"); return
-        await ctx.send(len(members))
+        await ctx.send(f"Found {len(members)} members")
         embed = discord.Embed(
             title=f"Showing members that meet {ctx.author.name}'s criteria",
             color=random.randint(0, 0xffffff)

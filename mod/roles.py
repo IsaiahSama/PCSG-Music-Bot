@@ -14,11 +14,10 @@ class Rolling(commands.Cog):
 
     capedict = {}
     csecdict = {}
-    daydict = {}
     cxcdict = {}
     group = {}
     
-    ids = [754573710974779443, 754561589163589743, 764787663776645140, 764790530181300244, 765008580143087617]
+    ids = [754573710974779443, 754561589163589743, 764790530181300244, 765008580143087617]
     roleids = [765345502907596840, 765345536244318220, 765345755505360937, 765345790616141874, 764795892904755200, 764796084316667945, 765013168846012458]
 
     async def async_init(self):
@@ -31,7 +30,7 @@ class Rolling(commands.Cog):
         print("Done")
 
     async def getroles(self, guild):
-        dicts = [self.capedict, self.csecdict, self.daydict, self.cxcdict, self.group]
+        dicts = [self.capedict, self.csecdict, self.cxcdict, self.group]
         for i, v in enumerate(self.ids):
             cate = guild.get_channel(v)
             channels = cate.text_channels
@@ -49,7 +48,6 @@ class Rolling(commands.Cog):
         ab = []
         if mode == "cape": check = self.capedict.items()
         elif mode == "csec": check = self.csecdict.items()
-        elif mode == "days": check = self.daydict.items()
         elif mode == "cxc": check = self.cxcdict.items()
         elif mode == "group": check = self.group.items()
         else: print("Bad mode"); return
@@ -123,10 +121,8 @@ class Rolling(commands.Cog):
                     await user.send(f"Sorry for being late, Here's your {role.name} role")
                 except: continue
 
-        msg2 = await ctx.send("Done... Probably")
-        await asyncio.sleep(5)
+        msg2 = await ctx.send("Done... Probably", delete_after=5)
         await ctx.message.delete()
-        await msg2.delete()
 
 
 
@@ -142,6 +138,8 @@ class Rolling(commands.Cog):
             emoji = str(emoji)
         
             results = re.findall(r"(.+:.+)`?", msg.content)
+            
+            name = None
         
             for r in results:
                 temp = r.split(":")
@@ -150,7 +148,6 @@ class Rolling(commands.Cog):
                     name = temp[1]
                     name = name.replace("`", "").replace("-", " ").strip()
                     break
-                name = None
             
             if not name: print("STILL FAILED")
         
@@ -173,6 +170,8 @@ class Rolling(commands.Cog):
         msg = await channel.fetch_message(payload.message_id)
         results = re.findall(r"(.+:.+)`?", msg.content)
         
+        name = None
+
         for r in results:
             temp = r.split(":")
             emoji2 = temp[0]
@@ -180,7 +179,6 @@ class Rolling(commands.Cog):
                 name = temp[1]
                 name = name.replace("`", "").replace("-", " ").strip()
                 break
-            name = None
         
         if not name: print("STILL FAILED")
 
