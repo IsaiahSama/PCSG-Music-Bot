@@ -51,7 +51,7 @@ class Timer(commands.Cog):
 
         current_time -= 5
 
-        songs = ["ping!.mp3", "chill.mp3"]
+        songs = ["Ping!.mp3", "chill.mp3"]
 
         if current_time <= 0:                
             await channel.edit(name=f"On Break")

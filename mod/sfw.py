@@ -150,8 +150,8 @@ class Moderator(commands.Cog):
 
     @commands.command(brief="Deletes x amount of messages", help="Used to bulk delete messages")
     @commands.has_permissions(administrator=True)
-    async def purge(self, ctx, amount):
-        pass
+    async def purge(self, ctx, amount:int):
+        await ctx.channel.purge(limit=amount)
 
     # Events
 
@@ -164,6 +164,7 @@ class Moderator(commands.Cog):
             channel = before.guild.get_channel(785986850736963675)
         elif changed == "roles":
             channel = before.guild.get_channel(785986876531015711)
+        else: return
 
         embed.set_footer(text=f"User ID: {before.id}")
 
