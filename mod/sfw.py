@@ -2,14 +2,6 @@ import discord, time, asyncio, random, aiosqlite, os, json, sqlite3, time
 from discord.ext import commands, tasks
 from random import randint
 
-class WarnUser:
-    def __init__(self, tag, warnlevel):
-        self.tag = tag
-        self.warnlevel = warnlevel
-
-    def warn(self):
-        self.warnlevel += 1
-
 class Moderator(commands.Cog):
     """Moderators only... A list of mod commands for mods to moderate"""
     def __init__(self, bot):
@@ -44,8 +36,8 @@ class Moderator(commands.Cog):
 
             async with db.execute("SELECT * FROM WarnUser") as cursor:
                 async for row in cursor:
-                    x = WarnUser(row[0], row[1])
-                    self.users.append(x)
+                    userdict = {"TAG": row[0], "WARNLEVEL":row[1]}
+                    self.users.append(userdict)
 
         self.saving.start()
 
@@ -55,14 +47,14 @@ class Moderator(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def warnstate(self, ctx, member: discord.Member):
         user = await self.getuser(member)
-        await ctx.send(f"{member.name} has {user.warnlevel}/4 warns")
+        await ctx.send(f"{member.name} has {user['WARNLEVEL']}/4 warns")
 
     @commands.command(brief="Applies +1 warn to the user mentioned", help="This can be used to warn a user about something that the bot did not catch. Use with disgression", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
         user = await self.getuser(member)
-        user.warn()
-        await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user.warnlevel} / 4")
+        user["WARNLEVEL"] += 1
+        await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user['WARNLEVEL']} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
         await self.log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
         
@@ -70,7 +62,7 @@ class Moderator(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def resetwarn(self, ctx, member: discord.Member):
         user = await self.getuser(member)
-        user.warnlevel = 0
+        user['WARNLEVEL'] = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
         await self.log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
 
@@ -131,9 +123,9 @@ class Moderator(commands.Cog):
     async def warned(self, ctx):
         warned = []
         for user in self.users:
-            temp = discord.utils.get(ctx.guild.members, id=user.tag)
+            temp = discord.utils.get(ctx.guild.members, id=user['TAG'])
             if not temp: continue
-            if user.warnlevel > 0: warned.append(f"Name: {temp.name}, Warns: {user.warnlevel}")
+            if user['WARNLEVEL'] > 0: warned.append(f"Name: {temp.name}, Warns: {user['WARNLEVEL']}")
 
         if not warned: await ctx.send("Everyone seems to be innocent. Excellent"); return
         await ctx.send("Showing 10 members with highest warns")
@@ -143,7 +135,7 @@ class Moderator(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def warnreset(self, ctx):
         for user in self.users:
-            user.warnlevel = 0
+            user['WARNLEVEL'] = 0
 
         await ctx.send("Cleared everyone's crimes")
         await self.log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
@@ -242,8 +234,8 @@ class Moderator(commands.Cog):
 
         for x in ["hentai", "porn"]:
             if x in message.content.lower():
-                user.warn()
-                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user.warnlevel} / 4 strikes")
+                user["WARNLEVEL"] += 1
+                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user['WARNLEVEL']} / 4 strikes")
                 try:
                     await message.delete()
                 except discord.errors.NotFound:
@@ -253,8 +245,8 @@ class Moderator(commands.Cog):
         for word in tempmsg:
             if word in self.profane:
 
-                user.warnlevel += 0.5
-                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user.warnlevel} / 4 strikes")
+                user['WARNLEVEL'] += 0.5
+                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user['WARNLEVEL']} / 4 strikes")
                 try:
                     await message.delete()
                 except discord.errors.NotFound:
@@ -263,7 +255,7 @@ class Moderator(commands.Cog):
                 await msg.delete()
                 break
 
-        if user.warnlevel >= 4: 
+        if user['WARNLEVEL'] >= 4: 
             await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
             role = discord.utils.get(message.guild.roles, name="Muted")
             await message.author.add_roles(role)
@@ -281,7 +273,7 @@ class Moderator(commands.Cog):
 
         user = await self.getuser(member)
         if user:
-            if user.warnlevel >= 4:
+            if user['WARNLEVEL'] >= 4:
                 role = discord.utils.get(member.guild.roles, name="Muted")
                 await member.add_roles(role)
                 await member.send("As your offenses have not been wiped, you are muted.")
@@ -382,7 +374,7 @@ class Moderator(commands.Cog):
             async with aiosqlite.connect("PCSGDB.sqlite3") as db:
                 for user in self.users:
                     await db.execute("INSERT OR REPLACE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", 
-                    (user.tag, user.warnlevel))
+                    (user['TAG'], user['WARNLEVEL']))
                 await db.commit()
         except sqlite3.OperationalError:
             print("Database is in use.")
@@ -393,9 +385,9 @@ class Moderator(commands.Cog):
     # Functions
     async def getuser(self, m):
         if hasattr(m, "author"):
-            toreturn = [x for x in self.users if m.author.id == x.tag]
+            toreturn = [x for x in self.users if m.author.id == x['TAG']]
         else:
-            toreturn = [x for x in self.users if m.id == x.tag]
+            toreturn = [x for x in self.users if m.id == x['TAG']]
         if toreturn:
             return toreturn[0]
         return None
