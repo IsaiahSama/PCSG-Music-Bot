@@ -289,8 +289,11 @@ class Moderator(commands.Cog):
         await member.guild.get_channel(786016910668070952).send(embed=embed)
         role = discord.utils.get(member.guild.roles, name="Family")
         role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
+        role_channel = member.guild.get_channel(762068938686595152)
+        intro_channel = member.guild.get_channel(762060265520365568)
+
         await member.add_roles(role, role2)
-        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face:")
+        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face: Press here: {intro_channel.mention} and introduce yourself, then press here: {role_channel.mention} to start getting your roles.")
 
 
     @commands.Cog.listener()
