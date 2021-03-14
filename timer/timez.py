@@ -14,6 +14,7 @@ class Timer(commands.Cog):
         await self.bot.wait_until_ready()
         self.guild = self.bot.get_guild(693608235835326464)
         
+        self.recon.start()
         await self.connect(self.guild)
 
     channel = None

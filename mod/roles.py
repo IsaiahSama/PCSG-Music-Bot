@@ -99,6 +99,7 @@ class Rolling(commands.Cog):
         msg = await ctx.fetch_message(mid)
         await self.check(ctx, mid)
         reactions = msg.reactions
+        name = None
         for reaction in reactions:
             users = await reaction.users().flatten()
             results = re.findall(r"(.+:.+)`?", msg.content)
@@ -113,6 +114,7 @@ class Rolling(commands.Cog):
                     break
 
             role = discord.utils.get(ctx.guild.roles, name=name)
+            if not role: return
             for user in users:
                 if user.bot: continue
                 if role in user.roles: continue

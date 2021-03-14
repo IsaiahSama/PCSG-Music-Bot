@@ -90,7 +90,7 @@ class MySchedule(commands.Cog):
         if dayset:
             if dayset.lower() not in dsotw: await ctx.send("Invalid day"); return
             dotw = [dayset.lower()]
-        if not dayset:
+        else:
             dotw = dsotw
 
         for day in dotw:
@@ -101,7 +101,7 @@ class MySchedule(commands.Cog):
                     if msg.content.lower() == "exit": await to_send.send("Exiting"); return
                     if msg.content.lower() == "skip": await to_send.send("Skipping"); skipped = True; break
                 
-                except TimeoutError: await to_send.send("Could have just said no instead of leaving me hanging...")
+                except TimeoutError: await to_send.send("Could have just said no instead of leaving me hanging..."); return
                 
                 if len(msg.content) > 900: await to_send.send("Those tasks are a bit too long for me. Trim it a bit please"); continue
                 

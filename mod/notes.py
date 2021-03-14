@@ -1,4 +1,4 @@
-import discord, asyncio, aiosqlite, random, re
+import discord, asyncio, aiosqlite, random, re, sqlite3
 from discord.ext import commands, tasks
 
 class Noting(commands.Cog):

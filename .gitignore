@@ -1,6 +1,5 @@
 .env
 .vscode
+__pycache__/
 pyvenv.cfg
-Scripts/
-Lib/
 Include
