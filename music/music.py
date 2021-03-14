@@ -1,9 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 import os
-import asyncio
-
-
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -15,11 +12,7 @@ class Music(commands.Cog):
 
     async def async_init(self):
         await self.bot.wait_until_ready()
-        guilds = self.bot.guilds
-        for g in guilds:
-            if g.id == 693608235835326464:
-                self.guild = g
-                break
+        self.guild = self.bot.guilds[0]
 
         if self.bot.user.id == 755685507907846144:
             target = 762082834235654164
@@ -32,17 +25,17 @@ class Music(commands.Cog):
 
         else: print("That's not right"); raise SystemExit
 
-        for chans in self.guild.voice_channels:
-            if chans.id == target:
-                self.chan = chans
-                break
-        
+        vc = discord.utils.get(self.guild.voice_channels, id=target)
+        self.chan = vc
         await self.chan.connect()
         self.reconnect.start()
 
     @tasks.loop(minutes=1)
     async def reconnect(self):
-        if self.guild.voice_client == None:
+        if not self.guild.voice_client:
+            if self.guild.voice_client.channel != self.chan:
+                await self.guild.voice_client.disconnect()
+                self.guild.voice_client.cleanup()
             await self.chan.connect()
             await self.playtune()
 
@@ -52,10 +45,10 @@ class Music(commands.Cog):
 
     async def playtune(self):
         vc = self.guild.voice_client
-        if vc == None:
+        if not vc:
             return
 
-        if not vc.is_playing() and vc is not None:
+        if not vc.is_playing():
             
             if self.bot.user.id == 755685507907846144:
                 target = "pcsgtune.mp3"
@@ -65,14 +58,9 @@ class Music(commands.Cog):
 
             elif self.bot.user.id == 762167641334218762:
                 target = "pcsgtune3.mp3"
-
-            for link in os.listdir():
-                if link.lower() == target: break
             
-            source = discord.FFmpegOpusAudio(link)
+            source = discord.FFmpegOpusAudio(target)
             vc.play(source)
-
-
 
 def setup(bot):
     bot.add_cog(Music(bot))
