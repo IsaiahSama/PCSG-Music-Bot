@@ -7,60 +7,58 @@ class Music(commands.Cog):
         self.bot = bot
         bot.loop.create_task(self.async_init())
 
-    guild = None
-    chan = None
+    data_dict = {}
 
     async def async_init(self):
         await self.bot.wait_until_ready()
-        self.guild = self.bot.guilds[0]
-
-        if self.bot.user.id == 755685507907846144:
-            target = 762082834235654164
+        self.data_dict["GUILD"] = self.bot.guilds[0]
+        self.data_dict["ERROR_CHANNEL"] = discord.utils.get(self.guild.text_channels, id=755875929208782928)
+        self.data_dict["BOT_ID"] = self.bot.user.id
         
-        elif self.bot.user.id == 756347306038657085:
+        if self.data_dict["BOT_ID"] == 755685507907846144:
+            target = 762082834235654164
+            self.data_dict["TRACK"] = "lofi.mp3"
+        
+        elif self.data_dict["BOT_ID"] == 756347306038657085:
             target = 762150460651339806
+            self.data_dict["TRACK"] = "nature.mp3"
 
-        elif self.bot.user.id == 762167641334218762:
+        elif self.data_dict["BOT_ID"] == 762167641334218762:
             target = 762171605244968990
+            self.data_dict["TRACK"] = "piano.mp3"
 
+        elif self.data_dict["BOT_ID"] == 820792275743014915:
+            target = 820793494419144845
+            self.data_dict["TRACK"] = "relax.mp3"
+            
         else: print("That's not right"); raise SystemExit
 
-        vc = discord.utils.get(self.guild.voice_channels, id=target)
-        self.chan = vc
-        await self.chan.connect()
+        self.data_dict["VOICE_CHANNEL"] = discord.utils.get(self.guild.voice_channels, id=target)
+        if not self.data_dict["VOICE_CHANNEL"]:
+            print("Something went wrong.")
+            await self.data_dict["ERROR_CHANNEL"].send("HEY BOSS, MY VOICE CHANNEL IS MISSIN'")
+            raise SystemExit
+        
+        self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
         self.reconnect.start()
 
     @tasks.loop(minutes=1)
     async def reconnect(self):
-        if not self.guild.voice_client:
-            if self.guild.voice_client.channel != self.chan:
-                await self.guild.voice_client.disconnect()
-                self.guild.voice_client.cleanup()
-            await self.chan.connect()
+        if not self.data_dict["VC_OBJECT"]:
+            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+
+        if self.data_dict["VC_OBJECT"].channel != self.data_dict["VOICE_CHANNEL"]:
+            await self.data_dict["VC_OBJECT"].disconnect()
+            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+
+        await self.playtune()
+
+        if not self.data_dict["VC_OBJECT"].is_playing():
             await self.playtune()
 
-        if not self.guild.voice_client.is_playing():
-            await self.playtune()
 
-
-    async def playtune(self):
-        vc = self.guild.voice_client
-        if not vc:
-            return
-
-        if not vc.is_playing():
-            
-            if self.bot.user.id == 755685507907846144:
-                target = "pcsgtune.mp3"
-        
-            elif self.bot.user.id == 756347306038657085:
-                target = "pcsgtune2.mp3"
-
-            elif self.bot.user.id == 762167641334218762:
-                target = "pcsgtune3.mp3"
-            
-            source = discord.FFmpegOpusAudio(target)
-            vc.play(source)
+    async def playtune(self):                    
+        self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
 
 def setup(bot):
     bot.add_cog(Music(bot))
