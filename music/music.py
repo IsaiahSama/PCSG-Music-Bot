@@ -12,7 +12,7 @@ class Music(commands.Cog):
     async def async_init(self):
         await self.bot.wait_until_ready()
         self.data_dict["GUILD"] = self.bot.guilds[0]
-        self.data_dict["ERROR_CHANNEL"] = discord.utils.get(self.guild.text_channels, id=755875929208782928)
+        self.data_dict["ERROR_CHANNEL"] = discord.utils.get(self.data_dict["GUILD"].text_channels, id=755875929208782928)
         self.data_dict["BOT_ID"] = self.bot.user.id
         
         if self.data_dict["BOT_ID"] == 755685507907846144:
@@ -33,7 +33,7 @@ class Music(commands.Cog):
             
         else: print("That's not right"); raise SystemExit
 
-        self.data_dict["VOICE_CHANNEL"] = discord.utils.get(self.guild.voice_channels, id=target)
+        self.data_dict["VOICE_CHANNEL"] = discord.utils.get(self.data_dict["GUILD"].voice_channels, id=target)
         if not self.data_dict["VOICE_CHANNEL"]:
             print("Something went wrong.")
             await self.data_dict["ERROR_CHANNEL"].send("HEY BOSS, MY VOICE CHANNEL IS MISSIN'")
