@@ -51,8 +51,6 @@ class Music(commands.Cog):
             await self.data_dict["VC_OBJECT"].disconnect()
             self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
 
-        await self.playtune()
-
         if not self.data_dict["VC_OBJECT"].is_playing():
             await self.playtune()
 
