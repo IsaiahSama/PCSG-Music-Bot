@@ -149,18 +149,21 @@ class Misc(commands.Cog):
 
     @commands.command(brief="See who's available when you are so you can study with them", help="Looking for a study buddy of sorts? Use this command to see who's online and doing your same subjects and available when you are")
     async def matchfind(self, ctx):
+        prof_channel = ctx.guild.get_channel(762068938686595152)
+        sub_channel_1 = ctx.guild.get_channel(755875615587958814)
+        sub_channel_2 = ctx.guild.get_channel(718473529452003329)
         caperole = [x for x in ctx.guild.roles if "cape " in x.name]
         csecrole = [x for x in ctx.guild.roles if "csec " in x.name]
         profrole = [x for x in ctx.guild.roles if x.name in ["csec", "cape"]]
 
         user_profic = [proficiency for proficiency in profrole if proficiency in ctx.author.roles]
-        if not user_profic: await ctx.send("You have not selected your role for csec/cape"); return
+        if not user_profic: await ctx.send(f"You have not selected your role for csec/cape. Select them from here {prof_channel.mention}"); return
         if user_profic[0].name == "csec":
             user_subjects = [subject.name for subject in csecrole if subject in ctx.author.roles]
         else:
             user_subjects = [subject.name for subject in caperole if subject in ctx.author.roles]
 
-        if not user_subjects: await ctx.send("You don't have any subject roles"); return
+        if not user_subjects: await ctx.send(f"You don't have any subject roles. Get them from {sub_channel_1.mention} or {sub_channel_2.mention}"); return
         
         await ctx.send("Searching for people with subjects similar to yours that are currently not offline")
         members = []
