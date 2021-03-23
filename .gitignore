@@ -3,3 +3,4 @@
 __pycache__/
 pyvenv.cfg
 Include
+mod/PCSGDB.sqlite3

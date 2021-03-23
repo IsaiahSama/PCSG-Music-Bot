@@ -186,6 +186,7 @@ class Misc(commands.Cog):
         )
         
         embed.set_thumbnail(url=self.bot.user.avatar_url)
+        
 
         for member in members[:25]:
             embed.add_field(name="Available:", value=member.mention)
