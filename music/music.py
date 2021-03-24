@@ -56,8 +56,13 @@ class Music(commands.Cog):
             try:
                 await self.playtune()
             except ClientException:
-                self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
-                await self.playtune()
+                try:
+                    await self.data_dict["VC_OBJECT"].disconnect()
+                except:
+                    pass
+                else:
+                    self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+                    await self.playtune()
 
     async def playtune(self):                    
         self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
