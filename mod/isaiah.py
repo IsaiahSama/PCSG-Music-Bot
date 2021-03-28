@@ -230,7 +230,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
         for role in roles:
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                role: discord.PermissionOverwrite(view_channel=True)
+                role: discord.PermissionOverwrite(view_channel=True, connect=True, speak=True, stream=True)
             }
             x = ' '.join(role.name.split(" ")[1:])
             await category.create_voice_channel(name=f"{name.upper()} {x}", overwrites=overwrites)

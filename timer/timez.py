@@ -41,6 +41,7 @@ class Timer(commands.Cog):
     @tasks.loop(minutes=5)
     async def ticker(self):
         guild = self.bot.get_guild(693608235835326464)
+        if not guild.voice_client: return
         channel = self.channel
         value = self.bot.user.name.split(" ")[0].replace("min", "")
         current_time = re.findall(r": ([0-9]+)", channel.name)
