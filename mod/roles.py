@@ -1,11 +1,6 @@
 import discord
 from discord.ext import commands
-import asyncio
-import random
-from random import randint
 import re
-from time import sleep
-
 
 class Rolling(commands.Cog):
     def __init__(self, bot):
@@ -151,7 +146,7 @@ class Rolling(commands.Cog):
                     name = name.replace("`", "").replace("-", " ").strip()
                     break
             
-            if not name: print("STILL FAILED")
+            if not name: print("STILL FAILED"); return
         
             role = discord.utils.get(guild.roles, name=name)
             if not role: print(f"can't find role for {name}"); return
@@ -182,7 +177,7 @@ class Rolling(commands.Cog):
                 name = name.replace("`", "").replace("-", " ").strip()
                 break
         
-        if not name: print("STILL FAILED")
+        if not name: print("STILL FAILED"); return
 
         role = discord.utils.get(guild.roles, name=name)
         if not role: return
