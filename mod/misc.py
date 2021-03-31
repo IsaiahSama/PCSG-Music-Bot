@@ -56,6 +56,7 @@ class Misc(commands.Cog):
         guilded.add_field(name="Guild Name", value=f"{guild.name}")
         guilded.add_field(name="Date Created",
                           value=f"{guild.created_at.strftime('%d/%m/%y')}")
+        guilded.add_field(name="Time Created", value=f"{guild.created_at.hour}:{guild.created_at.minute}:{guild.created_at.second} UTC")
         guilded.add_field(name="Guild Region", value=f"{guild.region}")
         guilded.add_field(name="Guild Owner", value=f"{guild.owner}")
         guilded.add_field(name="Number of humans", value=f"{len(humans)}")        

@@ -187,6 +187,7 @@ class Rolling(commands.Cog):
         role = discord.utils.get(guild.roles, name=name)
         if not role: return
         user = guild.get_member(payload.user_id)
+        if not user: return
         if role not in user.roles: return
         await user.remove_roles(role)
         try:
