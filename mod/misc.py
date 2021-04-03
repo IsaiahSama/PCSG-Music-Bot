@@ -26,6 +26,7 @@ class Misc(commands.Cog):
         name = temp[0]
         num = len(members)
         new_name = f"{name}: {num}"
+        if famcount.name == new_name: return
         await famcount.edit(name=new_name)
         
 
@@ -40,6 +41,7 @@ class Misc(commands.Cog):
 
         temp = studycount.name.split(":")
         name = temp[0]
+        if studycount.name == f"{name}: {total}": return
         await studycount.edit(name=f"{name}: {total}")
 
     @commands.command(brief="Used to see information on the server", help="Reveals some basic information on the PCSG server")
