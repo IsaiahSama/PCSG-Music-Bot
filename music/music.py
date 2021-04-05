@@ -1,7 +1,6 @@
 import discord
 from discord.errors import ClientException
 from discord.ext import commands, tasks
-import os
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -45,7 +44,7 @@ class Music(commands.Cog):
 
     @tasks.loop(minutes=1)
     async def reconnect(self):
-        if not self.data_dict["VC_OBJECT"]:
+        if not self.data_dict["VC_OBJECT"].is_connected():
             self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
 
         if self.data_dict["VC_OBJECT"].channel != self.data_dict["VOICE_CHANNEL"]:
@@ -55,14 +54,9 @@ class Music(commands.Cog):
         if not self.data_dict["VC_OBJECT"].is_playing():
             try:
                 await self.playtune()
-            except ClientException:
-                try:
-                    await self.data_dict["VC_OBJECT"].disconnect()
-                except:
-                    pass
-                else:
-                    self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
-                    await self.playtune()
+            except Exception as err:
+                print(f"An error occurred... Look at this {err}")
+                await self.data_dict["ERROR_CHANNEL"].send(f"An error occurred... Look at this:\n{err}")
 
     async def playtune(self):                    
         self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
