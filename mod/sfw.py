@@ -346,8 +346,10 @@ class Moderator(commands.Cog):
         await before.guild.get_channel(785993210522107925).send(embed=embed)
         
 
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        error_channel = ctx.guild.get_channel(828638567236108308)
         if isinstance(error, commands.CommandNotFound):
             all_cogs = self.bot.cogs
             msg = ctx.message.content.lower().split(".")[1]
@@ -368,6 +370,7 @@ class Moderator(commands.Cog):
         
         await ctx.send(error)
         print(error)
+        await error_channel.send(error)
 
 
     # Tasks

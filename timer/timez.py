@@ -14,7 +14,7 @@ class Timer(commands.Cog):
     async def async_init(self):
         await self.bot.wait_until_ready()
         self.data_dict["GUILD"] = self.bot.get_guild(693608235835326464)
-        self.data_dict["ERROR_CHANNEL"] = discord.utils.get(self.data_dict["GUILD"].text_channels, id=755875929208782928)
+        self.data_dict["ERROR_CHANNEL"] = discord.utils.get(self.data_dict["GUILD"].text_channels, id=828638567236108308)
         self.data_dict["BOT_ID"] = self.bot.user.id
         # 45 minute bot
         if self.data_dict["BOT_ID"] == 762840423965392906:

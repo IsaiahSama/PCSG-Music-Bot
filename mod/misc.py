@@ -34,6 +34,10 @@ class Misc(commands.Cog):
     async def studycount(self):
         guild = self.bot.get_guild(693608235835326464)
         studycount = guild.get_channel(764427421876748298)
+        if not studycount:
+            print("Can't access study count at the moment")
+            return
+            
         total = 0
         for vc in guild.voice_channels:
             temp = [user for user in vc.members if not user.bot]
