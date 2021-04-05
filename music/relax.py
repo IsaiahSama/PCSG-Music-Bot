@@ -19,8 +19,8 @@ async def refresh(ctx):
 
 @bot.event
 async def on_ready():
-    print(f"Tweet Tweet we're in")
-    activity = discord.Activity(name='Nature Music for PCSG', type=discord.ActivityType.playing)
+    print(f"Just relax")
+    activity = discord.Activity(name='Relaxing Music for PCSG', type=discord.ActivityType.playing)
     await bot.change_presence(activity=activity)
 
 yes=os.getenv("key4")
