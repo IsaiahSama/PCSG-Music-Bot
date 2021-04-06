@@ -247,5 +247,35 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
         await category.delete()
         await ctx.send("DONE!!!")
 
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def new_perms(self, ctx, word, cid:int):
+        if word == "csec":
+            teacher = discord.utils.get(ctx.guild.roles, id=762189597059842058)
+        elif word == "cape":
+            teacher = discord.utils.get(ctx.guild.roles, id=796519532628803584)
+        else:
+            print("No no no... NO!")
+            return
+        match = re.compile(rf"({word}.+)")
+        category = ctx.guild.get_channel(cid)
+        for channel in category.text_channels:
+            name = match.search(channel.name).group(1)
+            name = name.replace("-", " ")
+            role = discord.utils.get(ctx.guild.roles, name=name)
+            if not role:
+                print(f"Failed to get role for {channel.name}")
+                continue
+
+            overwrites = {
+                ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                role: discord.PermissionOverwrite(view_channel=True, send_messages=True),
+                teacher: discord.PermissionOverwrite(view_channel=True, send_messages=True, manage_messages=True)
+            }
+
+            await channel.edit(overwrites=overwrites)
+            print(f"Changed overwrites for {channel.name}")
+
+
 def setup(bot):
     bot.add_cog(Isaiah(bot))
