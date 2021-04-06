@@ -144,7 +144,7 @@ class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def removeall(self, ctx):
-        role = [role for role in ctx.guild.roles if role.name in ["Family", "Newbie Learner"]]
+        role = [role for role in ctx.guild.roles if role.name in [762190942316134400, 755633133600112651]]
         for member in ctx.guild.members: await member.remove_roles(*role)
         await ctx.send("Removed roles from everyone")
 
