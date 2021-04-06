@@ -126,7 +126,7 @@ class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.command(hidden=True)
     async def roleall(self, ctx):
         await ctx.send("Beginning") 
-        role = [role for role in ctx.guild.roles if role.name in ["Family", "Newbie Learner"]]
+        role = [role for role in ctx.guild.roles if role.id in [762190942316134400, 755633133600112651]]
         members = [user for user in ctx.guild.members if not user.bot]
 
         role_channel = ctx.guild.get_channel(762068938686595152)

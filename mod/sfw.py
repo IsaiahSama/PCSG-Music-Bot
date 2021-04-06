@@ -287,8 +287,8 @@ class Moderator(commands.Cog):
         embed.add_field(name="Account Creation Date", value=member.created_at.strftime("%d/%m/%y"))
         embed.add_field(name="Joined at", value=time.ctime())
         await member.guild.get_channel(786016910668070952).send(embed=embed)
-        role = discord.utils.get(member.guild.roles, name="Family")
-        role2 = discord.utils.get(member.guild.roles, name="Newbie Learner")
+        role = discord.utils.get(member.guild.roles, id=755633133600112651)
+        role2 = discord.utils.get(member.guild.roles, id=762190942316134400)
         role_channel = member.guild.get_channel(762068938686595152)
         intro_channel = member.guild.get_channel(762060265520365568)
 
