@@ -48,6 +48,10 @@ class Timer(commands.Cog):
     async def ticker(self):
         channel = self.data_dict["CHANNEL"]
         value = self.bot.user.name.split(" ")[0].replace("min", "")
+        users = [member for member in channel.members if not member.bot]
+        if not users:
+            await channel.edit(name=f"({value})Study Time: {value}")
+            return
         current_time = re.findall(r": ([0-9]+)", channel.name)
         if current_time: current_time = int(current_time[0])
         else: 
