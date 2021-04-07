@@ -50,6 +50,7 @@ class Timer(commands.Cog):
         value = self.bot.user.name.split(" ")[0].replace("min", "")
         users = [member for member in channel.members if not member.bot]
         if not users:
+            if channel.name == f"({value})Study Time: {value}": return
             await channel.edit(name=f"({value})Study Time: {value}")
             return
         current_time = re.findall(r": ([0-9]+)", channel.name)
