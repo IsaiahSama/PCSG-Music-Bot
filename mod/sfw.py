@@ -293,6 +293,9 @@ class Moderator(commands.Cog):
         intro_channel = member.guild.get_channel(762060265520365568)
 
         await member.add_roles(role, role2)
+        humans = [member for member in member.guild.members if not member.bot]
+        if human_count := len(humans) % 100 == 0:
+            await member.guild.get_channel(700214669003980801).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
         await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face: Press here: {intro_channel.mention} and introduce yourself, then press here: {role_channel.mention} to start getting your roles.")
 
 
