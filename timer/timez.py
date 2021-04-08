@@ -1,5 +1,6 @@
 import discord
 from discord import utils
+from discord.errors import ClientException
 from discord.ext import commands, tasks
 import asyncio
 import random, re, os
@@ -82,7 +83,10 @@ class Timer(commands.Cog):
     @tasks.loop(seconds=60)
     async def recon(self):
         if not self.data_dict["VC_OBJECT"].is_connected():
-            self.data_dict["VC_OBJECT"] = await self.data_dict["CHANNEL"].connect()
+            try:
+                self.data_dict["VC_OBJECT"] = await self.data_dict["CHANNEL"].connect()
+            except ClientException:
+                pass
         
         if self.data_dict["VC_OBJECT"].channel != self.data_dict["CHANNEL"]:
             await self.data_dict["VC_OBJECT"].disconnect(force=True)
