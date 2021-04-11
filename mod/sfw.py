@@ -1,4 +1,5 @@
-import discord, time, asyncio, random, aiosqlite, os, json, sqlite3, time
+import discord, time, asyncio, aiosqlite, os, json, sqlite3, time
+from mydicts import *
 from discord.ext import commands, tasks
 from random import randint
 
@@ -25,7 +26,7 @@ class Moderator(commands.Cog):
     users = []
 
     async def setup(self):
-        guild = self.bot.get_guild(693608235835326464)
+        guild = self.bot.get_guild(guild_id)
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
@@ -69,7 +70,7 @@ class Moderator(commands.Cog):
     @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
     async def timeout(self, ctx, member: discord.Member, time, *, reason):
-        role = discord.utils.get(ctx.guild.roles, name="Muted")
+        role = discord.utils.get(ctx.guild.roles, id=roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been timed out for {time} minutes for {reason} by {ctx.author.name}")
         time *= 60
@@ -83,7 +84,7 @@ class Moderator(commands.Cog):
     @commands.command(brief="Mutes a user until unmuted", help="Mutes a user until unmuted", usage="@user duration_in_seconds")
     @commands.has_permissions(administrator=True)
     async def mute(self, ctx, member: discord.Member, *, reason):
-        role = discord.utils.get(ctx.guild.roles, name="Muted")
+        role = discord.utils.get(ctx.guild.roles, id=roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been muted by {ctx.author}. Reason: {reason}")
         await self.log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
@@ -91,7 +92,7 @@ class Moderator(commands.Cog):
     @commands.command(brief="Unmutes a user that has been muted.", help="Unmutes a muted user", usage="@user")
     @commands.has_permissions(administrator=True)
     async def unmute(self, ctx, member: discord.Member):
-        role = discord.utils.get(member.roles, name="Muted")
+        role = discord.utils.get(member.roles, id=roles["MUTED"])
         if not role: await ctx.send("User isn't muted"); return
         await member.remove_roles(role)
         await ctx.send(f"Unmuted {member.mention}. Refrain from having to be muted again")
@@ -153,9 +154,9 @@ class Moderator(commands.Cog):
         if not embed: return
 
         if changed == "nickname":
-            channel = before.guild.get_channel(785986850736963675)
+            channel = before.guild.get_channel(channels["NAME_CHANGES"])
         elif changed == "roles":
-            channel = before.guild.get_channel(785986876531015711)
+            channel = before.guild.get_channel(channels["ROLE_CHANGES"])
         else: return
 
         embed.set_footer(text=f"User ID: {before.id}")
@@ -203,7 +204,7 @@ class Moderator(commands.Cog):
             description=message.content,
             color=randint(0, 0xffffff)
         )
-        channel = message.guild.get_channel(785993210522107925)
+        channel = message.guild.get_channel(channels["MESSAGE_LOGS"])
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -217,7 +218,7 @@ class Moderator(commands.Cog):
         for msg in messagelist[:24]:
             embed.add_field(name=f"Deleted from {msg.channel.name}", value=f"{msg.content[:550]} ...")
 
-        await messagelist[0].guild.get_channel(786003742813192233).send(embed=embed)
+        await messagelist[0].guild.get_channel(channels["BULK_DELETES"]).send(embed=embed)
     
 
     with open("swearWords.txt") as f:
@@ -257,7 +258,7 @@ class Moderator(commands.Cog):
 
         if user['WARNLEVEL'] >= 4: 
             await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
-            role = discord.utils.get(message.guild.roles, name="Muted")
+            role = discord.utils.get(message.guild.roles, id=roles["MUTED"])
             await message.author.add_roles(role)
             await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
 
@@ -274,9 +275,12 @@ class Moderator(commands.Cog):
         user = await self.getuser(member)
         if user:
             if user['WARNLEVEL'] >= 4:
-                role = discord.utils.get(member.guild.roles, name="Muted")
+                role = discord.utils.get(member.guild.roles, id=roles["MUTED"])
                 await member.add_roles(role)
-                await member.send("As your offenses have not been wiped, you are muted.")
+                try:
+                    await member.send("As your offenses have not been wiped, you are muted.")
+                except:
+                    return
 
         embed = discord.Embed(
             title="Member join",
@@ -286,17 +290,31 @@ class Moderator(commands.Cog):
 
         embed.add_field(name="Account Creation Date", value=member.created_at.strftime("%d/%m/%y"))
         embed.add_field(name="Joined at", value=time.ctime())
-        await member.guild.get_channel(786016910668070952).send(embed=embed)
-        role = discord.utils.get(member.guild.roles, id=755633133600112651)
-        role2 = discord.utils.get(member.guild.roles, id=762190942316134400)
-        role_channel = member.guild.get_channel(762068938686595152)
-        intro_channel = member.guild.get_channel(762060265520365568)
+        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
 
-        await member.add_roles(role, role2)
+        pending_member_role = discord.utils.get(member.guild.roles, id=roles["PENDING_MEMBER"])
+
+        await member.add_roles(pending_member_role)
+
         human_count = sum(not human.bot for human in member.guild.members)
+
         if human_count % 100 == 0:
-            await member.guild.get_channel(700214669003980801).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
-        await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face: Press here: {intro_channel.mention} and introduce yourself, then press here: {role_channel.mention} to start getting your roles.")
+            await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
+            
+        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
+"""Welcome @... to the :PCSGLETTERSWITHOUTBACKGROUND: Family! :bcheart: You're the (insert number)th Family Member :heartato: 
+Thank You for joining The Study-Goals' E-School :ared:
+
+Please follow these 3 Verification Steps:  :disputed: 
+1.   Press here: #☑-cxc-proficiency-select to select CSEC/CAPE  :6181_check: 
+2.  Select your subjects in: #📗-csec-subject-select or #📕-cape-subject-select :black_tick: 
+3.  Press here: #👋-meet-and-greet to introduce yourself :9697_MegaShout:
+Congrats, you're Verified  :hypertada:
+
+We look forward to learning with you, Newbie E-Schooler! :jamcat: 
+Feel free to invite your family & friends: :mmcheer: https://discord.com/invite/4muGPHHwar 
+For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://www.pcsgfamily.org/
+""")
 
 
     @commands.Cog.listener()
@@ -313,7 +331,7 @@ class Moderator(commands.Cog):
         embed.add_field(name="Reason", value=ban.reason)
         embed.set_footer(text=f"Target ID {ban.target.id}. Banner ID {ban.user.id}")
 
-        await member.guild.get_channel(786016910668070952).send(embed=embed)
+        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
 
     
     @commands.Cog.listener()
@@ -329,7 +347,7 @@ class Moderator(commands.Cog):
         if entry.action is discord.AuditLogAction.kick:
             embed.add_field(name=":o , It was a kick", value=f"{str(entry.target)} was kicked by {str(entry.user)} for {entry.reason}")
         
-        await member.guild.get_channel(786016910668070952).send(embed=embed)
+        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
 
 
     @commands.Cog.listener()
@@ -346,13 +364,13 @@ class Moderator(commands.Cog):
         embed.add_field(name="Jump URL", value=after.jump_url)
         embed.set_footer(text=f"User ID: {before.author.id}")
 
-        await before.guild.get_channel(785993210522107925).send(embed=embed)
+        await before.guild.get_channel(channels["MESSAGE_LOGS"]).send(embed=embed)
         
 
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        error_channel = ctx.guild.get_channel(828638567236108308)
+        error_channel = ctx.guild.get_channel(channels["ERROR_ROOM"])
         if isinstance(error, commands.CommandNotFound):
             all_cogs = self.bot.cogs
             msg = ctx.message.content.lower().split(".")[1]
