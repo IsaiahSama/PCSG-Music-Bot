@@ -1,9 +1,11 @@
 import discord
 import asyncio
+import re
 from discord.ext import commands, tasks
 import random
 import wikipedia as wp
 from mydicts import *
+
 
 
 
@@ -20,7 +22,7 @@ class General(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def humancount(self):
-        guild = self.bot.get_guild(channels["GUILD"])
+        guild = self.bot.get_guild(guild_id)
         member_count_channel = guild.get_channel(channels["MEMBER_COUNT_CHANNEL"])
         human_count = sum(not member.bot for member in guild.members)
         channel_name = member_count_channel.name.split(":")[0]
@@ -34,7 +36,7 @@ class General(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def studycount(self):
-        guild = self.bot.get_guild(channels["GUILD"])
+        guild = self.bot.get_guild(guild_id)
         studycount = guild.get_channel(channels["MEMBERS_IN_VC_COUNT_CHANNEL"])
         if not studycount:
             print("Can't access study count at the moment")
@@ -268,6 +270,23 @@ class General(commands.Cog):
         if not channel: await ctx.send(f"Channel with {channame} could not be found"); return
         
         await ctx.send(''.join(channel[:49]))
+
+    @commands.command(brief="Used to view all subjects that are available to you", help="Shows the subjects that matches your proficiency (cape/csec)")
+    async def show_subject(self, ctx):
+        proficiency_role = discord.utils.get(ctx.author.roles, id=roles["CAPE"]) or discord.utils.get(ctx.author.roles, id=roles["CSEC"])
+        if not proficiency_role:
+            await ctx.send("You have not selected your subject proficiency. Please contact a moderator to get this issue resolved")
+            return
+
+        proficiency = proficiency_role.name.lower()
+
+        try:
+            role_names = ', '.join([role.name for role in ctx.guild.roles if role.name.startswith(proficiency)])
+        except Exception as err:
+            await ctx.send(f"An error occurred: {err}")
+            return
+        
+        await ctx.send(f"`{role_names}`")
 
 def setup(bot):
     bot.add_cog(General(bot))
