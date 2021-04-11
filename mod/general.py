@@ -1,4 +1,5 @@
 import discord
+import asyncio
 from discord.ext import commands, tasks
 import random
 import wikipedia as wp
@@ -203,6 +204,70 @@ class General(commands.Cog):
 
         await ctx.send(embed=embed)  
 
+    active_polls = []
+
+    @commands.command(help="Make a poll for users to vote on. Options for the poll must first start with an emoji of your choice, then the poll option. Each option must go on a new line.", brief="Used to make a poll", usage="poll_options")
+    async def poll(self, ctx, *, pollmsg):
+        poll = pollmsg.split("\n")
+        if not len(poll) > 1:
+            await ctx.send("You must have at least 2 options to have a valid poll.")
+            return
+
+        if len(poll) > 10: await ctx.send("You have too many values for this poll."); return
+
+
+        content = {}
+        for line in poll:
+            if len(line[1:].strip()) == 0: await ctx.send("Not a valid poll option"); return
+            content[line[0]] = line[1:].strip()
+            if len(content[line[0]]) > 250: await ctx.send("Option is far too long. shorten it and try again"); return
+
+        pollbed = discord.Embed(
+            title=f"Poll Created by {ctx.author}",
+            color=random.randint(0, 0xffffff)
+        )
+
+        pollbed.set_thumbnail(url=ctx.author.avatar_url)
+        pollbed.set_footer(text="React to give your feedback.")
+
+        for k, v in content.items():
+            pollbed.add_field(name=f"Option: {v}", value=f"Reaction: {k}", inline=False)
+
+
+        old_msg = await ctx.send(embed=pollbed)
+
+        for v in content.keys():
+            try:
+                await old_msg.add_reaction(v)
+            except discord.HTTPException:
+                await ctx.send(f"{v} is an invalid emoji. So your poll has been cancelled")
+                return
+
+        await ctx.send("I'll let you know results in 1 hour")
+
+        await asyncio.sleep(3600)
+        
+        msg = await ctx.channel.fetch_message(old_msg.id)
+        allreactions = msg.reactions
+
+        valid_reactions = [reaction for reaction in allreactions if str(reaction) in content.keys()]
+
+        highest = 0
+        winner = None
+        for reaction in valid_reactions:
+            if reaction.count > highest:
+                winner = reaction
+                highest = winner.count
+
+        await ctx.send(f"{ctx.author.mention}, Your poll is complete. Winner is {content[winner.emoji]} with {winner.count} votes")
+
+    @commands.command(brief="This is used to go to any text channel within the server", help="This command creates a 'portal' of sorts that you can press to go to any text channel within the PCSG server.", usage="name_of_channel")
+    async def portal(self, ctx, *, channame):
+        channels = ctx.guild.text_channels
+        channel = [chan.mention for chan in channels if channame.lower() in chan.name.lower()]
+        if not channel: await ctx.send(f"Channel with {channame} could not be found"); return
+        
+        await ctx.send(''.join(channel[:49]))
 
 def setup(bot):
     bot.add_cog(General(bot))
