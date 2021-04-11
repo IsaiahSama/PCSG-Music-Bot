@@ -335,6 +335,8 @@ For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://
 
         await member.add_roles(proficiency_role, family_role, newbie_role)
 
+        await introduction_channel.send("Please use `p.show_subjects` to see a list of all available subjects for your proficiency, then use `p.select_subject subject_names` to select those subjects. Remember to separate your subjects with commas (,)")
+
     @commands.Cog.listener()
     async def on_member_ban(self, member):
         bann = await member.guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
