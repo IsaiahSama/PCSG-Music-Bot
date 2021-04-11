@@ -14,20 +14,21 @@ class General(commands.Cog):
 
     async def async_init(self):
         await self.bot.wait_until_ready()
-        self.chancount.start()
+        self.humancount.start()
         self.studycount.start()
 
     @tasks.loop(minutes=5)
-    async def chancount(self):
+    async def humancount(self):
         guild = self.bot.get_guild(channels["GUILD"])
         member_count_channel = guild.get_channel(channels["MEMBER_COUNT_CHANNEL"])
         human_count = sum(not member.bot for member in guild.members)
-        temp = member.name.split(":")
-        name = temp[0]
-        num = len(members)
-        new_name = f"{name}: {num}"
-        if famcount.name == new_name: return
-        await famcount.edit(name=new_name)
+        channel_name = member_count_channel.name.split(":")[0]
+
+        new_name = f"{channel_name}: {human_count}"
+
+        if member_count_channel.name == new_name: return
+
+        await member_count_channel.edit(name=new_name)
         
 
     @tasks.loop(minutes=5)
@@ -40,13 +41,12 @@ class General(commands.Cog):
             
         total = 0
         for vc in guild.voice_channels:
-            temp = [user for user in vc.members if not user.bot]
-            total += len(temp)
+            total += sum(not user.bot for user in vc.members)
 
-        temp = studycount.name.split(":")
-        name = temp[0]
-        if studycount.name == f"{name}: {total}": return
-        await studycount.edit(name=f"{name}: {total}")
+        channel_name = studycount.name.split(":")[0]
+        
+        if studycount.name == f"{channel_name}: {total}": return
+        await studycount.edit(name=f"{channel_name}: {total}")
 
     @commands.command(brief="Used to see information on the server", help="Reveals some basic information on the PCSG server")
     async def serverinfo(self, ctx):
@@ -55,8 +55,8 @@ class General(commands.Cog):
             title=f"Showing server info for {ctx.guild.name}",
             color=random.randint(0, 0xffffff)
         )        
-        humans = [member for member in ctx.guild.members if not member.bot]
-        bots = [member for member in ctx.guild.members if member.bot]
+        human_count = sum(not member.bot for member in ctx.guild.members)
+        bot_count = sum(member.bot for member in ctx.guild.members)
 
         guilded.set_thumbnail(url=guild.icon_url)
         guilded.add_field(name="Guild Name", value=f"{guild.name}")
@@ -65,8 +65,8 @@ class General(commands.Cog):
         guilded.add_field(name="Time Created", value=f"{guild.created_at.hour}:{guild.created_at.minute}:{guild.created_at.second} UTC")
         guilded.add_field(name="Guild Region", value=f"{guild.region}")
         guilded.add_field(name="Guild Owner", value=f"{guild.owner}")
-        guilded.add_field(name="Number of humans", value=f"{len(humans)}")        
-        guilded.add_field(name="Number of bots", value=f"{len(bots)}")        
+        guilded.add_field(name="Number of humans", value=f"{human_count}")        
+        guilded.add_field(name="Number of bots", value=f"{bot_count}")        
         guilded.add_field(name="Number of Text Channels", value=f"{len(ctx.guild.text_channels)}")
         guilded.add_field(name="Number of Voice Channels", value=f"{len(ctx.guild.voice_channels)}")
         guilded.add_field(name="Number of roles", value=f"{len(ctx.guild.roles)}")
@@ -205,4 +205,4 @@ class General(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Misc(bot))
+    bot.add_cog(General(bot))
