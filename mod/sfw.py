@@ -316,6 +316,24 @@ Feel free to invite your family & friends: :mmcheer: https://discord.com/invite/
 For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://www.pcsgfamily.org/
 """)
 
+        await self.handle_new_user(member)
+
+    async def handle_new_user(self, member):
+        introduction_channel = member.guild.get_channel(channels["INTRO_CHANNEL"])
+        await introduction_channel.send(f"Welcome {member.mention}. Before we can get started, you need to get verified :). What is your subject proficiency?\n`cape`/`csec`")
+        
+        def proficiency_check(m):
+            return m.author == member and m.content.lower() in ["cape", "csec"]
+
+        input_ = await self.bot.wait_for("message", check=proficiency_check)
+        proficiency = input_.content.upper()
+
+        # Where proficiency is either CAPE or CSEC
+        proficiency_role = discord.utils.get(member.guild.roles, id=roles[proficiency])
+        family_role = discord.utils.get(member.guild.roles, id=roles["FAMILY"])
+        newbie_role = discord.utils.get(member.guild.roles, id=roles["NEWBIE"])
+
+        await member.add_roles(proficiency_role, family_role, newbie_role)
 
     @commands.Cog.listener()
     async def on_member_ban(self, member):
