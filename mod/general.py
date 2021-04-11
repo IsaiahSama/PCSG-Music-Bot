@@ -271,22 +271,6 @@ class General(commands.Cog):
         
         await ctx.send(''.join(channel[:49]))
 
-    @commands.command(brief="Used to view all subjects that are available to you", help="Shows the subjects that matches your proficiency (cape/csec)")
-    async def show_subject(self, ctx):
-        proficiency_role = discord.utils.get(ctx.author.roles, id=roles["CAPE"]) or discord.utils.get(ctx.author.roles, id=roles["CSEC"])
-        if not proficiency_role:
-            await ctx.send("You have not selected your subject proficiency. Please contact a moderator to get this issue resolved")
-            return
-
-        proficiency = proficiency_role.name.lower()
-
-        try:
-            role_names = ', '.join([role.name for role in ctx.guild.roles if role.name.startswith(proficiency)])
-        except Exception as err:
-            await ctx.send(f"An error occurred: {err}")
-            return
-        
-        await ctx.send(f"`{role_names}`")
 
 def setup(bot):
     bot.add_cog(General(bot))
