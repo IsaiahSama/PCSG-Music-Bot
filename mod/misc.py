@@ -1,13 +1,13 @@
 import discord
 from discord.ext import commands, tasks
-import asyncio
 import random
 import wikipedia as wp
+from mydicts import *
 
 
 
-class Misc(commands.Cog):
-    """For the use of commands that don't have their own category."""
+class General(commands.Cog):
+    """Although my main purpose is to moderate, I still have some General commands for all of you to use :)"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())
@@ -19,10 +19,10 @@ class Misc(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def chancount(self):
-        guild = self.bot.get_guild(693608235835326464)
-        famcount = guild.get_channel(764418047246729227)
-        members = [mem for mem in guild.members if not mem.bot]
-        temp = famcount.name.split(":")
+        guild = self.bot.get_guild(channels["GUILD"])
+        member_count_channel = guild.get_channel(channels["MEMBER_COUNT_CHANNEL"])
+        human_count = sum(not member.bot for member in guild.members)
+        temp = member.name.split(":")
         name = temp[0]
         num = len(members)
         new_name = f"{name}: {num}"
@@ -32,8 +32,8 @@ class Misc(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def studycount(self):
-        guild = self.bot.get_guild(693608235835326464)
-        studycount = guild.get_channel(764427421876748298)
+        guild = self.bot.get_guild(channels["GUILD"])
+        studycount = guild.get_channel(channels["MEMBERS_IN_VC_COUNT_CHANNEL"])
         if not studycount:
             print("Can't access study count at the moment")
             return

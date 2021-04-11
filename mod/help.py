@@ -87,6 +87,8 @@ class MyHelpCommand(commands.MinimalHelpCommand):
             embed.add_field(name="Aliases", value=f"```{command.aliases}```")
         if command.cog:
             embed.add_field(name="Cog:", value=f"```{command.cog.qualified_name}```")
+        
+        embed.set_footer(text=self.get_opening_note())
     
         destination = self.get_destination()
         await destination.send(embed=embed)
@@ -126,8 +128,6 @@ class MyHelpCommand(commands.MinimalHelpCommand):
 
     
 class MyHelp(commands.Cog):
-    """Shows this help message"""
-
     def __init__(self, bot):
         self._original_help_command = bot.help_command
         bot.help_command = MyHelpCommand()

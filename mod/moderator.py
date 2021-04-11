@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 from random import randint
 
 class Moderator(commands.Cog):
-    """Moderators only... A list of mod commands for mods to moderate"""
+    """These commands assist our mods with their job. Better be good... I'm also watching you"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())

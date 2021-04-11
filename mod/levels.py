@@ -26,8 +26,8 @@ class Person:
         return False
 
 
-class Leveling(commands.Cog):
-    """Commands dealing with the leveling system of this server"""
+class Progression(commands.Cog):
+    """Competition is good :) and these commands will let you know all that's going on competitively. Strive to be #1"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())
@@ -216,4 +216,4 @@ class Leveling(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Leveling(bot))
+    bot.add_cog(Progression(bot))

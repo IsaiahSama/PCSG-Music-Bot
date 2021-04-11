@@ -2,7 +2,7 @@ import discord, asyncio, aiosqlite, random, re, sqlite3
 from discord.ext import commands, tasks
 
 class Noting(commands.Cog):
-    """All commands relating to notes"""
+    """Ready to make some notes and see what other notes exist? Here are all the commands you need to do so"""
     def __init__(self, bot):
         self.bot = bot
         bot.loop.create_task(self.async_init())

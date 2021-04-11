@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix=["p.","P."], case_insensitive=True, intents=in
 
 bot.load_extension("roles")
 bot.load_extension("levels")
-bot.load_extension("sfw")
+bot.load_extension("moderator")
 bot.load_extension("portals")
 bot.load_extension("misc")
 bot.load_extension("schedule")

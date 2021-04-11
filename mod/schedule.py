@@ -35,7 +35,7 @@ class Scheduler:
         
 
 class MySchedule(commands.Cog):
-    """For all things relating to your schedules"""
+    """Have trouble managing your daily schedules? Do p.help MySchedule for some commands to help you out"""
 
     users = []
 
