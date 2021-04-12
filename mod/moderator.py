@@ -304,18 +304,18 @@ class Moderator(commands.Cog):
             await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
             
         await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
-"""Welcome @... to the :PCSGLETTERSWITHOUTBACKGROUND: Family! :bcheart: You're the (insert number)th Family Member :heartato: 
-Thank You for joining The Study-Goals' E-School :ared:
+f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the {sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375> 
+Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311>
 
-Please follow these 3 Verification Steps:  :disputed: 
-1.   Press here: #☑-cxc-proficiency-select to select CSEC/CAPE  :6181_check: 
-2.  Select your subjects in: #📗-csec-subject-select or #📕-cape-subject-select :black_tick: 
-3.  Press here: #👋-meet-and-greet to introduce yourself :9697_MegaShout:
-Congrats, you're Verified  :hypertada:
+Please follow these 3 Verification Steps:  <:blueexclamation:830938893204455454>
+1.   Press here: #☑-cxc-proficiency-select to select CSEC/CAPE <a:greentick:830939074712961035>
+2.  Select your subjects in: #📗-csec-subject-select or #📕-cape-subject-select <a:blacktick:830938918262013952>
+3.  Press here: #👋-meet-and-greet to introduce yourself <a:speaker:830939522572484659>
+Congrats, you're Verified  <a:party:830939382944628766> 
 
-We look forward to learning with you, Newbie E-Schooler! :jamcat: 
-Feel free to invite your family & friends: :mmcheer: https://discord.com/invite/4muGPHHwar 
-For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://www.pcsgfamily.org/
+We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999>
+Feel free to invite your family & friends: <a:animalscheering:830938963761299456>  https://discord.com/invite/4muGPHHwar
+For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : Please visit https://www.pcsgfamily.org/
 """)
 
         await self.handle_new_user(member, pending_member_role)
@@ -335,7 +335,7 @@ For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://
         family_role = discord.utils.get(member.guild.roles, id=roles["FAMILY"])
         newbie_role = discord.utils.get(member.guild.roles, id=roles["NEWBIE"])
 
-        group_size = await self.group_select(self, member, introduction_channel)
+        group_size = await self.group_select(member, introduction_channel)
 
         subject_roles = await self.available_subjects(member, proficiency, introduction_channel)
 
@@ -364,6 +364,7 @@ For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://
         return group_role
 
     async def available_subjects(self, member, proficiency, channel):
+        proficiency = proficiency.lower()
         role_names = '\t'.join([role.name for role in member.guild.roles if role.name.startswith(proficiency)][1:])
         
         await channel.send(f"Okay. Final step. I'll send a list of all {proficiency} subjects just for you {member.mention}. Simply enter all the subjects that you do separated by commas (,). (You'll have to enter them as they are here. For example `{proficiency} computer science`")
