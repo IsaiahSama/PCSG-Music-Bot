@@ -1,6 +1,5 @@
 import discord, time, asyncio, aiosqlite, os, json, sqlite3, time
-
-from discord.ext.commands.core import group
+from discord import utils
 from mydicts import *
 from discord.ext import commands, tasks
 from random import randint
@@ -59,7 +58,7 @@ class Moderator(commands.Cog):
         user["WARNLEVEL"] += 1
         await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user['WARNLEVEL']} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
-        await self.log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
+        await log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
         
     @commands.command(brief="This resets the warns that a person has back to 0", help="This sets the warns of a user back to 0.", usage="@user")
     @commands.has_permissions(administrator=True)
@@ -67,7 +66,7 @@ class Moderator(commands.Cog):
         user = await self.getuser(member)
         user['WARNLEVEL'] = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
-        await self.log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
+        await log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
 
     @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
@@ -81,7 +80,7 @@ class Moderator(commands.Cog):
 
         await ctx.send(f"{member.mention}. Your timeout has come to an end. Refrain from having to be timed out again")
         await member.remove_roles(role)
-        await self.log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
+        await log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
 
     @commands.command(brief="Mutes a user until unmuted", help="Mutes a user until unmuted", usage="@user duration_in_seconds")
     @commands.has_permissions(administrator=True)
@@ -89,7 +88,7 @@ class Moderator(commands.Cog):
         role = discord.utils.get(ctx.guild.roles, id=roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been muted by {ctx.author}. Reason: {reason}")
-        await self.log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
+        await log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
 
     @commands.command(brief="Unmutes a user that has been muted.", help="Unmutes a muted user", usage="@user")
     @commands.has_permissions(administrator=True)
@@ -98,28 +97,28 @@ class Moderator(commands.Cog):
         if not role: await ctx.send("User isn't muted"); return
         await member.remove_roles(role)
         await ctx.send(f"Unmuted {member.mention}. Refrain from having to be muted again")
-        await self.log("Unmute", f"{str(member)} was unmuted", str(ctx.author), reason="Null")
+        await log("Unmute", f"{str(member)} was unmuted", str(ctx.author), reason="Null")
 
     @commands.command(brief="Kicks a user", help="Kicks a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def kick(self, ctx, member: discord.Member, *, reason):
         await member.kick(reason=reason)
         await ctx.send(f"{member.name} was kicked from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
-        await self.log("Kick", f"{str(member)} was kicked", str(ctx.author), reason)
+        await log("Kick", f"{str(member)} was kicked", str(ctx.author), reason)
 
     @commands.command(brief='Bans a user', help="Bans a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def ban(self, ctx, member:discord.Member, *, reason):
         await member.ban(reason=reason)
         await ctx.send(f"{member.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
-        await self.log("Ban", f"{str(member)} was banned", str(ctx.author), reason)
+        await log("Ban", f"{str(member)} was banned", str(ctx.author), reason)
     
     @commands.command(brief="Puts channel in slowmode", help="Use this to apply or disable a channel's slowmode", usage="duration")
     @commands.has_permissions(administrator=True)
     async def slow(self, ctx, duration: int):
         await ctx.channel.edit(slowmode_delay=duration)
         await ctx.send(f"Messages from same user will be in {duration} second intervals")
-        await self.log("SLOW", f"{ctx.channel.name} has been slowed to {duration}", str(ctx.author), reason="None")
+        await log("SLOW", f"{ctx.channel.name} has been slowed to {duration}", str(ctx.author), reason="None")
 
     @commands.command(brief="Shows the 10 members with the highest warnstate", help="Shows the naughtiest 10 members in the server who have a warnstate")
     @commands.has_permissions(administrator=True)
@@ -141,7 +140,7 @@ class Moderator(commands.Cog):
             user['WARNLEVEL'] = 0
 
         await ctx.send("Cleared everyone's crimes")
-        await self.log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
+        await log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
 
     @commands.command(brief="Deletes x amount of messages", help="Used to bulk delete messages")
     @commands.has_permissions(administrator=True)
@@ -149,79 +148,6 @@ class Moderator(commands.Cog):
         await ctx.channel.purge(limit=amount)
 
     # Events
-
-    @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        changed, embed = await self.was_changed(before, after)
-        if not embed: return
-
-        if changed == "nickname":
-            channel = before.guild.get_channel(channels["NAME_CHANGES"])
-        elif changed == "roles":
-            channel = before.guild.get_channel(channels["ROLE_CHANGES"])
-        else: return
-
-        embed.set_footer(text=f"User ID: {before.id}")
-
-        await channel.send(embed=embed)
-        
-
-    async def was_changed(self, before, after):
-        if not before.nick == after.nick:
-            if not after.nick: after.nick = after.name
-            embed = discord.Embed(
-                title="Wait... so they want to have a nickname?",
-                description=f"{str(before)} would like to be known as {after.nick}",
-                color=randint(0, 0xffffff)
-            )
-            return "nickname", embed
-
-        if not before.roles == after.roles:
-            value = await before.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update).flatten()
-            value = value[0]
-            try:
-                initial = value.before.roles[0].name
-            except IndexError:
-                initial = "Received the role"
-            try:
-                final = value.after.roles[0].name
-            except IndexError:
-                final = "was removed"
-            
-            embed = discord.Embed(
-                title=f"Role updates for {before.name}/{before.nick}",
-                description=f"{str(value.user)} changed {value.target}'s roles. {initial} {final}",
-                color=randint(0, 0xffffff)
-            )
-
-            return "roles", embed
-
-        return None, None
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        if message.author.bot: return
-        embed = discord.Embed(
-            title=f"{message.author} had a deleted message in {message.channel.name}",
-            description=message.content,
-            color=randint(0, 0xffffff)
-        )
-        channel = message.guild.get_channel(channels["MESSAGE_LOGS"])
-        await channel.send(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_bulk_message_delete(self, messagelist):
-        embed = discord.Embed(
-            title="Bulk Deletion",
-            description=f"{len(messagelist)} messages were bulk deleted.",
-            color=randint(0, 0xffffff)
-        )
-
-        for msg in messagelist[:24]:
-            embed.add_field(name=f"Deleted from {msg.channel.name}", value=f"{msg.content[:550]} ...")
-
-        await messagelist[0].guild.get_channel(channels["BULK_DELETES"]).send(embed=embed)
-    
 
     with open("swearWords.txt") as f:
         words = f.read()
@@ -282,7 +208,7 @@ class Moderator(commands.Cog):
                 try:
                     await member.send("As your offenses have not been wiped, you are muted.")
                 except:
-                    return
+                    await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"{member.mention}. As your offenses have not been cleared, you are muted")
 
         embed = discord.Embed(
             title="Member join",
@@ -303,174 +229,57 @@ class Moderator(commands.Cog):
         if human_count % 100 == 0:
             await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
             
-        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
-f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the {sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375> 
-Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311>
+        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"Welcome {member.mention}. Glad to have you.")
 
-Please follow these 3 Verification Steps:  <:blueexclamation:830938893204455454>
-1.   Press here: #☑-cxc-proficiency-select to select CSEC/CAPE <a:greentick:830939074712961035>
-2.  Select your subjects in: #📗-csec-subject-select or #📕-cape-subject-select <a:blacktick:830938918262013952>
-3.  Press here: #👋-meet-and-greet to introduce yourself <a:speaker:830939522572484659>
-Congrats, you're Verified  <a:party:830939382944628766> 
+        await self.handle_new_user(member)
 
-We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999>
-Feel free to invite your family & friends: <a:animalscheering:830938963761299456>  https://discord.com/invite/4muGPHHwar
-For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : Please visit https://www.pcsgfamily.org/
-""")
-
-        await self.handle_new_user(member, pending_member_role)
-
-    async def handle_new_user(self, member, pending_role):
-        introduction_channel = member.guild.get_channel(channels["INTRO_CHANNEL"])
-        await introduction_channel.send(f"Welcome {member.mention}. Before we can get started, you need to get verified :). What is your subject proficiency?\n`cape`/`csec`")
+    async def handle_new_user(self, member):
+        channel = member.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+        await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
-        def proficiency_check(m):
-            return m.author == member and m.content.lower() in ["cape", "csec"]
+        await self.handle_name(member)
+        group_size_message = await channel.send(F"Nice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n🕑2 People\n🕒3 People\🕓4 People\n🕔5 people\n🕙10 People\n👪11 or more")
+        group_size_role = await self.handle_group_size(member, group_size_message)
 
-        input_ = await self.bot.wait_for("message", check=proficiency_check)
-        proficiency = input_.content.upper()
+        proficiency_message = await channel.send(f"So {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?")
+        proficiency_role = await self.handle_proficiency(member, proficiency_message)
 
-        # Where proficiency is either CAPE or CSEC
-        proficiency_role = discord.utils.get(member.guild.roles, id=roles[proficiency])
-        family_role = discord.utils.get(member.guild.roles, id=roles["FAMILY"])
-        newbie_role = discord.utils.get(member.guild.roles, id=roles["NEWBIE"])
+        await member.add_roles(group_size_role, proficiency_role)
+        prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_role.name.upper()])
+        await channel.send(f"Alright {member.mention} head over to {prof_channel} to select your subjects")
 
-        group_size = await self.group_select(member, introduction_channel)
-
-        subject_roles = await self.available_subjects(member, proficiency, introduction_channel)
-
-        await member.remove_roles(pending_role)
-        await member.add_roles(proficiency_role, group_size, family_role, newbie_role)
-
-        for role in subject_roles:
-            await member.add_roles(role)
-
-        await introduction_channel.send(f"All roles added to {member.name}: {proficiency_role.name}\n{family_role.name}\n{newbie_role.name}\n{group_size.name}\n{[role.name for role in subject_roles]}", delete_after=10)
-
-        await introduction_channel.send(f"And that completes it {member.mention}. I officially welcome you to the Study Goals Server :D")
-
-    async def group_select(self, member, channel):
-        await channel.send(f"Now {member.mention}. What size group do you prefer to study in?\nDuo (2 people)\nTrio (3 people)\nQuartet (4 people)\nQuintet (5 people)\nDecuplet (10 people)\nVigintet (20 people)\nSimply enter the name")
-
-        lowered_group_roles = [name.lower() for name in list(group_roles.keys())]
-
-        def check(m):
-            return m.author == member and m.content.lower() in lowered_group_roles
-
-        group_size = await self.bot.wait_for("message", check=check)
-
-        group_role = discord.utils.get(member.guild.roles, id=group_roles[group_size.content.upper()])
-
-        return group_role
-
-    async def available_subjects(self, member, proficiency, channel):
-        proficiency = proficiency.lower()
-        role_names = '\t'.join([role.name for role in member.guild.roles if role.name.startswith(proficiency)][1:])
-        
-        await channel.send(f"Okay. Final step. I'll send a list of all {proficiency} subjects just for you {member.mention}. Simply enter all the subjects that you do separated by commas (,). (You'll have to enter them as they are here. For example `{proficiency} computer science`")
-        await channel.send(f"```{role_names}```")
-
-        def is_valid(responses):
-            for response in responses:
-                if response not in role_names:
-                    return False
-
-            return True
-
+    async def handle_name(self, member):
         def check(m):
             return m.author == member
 
-        while True:
-            
-            user_input = await self.bot.wait_for("message", check=check)
-            responses = user_input.split(",")
-            responses = [response.strip().lower() for response in responses]
+        response = await self.bot.wait_for("message", check=check)
+        name = response.content 
 
-            if not is_valid(responses):
-                await channel.send("One or more of the subjects you mentioned are invalid. May you please try again?")
-                continue
+        await member.edit(nick=name)
 
-            break 
-
-        roles_to_give = [discord.utils.get(member.guild.roles, response) for response in responses]
-        return roles_to_give
-
-    @commands.Cog.listener()
-    async def on_member_ban(self, member):
-        bann = await member.guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
-        ban = bann[0]
-
-        embed = discord.Embed(
-            title="I see... Now you're banned",
-            description=f"{str(ban.target)} has been banned by {str(ban.user)}",
-            color=randint(0, 0xffffff)
-        )
-
-        embed.add_field(name="Reason", value=ban.reason)
-        embed.set_footer(text=f"Target ID {ban.target.id}. Banner ID {ban.user.id}")
-
-        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
-
-    
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        embed = discord.Embed(
-            title="Leaving",
-            description=f"It would seem as though {str(member)} has left the server",
-            color=randint(0, 0xffffff)
-        )
-
-        entry = await member.guild.audit_logs(limit=1).flatten()
-        entry = entry[0]
-        if entry.action is discord.AuditLogAction.kick:
-            embed.add_field(name=":o , It was a kick", value=f"{str(entry.target)} was kicked by {str(entry.user)} for {entry.reason}")
+    async def handle_group_size(self, member, message):
+        def check(reaction, user):
+            return user == member and str(reaction.emoji) in list(group_roles.keys())
         
-        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
+        for key in list(group_roles.keys()):
+            await message.add_reaction(key)
 
+        group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check)
 
-    @commands.Cog.listener()
-    async def on_message_edit(self, before, after):
-        if before.embeds: return
-        embed = discord.Embed(
-            description=f"{str(before.author)} made an edit to a message in {after.channel.name}",
-            title="A message has been edited.",
-            color=randint(0, 0xffffff)
-        )
+        return utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]])
 
-        embed.add_field(name="Before", value=before.content or "Unknown")
-        embed.add_field(name="After", value=after.content or "Unknown", inline=False)
-        embed.add_field(name="Jump URL", value=after.jump_url)
-        embed.set_footer(text=f"User ID: {before.author.id}")
+    async def handle_proficiency(self, member, message):
+        pro_dict = {"📘": "CSEC", "📖": "CAPE"}
 
-        await before.guild.get_channel(channels["MESSAGE_LOGS"]).send(embed=embed)
-        
+        def check(reaction, user):
+            return user == member and str(reaction.emoji) in pro_dict
 
+        for key in list(pro_dict.keys()):
+            await message.add_reaction(key)
 
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        error_channel = ctx.guild.get_channel(channels["ERROR_ROOM"])
-        if isinstance(error, commands.CommandNotFound):
-            all_cogs = self.bot.cogs
-            msg = ctx.message.content.lower().split(".")[1]
-            
-            potential = []
-            for v in all_cogs.values():
-                mycommands = v.get_commands()
-                if not mycommands: continue
-                yes = [name.name for name in mycommands if msg in name.name.lower()]
-                if yes:
-                    for i in yes: potential.append(i)
+        raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
 
-            if potential:
-                await ctx.send(f"I don't know that command, maybe one of these: {', '.join(potential)}")
-            else:
-                await ctx.send("Uhm... Try p.help for a list of my commands because I don't know that one")
-            return
-        
-        await ctx.send(error)
-        print(error)
-        await error_channel.send(error)
-
+        return utils.get(member.guild.roles, id=roles[pro_dict[str(raw_proficiency[0].emoji)]])
 
     # Tasks
     @tasks.loop(seconds=250)
@@ -497,23 +306,7 @@ For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : 
             return toreturn[0]
         return None
 
-    logs = []
 
-    if os.path.exists("logs.json"):
-        with open("logs.json") as f:
-            try:
-                logs = json.load(f)
-            except json.JSONDecodeError:
-                pass
-
-    async def log(self, modcmd, action, culprit, reason):
-
-        mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason, "Time": time.ctime()}
-        
-        self.logs.append(mydict)
-
-        with open("logs.json", "w") as f:
-            json.dump(self.logs, f, indent=4)
 
 def setup(bot):
     bot.add_cog(Moderator(bot))

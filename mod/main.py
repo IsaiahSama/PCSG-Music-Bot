@@ -18,7 +18,7 @@ bot.load_extension("schedule")
 bot.load_extension("help")
 bot.load_extension("notes")
 bot.load_extension("isaiah")
-bot.load_extension("roles")
+bot.load_extension("eventhandler")
 
 @bot.event
 async def on_ready():

@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 import random
 from random import randint
 import asyncio, aiosqlite, sqlite3
+from mydicts import roles
 
 
 class Person:
@@ -21,7 +22,7 @@ class Person:
         self.level += 1
 
     def didrole(self):
-        if self.level % 20 == 0:
+        if self.level > 1 and self.level % 20 == 0:
             return True
         return False
 
@@ -33,7 +34,7 @@ class Progression(commands.Cog):
         bot.loop.create_task(self.async_init())
 
     users = []
-    roles = []
+    roles = ["SEASONED", "EXPERIENCED", "ADVANCED", "ELITIST"]
 
     # Set up
     async def async_init(self):
@@ -52,7 +53,6 @@ class Progression(commands.Cog):
 
     async def setup(self):
         guild = self.bot.get_guild(693608235835326464)
-        self.roles = [role.name for role in guild.roles if role.name.endswith("Learner")]
 
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
@@ -157,8 +157,8 @@ class Progression(commands.Cog):
                 color=randint(0, 0xffffff)
             )
             if person.didrole():
-                role_to_give = self.roles[(person.level / 20) - 1]
-                if person.level / 20 >= len(self.roles):
+                role_to_give = discord.utils.get(message.guild.roles, id=roles[self.roles[(person.level // 20) - 1]])
+                if person.level // 20 >= len(self.roles):
                     return
                 await message.author.add_role(role_to_give)
 
