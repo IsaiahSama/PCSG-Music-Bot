@@ -238,15 +238,15 @@ class Moderator(commands.Cog):
         await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
         await self.handle_name(member)
-        group_size_message = await channel.send(F"Nice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n🕑2 People\n🕒3 People\🕓4 People\n🕔5 people\n🕙10 People\n👪11 or more")
+        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People\n🕒3 People\n🕓4 People\n🕔5 people\n🕙10 People\n👪10+")
         group_size_role = await self.handle_group_size(member, group_size_message)
 
-        proficiency_message = await channel.send(f"So {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?")
+        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?")
         proficiency_role = await self.handle_proficiency(member, proficiency_message)
 
         await member.add_roles(group_size_role, proficiency_role)
         prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_role.name.upper()])
-        await channel.send(f"Alright {member.mention} head over to {prof_channel} to select your subjects")
+        await channel.send(f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects")
 
     async def handle_name(self, member):
         def check(m):
