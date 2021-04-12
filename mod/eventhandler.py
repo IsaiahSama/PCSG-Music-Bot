@@ -1,3 +1,4 @@
+from discord.errors import HTTPException
 from mydicts import *
 import discord 
 from discord.ext import commands 
@@ -139,6 +140,7 @@ class EventHandling(commands.cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         error_channel = ctx.guild.get_channel(channels["ERROR_ROOM"])
+
         if isinstance(error, commands.CommandNotFound):
             all_cogs = self.bot.cogs
             msg = ctx.message.content.lower().split(".")[1]
@@ -156,10 +158,47 @@ class EventHandling(commands.cog):
             else:
                 await ctx.send("Uhm... Try p.help for a list of my commands because I don't know that one")
             return
-        
+
         await ctx.send(error)
         print(error)
         await error_channel.send(error)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.channel_id in list(raw_react_channel_ids.keys()):
+            await self.handle_reaction(payload)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        if payload.channel_id in list(raw_react_channel_ids.keys()):
+            await self.handle_reaction(payload)
+
+    async def handle_reaction(self, payload):
+        guild = discord.utils.get(self.bot.guilds, id=payload.guild_id)
+        member = payload.member
+        bot_channel = guild.get_channel(channels["BOT_ROOM"])
+        # So this will get a bit confusing... even for me, so let's take this slow
+        # raw_react_channel_ids will link the id of the channel to a name
+        # This name when put in of reactions, will link it to it's respective dictionaries of reactions
+        # This innermost dict will match the stringified emoji to role name, and then assign. Simple :D
+        role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
+
+        if role.name == "Pending Member":
+            await member.remove_roles(role)
+            msg = "Excellent, you're now an official member :D"
+        else:
+            if payload.event_type == "REACTION_ADD":
+                await member.add_roles(role)
+                msg = f"There you go, {role.name} is now yours."
+            else:
+                await member.remove_roles(role)
+                msg = f"I have removed {role.name} from you."
+        
+        try:    
+            await member.send(msg)
+        except HTTPException:
+            await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
+
 
 def setup(bot):
     bot.add_cog(EventHandling(bot))

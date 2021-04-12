@@ -44,10 +44,26 @@ channels = {
     "PERSONALIZE_CHANNEL": 830914205078782072,
     "WELCOME_CHANNEL": 700214669003980801,
     "MEMBER_COUNT_CHANNEL": 764418047246729227,
-    "MEMBERS_IN_VC_COUNT_CHANNEL": 764427421876748298
+    "MEMBERS_IN_VC_COUNT_CHANNEL": 764427421876748298,
+    "BOT_ROOM": 831275896429477980
 }
 
-subjects= {
+
+# Dictionary linking channel ids to names
+raw_react_channel_ids = {
+    762068938686595152: "PROFICIENCY",
+    755875615587958814: "CSEC",
+    718473529452003329: "CAPE",
+    762068609278410752: "GROUPS",
+    831265040434331649: "VERIFY"
+}
+
+# Dictionary containing all emojis and their links to their roles.
+reactions = {
+    "PROFICIENCY": {
+        "📘": "csec",
+        "📖": "cape"
+        },
     "CSEC": {
         "📈":"csec add maths",
         "🌾":"csec agricultural science",
@@ -120,8 +136,18 @@ subjects= {
         "🗿":"cape sociology",
         "💃":"cape spanish",
         "🏖":"cape tourism"
-    }
+    },
+    "GROUPS": {
+        "🕑": "duo",
+        "🕒": "trio",
+        "🕓": "quartet",
+        "🕔": "qunitet",
+        "🕙": "decuplet",
+        "👪": "vigintet"
+    },
+    "VERIFY": {"✅": "Pending Member"}
 }
+
 
 logs = []
 
