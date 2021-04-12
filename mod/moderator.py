@@ -318,9 +318,9 @@ Feel free to invite your family & friends: :mmcheer: https://discord.com/invite/
 For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://www.pcsgfamily.org/
 """)
 
-        await self.handle_new_user(member)
+        await self.handle_new_user(member, pending_member_role)
 
-    async def handle_new_user(self, member):
+    async def handle_new_user(self, member, pending_role):
         introduction_channel = member.guild.get_channel(channels["INTRO_CHANNEL"])
         await introduction_channel.send(f"Welcome {member.mention}. Before we can get started, you need to get verified :). What is your subject proficiency?\n`cape`/`csec`")
         
@@ -339,6 +339,7 @@ For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://
 
         subject_roles = await self.available_subjects(member, proficiency, introduction_channel)
 
+        await member.remove_roles(pending_role)
         await member.add_roles(proficiency_role, group_size, family_role, newbie_role)
 
         for role in subject_roles:
