@@ -229,7 +229,19 @@ class Moderator(commands.Cog):
         if human_count % 100 == 0:
             await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
             
-        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"Welcome {member.mention}. Glad to have you.")
+        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
+f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the {sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375>
+Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311>
+
+Please follow The Registration Process <:blueexclamation:830938893204455454>:
+<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["REP_FLAG"]).mention}  to select your country.
+<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to personalize The E-School to your criteria.
+<a:blacktick:830938918262013952> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify yourself.
+***DONE***  <a:party:830939382944628766>
+
+We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999> 
+Feel free to invite your family & friends: <a:animalscheering:830938963761299456> https://discord.com/invite/4muGPHHwar 
+For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900>: Please visit https://www.pcsgfamily.org/""")
 
         await self.handle_new_user(member)
 
