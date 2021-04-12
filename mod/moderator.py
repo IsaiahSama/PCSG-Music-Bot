@@ -250,7 +250,7 @@ class Moderator(commands.Cog):
 
     async def handle_name(self, member):
         def check(m):
-            m.author == member
+            return m.author == member
 
         response = await self.bot.wait_for("message", check=check)
         name = response.content 
@@ -266,7 +266,7 @@ class Moderator(commands.Cog):
 
         group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check)
 
-        return utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji.emoji)]])
+        return utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]])
 
     async def handle_proficiency(self, member, message):
         pro_dict = {"📘": "CSEC", "📖": "CAPE"}
@@ -279,7 +279,7 @@ class Moderator(commands.Cog):
 
         raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
 
-        return utils.get(member.guild.roles, id=roles[pro_dict[str(raw_proficiency.emoji)]])
+        return utils.get(member.guild.roles, id=roles[pro_dict[str(raw_proficiency[0].emoji)]])
 
     # Tasks
     @tasks.loop(seconds=250)

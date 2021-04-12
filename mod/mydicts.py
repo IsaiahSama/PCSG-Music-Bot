@@ -83,7 +83,7 @@ reactions = {
         "📕":"csec english a",
         "📗":"csec english b",
         "🍽":"csec food and nutrition",
-        "🥖":"csec french",
+        "🇨":"csec french",
         "🗺":"csec geography",
         "🧠":"csec hsb",
         "🖥":"csec information technology",
@@ -99,7 +99,7 @@ reactions = {
         "🙏":"csec religious education",
         "🏡":"csec resources and family management",
         "🎎":"csec social studies",
-        "💃":"csec spanish",
+        "🇪":"csec spanish",
         "✏":"csec technical drawing",
         "🎭":"csec theatre arts",
         "🎨":"csec visual arts"
@@ -123,7 +123,7 @@ reactions = {
         "🏞":"cape environmental science",
         "🗂":"cape financial services studies",
         "🍔":"cape food and nutrition",
-        "🥖":"cape french",
+        "🇨":"cape french",
         "🌍":"cape geography",
         "♻":"cape green engineering",
         "🗾":"cape history",
@@ -138,7 +138,7 @@ reactions = {
         "🔋":"cape physics",
         "📐":"cape pure maths",
         "🗿":"cape sociology",
-        "💃":"cape spanish",
+        "🇻":"cape spanish",
         "🏖":"cape tourism"
     },
     "GROUPS": {

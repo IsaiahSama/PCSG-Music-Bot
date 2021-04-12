@@ -175,7 +175,7 @@ class EventHandling(commands.Cog):
 
     async def handle_reaction(self, payload):
         guild = discord.utils.get(self.bot.guilds, id=payload.guild_id)
-        member = payload.member
+        member = payload.member or discord.utils.get(guild.members, id=payload.user_id)
         bot_channel = guild.get_channel(channels["BOT_ROOM"])
         # So this will get a bit confusing... even for me, so let's take this slow
         # raw_react_channel_ids will link the id of the channel to a name
