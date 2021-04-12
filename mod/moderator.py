@@ -1,6 +1,5 @@
 import discord, time, asyncio, aiosqlite, os, json, sqlite3, time
-
-from discord.ext.commands.core import group
+from discord import utils
 from mydicts import *
 from discord.ext import commands, tasks
 from random import randint
@@ -150,79 +149,6 @@ class Moderator(commands.Cog):
 
     # Events
 
-    @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        changed, embed = await self.was_changed(before, after)
-        if not embed: return
-
-        if changed == "nickname":
-            channel = before.guild.get_channel(channels["NAME_CHANGES"])
-        elif changed == "roles":
-            channel = before.guild.get_channel(channels["ROLE_CHANGES"])
-        else: return
-
-        embed.set_footer(text=f"User ID: {before.id}")
-
-        await channel.send(embed=embed)
-        
-
-    async def was_changed(self, before, after):
-        if not before.nick == after.nick:
-            if not after.nick: after.nick = after.name
-            embed = discord.Embed(
-                title="Wait... so they want to have a nickname?",
-                description=f"{str(before)} would like to be known as {after.nick}",
-                color=randint(0, 0xffffff)
-            )
-            return "nickname", embed
-
-        if not before.roles == after.roles:
-            value = await before.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update).flatten()
-            value = value[0]
-            try:
-                initial = value.before.roles[0].name
-            except IndexError:
-                initial = "Received the role"
-            try:
-                final = value.after.roles[0].name
-            except IndexError:
-                final = "was removed"
-            
-            embed = discord.Embed(
-                title=f"Role updates for {before.name}/{before.nick}",
-                description=f"{str(value.user)} changed {value.target}'s roles. {initial} {final}",
-                color=randint(0, 0xffffff)
-            )
-
-            return "roles", embed
-
-        return None, None
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        if message.author.bot: return
-        embed = discord.Embed(
-            title=f"{message.author} had a deleted message in {message.channel.name}",
-            description=message.content,
-            color=randint(0, 0xffffff)
-        )
-        channel = message.guild.get_channel(channels["MESSAGE_LOGS"])
-        await channel.send(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_bulk_message_delete(self, messagelist):
-        embed = discord.Embed(
-            title="Bulk Deletion",
-            description=f"{len(messagelist)} messages were bulk deleted.",
-            color=randint(0, 0xffffff)
-        )
-
-        for msg in messagelist[:24]:
-            embed.add_field(name=f"Deleted from {msg.channel.name}", value=f"{msg.content[:550]} ...")
-
-        await messagelist[0].guild.get_channel(channels["BULK_DELETES"]).send(embed=embed)
-    
-
     with open("swearWords.txt") as f:
         words = f.read()
         profane = words.split("\n")
@@ -282,7 +208,7 @@ class Moderator(commands.Cog):
                 try:
                     await member.send("As your offenses have not been wiped, you are muted.")
                 except:
-                    return
+                    await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"{member.mention}. As your offenses have not been cleared, you are muted")
 
         embed = discord.Embed(
             title="Member join",
@@ -303,97 +229,53 @@ class Moderator(commands.Cog):
         if human_count % 100 == 0:
             await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
             
-        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
-f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the {sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375> 
-Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311>
+        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"Welcome {member.mention}. Glad to have you.")
 
-Please follow these 3 Verification Steps:  <:blueexclamation:830938893204455454>
-1.   Press here: #☑-cxc-proficiency-select to select CSEC/CAPE <a:greentick:830939074712961035>
-2.  Select your subjects in: #📗-csec-subject-select or #📕-cape-subject-select <a:blacktick:830938918262013952>
-3.  Press here: #👋-meet-and-greet to introduce yourself <a:speaker:830939522572484659>
-Congrats, you're Verified  <a:party:830939382944628766> 
+        await self.handle_new_user(member)
 
-We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999>
-Feel free to invite your family & friends: <a:animalscheering:830938963761299456>  https://discord.com/invite/4muGPHHwar
-For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : Please visit https://www.pcsgfamily.org/
-""")
-
-        await self.handle_new_user(member, pending_member_role)
-
-    async def handle_new_user(self, member, pending_role):
-        introduction_channel = member.guild.get_channel(channels["INTRO_CHANNEL"])
-        await introduction_channel.send(f"Welcome {member.mention}. Before we can get started, you need to get verified :). What is your subject proficiency?\n`cape`/`csec`")
+    async def handle_new_user(self, member):
+        channel = member.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+        await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
-        def proficiency_check(m):
-            return m.author == member and m.content.lower() in ["cape", "csec"]
+        await self.handle_name(member)
+        group_size_message = await channel.send(F"Nice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n🕑2 People\n🕒3 People\🕓4 People\n🕔5 people\n🕙10 People\n👪11 or more")
+        group_size = await self.handle_group_size(member, group_size_message)
 
-        input_ = await self.bot.wait_for("message", check=proficiency_check)
-        proficiency = input_.content.upper()
+        proficiency_message = await channel.send(f"So {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?")
+        proficiency = await self.handle_proficiency(member, proficiency_message)
 
-        # Where proficiency is either CAPE or CSEC
-        proficiency_role = discord.utils.get(member.guild.roles, id=roles[proficiency])
-        family_role = discord.utils.get(member.guild.roles, id=roles["FAMILY"])
-        newbie_role = discord.utils.get(member.guild.roles, id=roles["NEWBIE"])
-
-        group_size = await self.group_select(member, introduction_channel)
-
-        subject_roles = await self.available_subjects(member, proficiency, introduction_channel)
-
-        await member.remove_roles(pending_role)
-        await member.add_roles(proficiency_role, group_size, family_role, newbie_role)
-
-        for role in subject_roles:
-            await member.add_roles(role)
-
-        await introduction_channel.send(f"All roles added to {member.name}: {proficiency_role.name}\n{family_role.name}\n{newbie_role.name}\n{group_size.name}\n{[role.name for role in subject_roles]}", delete_after=10)
-
-        await introduction_channel.send(f"And that completes it {member.mention}. I officially welcome you to the Study Goals Server :D")
-
-    async def group_select(self, member, channel):
-        await channel.send(f"Now {member.mention}. What size group do you prefer to study in?\nDuo (2 people)\nTrio (3 people)\nQuartet (4 people)\nQuintet (5 people)\nDecuplet (10 people)\nVigintet (20 people)\nSimply enter the name")
-
-        lowered_group_roles = [name.lower() for name in list(group_roles.keys())]
-
+    async def handle_name(self, member):
         def check(m):
-            return m.author == member and m.content.lower() in lowered_group_roles
+            m.author == member
 
-        group_size = await self.bot.wait_for("message", check=check)
+        response = await self.bot.wait_for("message", check=check)
+        name = response.content 
 
-        group_role = discord.utils.get(member.guild.roles, id=group_roles[group_size.content.upper()])
+        await member.edit(nick=name)
 
-        return group_role
-
-    async def available_subjects(self, member, proficiency, channel):
-        proficiency = proficiency.lower()
-        role_names = '\t'.join([role.name for role in member.guild.roles if role.name.startswith(proficiency)][1:])
+    async def handle_group_size(self, member, message):
+        def check(reaction, user):
+            return user == member and str(reaction.emoji) in list(group_roles.keys())
         
-        await channel.send(f"Okay. Final step. I'll send a list of all {proficiency} subjects just for you {member.mention}. Simply enter all the subjects that you do separated by commas (,). (You'll have to enter them as they are here. For example `{proficiency} computer science`")
-        await channel.send(f"```{role_names}```")
+        for key in list(group_roles.keys()):
+            await message.add_reaction(key)
 
-        def is_valid(responses):
-            for response in responses:
-                if response not in role_names:
-                    return False
+        group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check)
 
-            return True
+        return utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji.emoji)]])
 
-        def check(m):
-            return m.author == member
+    async def handle_proficiency(self, member, message):
+        pro_dict = {"📘": "CSEC", "📖": "CAPE"}
 
-        while True:
-            
-            user_input = await self.bot.wait_for("message", check=check)
-            responses = user_input.split(",")
-            responses = [response.strip().lower() for response in responses]
+        def check(reaction, user):
+            return user == member and str(reaction.emoji) in pro_dict
 
-            if not is_valid(responses):
-                await channel.send("One or more of the subjects you mentioned are invalid. May you please try again?")
-                continue
+        for key in list(pro_dict.keys()):
+            await message.add_reaction(key)
 
-            break 
+        raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
 
-        roles_to_give = [discord.utils.get(member.guild.roles, response) for response in responses]
-        return roles_to_give
+        return utils.get(member.guild.roles, id=roles[pro_dict[str(raw_proficiency.emoji)]])
 
     # Tasks
     @tasks.loop(seconds=250)

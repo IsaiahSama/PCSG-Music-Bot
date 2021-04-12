@@ -61,7 +61,79 @@ class EventHandling(commands.cog):
         embed.set_footer(text=f"User ID: {before.author.id}")
 
         await before.guild.get_channel(channels["MESSAGE_LOGS"]).send(embed=embed)
+    
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        changed, embed = await self.was_changed(before, after)
+        if not embed: return
+
+        if changed == "nickname":
+            channel = before.guild.get_channel(channels["NAME_CHANGES"])
+        elif changed == "roles":
+            channel = before.guild.get_channel(channels["ROLE_CHANGES"])
+        else: return
+
+        embed.set_footer(text=f"User ID: {before.id}")
+
+        await channel.send(embed=embed)
         
+
+    async def was_changed(self, before, after):
+        if not before.nick == after.nick:
+            if not after.nick: after.nick = after.name
+            embed = discord.Embed(
+                title="Wait... so they want to have a nickname?",
+                description=f"{str(before)} would like to be known as {after.nick}",
+                color=randint(0, 0xffffff)
+            )
+            return "nickname", embed
+
+        if not before.roles == after.roles:
+            value = await before.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update).flatten()
+            value = value[0]
+            try:
+                initial = value.before.roles[0].name
+            except IndexError:
+                initial = "Received the role"
+            try:
+                final = value.after.roles[0].name
+            except IndexError:
+                final = "was removed"
+            
+            embed = discord.Embed(
+                title=f"Role updates for {before.name}/{before.nick}",
+                description=f"{str(value.user)} changed {value.target}'s roles. {initial} {final}",
+                color=randint(0, 0xffffff)
+            )
+
+            return "roles", embed
+
+        return None, None
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.author.bot: return
+        embed = discord.Embed(
+            title=f"{message.author} had a deleted message in {message.channel.name}",
+            description=message.content,
+            color=randint(0, 0xffffff)
+        )
+        channel = message.guild.get_channel(channels["MESSAGE_LOGS"])
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_bulk_message_delete(self, messagelist):
+        embed = discord.Embed(
+            title="Bulk Deletion",
+            description=f"{len(messagelist)} messages were bulk deleted.",
+            color=randint(0, 0xffffff)
+        )
+
+        for msg in messagelist[:24]:
+            embed.add_field(name=f"Deleted from {msg.channel.name}", value=f"{msg.content[:550]} ...")
+
+        await messagelist[0].guild.get_channel(channels["BULK_DELETES"]).send(embed=embed)
+    
 
 
     @commands.Cog.listener()
