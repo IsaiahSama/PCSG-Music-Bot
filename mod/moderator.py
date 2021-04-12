@@ -1,4 +1,6 @@
 import discord, time, asyncio, aiosqlite, os, json, sqlite3, time
+
+from discord.ext.commands.core import group
 from mydicts import *
 from discord.ext import commands, tasks
 from random import randint
@@ -333,9 +335,63 @@ For more information about :PCSGLETTERSWITHOUTBACKGROUND:: Please visit https://
         family_role = discord.utils.get(member.guild.roles, id=roles["FAMILY"])
         newbie_role = discord.utils.get(member.guild.roles, id=roles["NEWBIE"])
 
-        await member.add_roles(proficiency_role, family_role, newbie_role)
+        group_size = await self.group_select(self, member, introduction_channel)
 
-        await introduction_channel.send("Please use `p.show_subjects` to see a list of all available subjects for your proficiency, then use `p.select_subject subject_names` to select those subjects. Remember to separate your subjects with commas (,)")
+        subject_roles = await self.available_subjects(member, proficiency, introduction_channel)
+
+        await member.add_roles(proficiency_role, group_size, family_role, newbie_role)
+
+        for role in subject_roles:
+            await member.add_roles(role)
+
+        await introduction_channel.send(f"All roles added to {member.name}: {proficiency_role.name}\n{family_role.name}\n{newbie_role.name}\n{group_size.name}\n{[role.name for role in subject_roles]}", delete_after=10)
+
+        await introduction_channel.send(f"And that completes it {member.mention}. I officially welcome you to the Study Goals Server :D")
+
+    async def group_select(self, member, channel):
+        await channel.send(f"Now {member.mention}. What size group do you prefer to study in?\nDuo (2 people)\nTrio (3 people)\nQuartet (4 people)\nQuintet (5 people)\nDecuplet (10 people)\nVigintet (20 people)\nSimply enter the name")
+
+        lowered_group_roles = [name.lower() for name in list(group_roles.keys())]
+
+        def check(m):
+            return m.author == member and m.content.lower() in lowered_group_roles
+
+        group_size = await self.bot.wait_for("message", check=check)
+
+        group_role = discord.utils.get(member.guild.roles, id=group_roles[group_size.content.upper()])
+
+        return group_role
+
+    async def available_subjects(self, member, proficiency, channel):
+        role_names = '\t'.join([role.name for role in member.guild.roles if role.name.startswith(proficiency)][1:])
+        
+        await channel.send(f"Okay. Final step. I'll send a list of all {proficiency} subjects just for you {member.mention}. Simply enter all the subjects that you do separated by commas (,). (You'll have to enter them as they are here. For example `{proficiency} computer science`")
+        await channel.send(f"```{role_names}```")
+
+        def is_valid(responses):
+            for response in responses:
+                if response not in role_names:
+                    return False
+
+            return True
+
+        def check(m):
+            m.author == member
+
+        while True:
+            
+            user_input = await self.bot.wait_for("message", check=check)
+            responses = user_input.split(",")
+            responses = [response.strip().lower() for response in responses]
+
+            if not is_valid(responses):
+                await channel.send("One or more of the subjects you mentioned are invalid. May you please try again?")
+                continue
+
+            break 
+
+        roles_to_give = [discord.utils.get(member.guild.roles, response) for response in responses]
+        return roles_to_give
 
     @commands.Cog.listener()
     async def on_member_ban(self, member):
