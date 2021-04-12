@@ -88,3 +88,6 @@ class EventHandling(commands.cog):
         await ctx.send(error)
         print(error)
         await error_channel.send(error)
+
+def setup(bot):
+    bot.add_cog(EventHandling(bot))
