@@ -59,7 +59,7 @@ class Moderator(commands.Cog):
         user["WARNLEVEL"] += 1
         await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user['WARNLEVEL']} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
-        await self.log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
+        await log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
         
     @commands.command(brief="This resets the warns that a person has back to 0", help="This sets the warns of a user back to 0.", usage="@user")
     @commands.has_permissions(administrator=True)
@@ -67,7 +67,7 @@ class Moderator(commands.Cog):
         user = await self.getuser(member)
         user['WARNLEVEL'] = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
-        await self.log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
+        await log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
 
     @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
@@ -81,7 +81,7 @@ class Moderator(commands.Cog):
 
         await ctx.send(f"{member.mention}. Your timeout has come to an end. Refrain from having to be timed out again")
         await member.remove_roles(role)
-        await self.log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
+        await log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
 
     @commands.command(brief="Mutes a user until unmuted", help="Mutes a user until unmuted", usage="@user duration_in_seconds")
     @commands.has_permissions(administrator=True)
@@ -89,7 +89,7 @@ class Moderator(commands.Cog):
         role = discord.utils.get(ctx.guild.roles, id=roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been muted by {ctx.author}. Reason: {reason}")
-        await self.log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
+        await log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
 
     @commands.command(brief="Unmutes a user that has been muted.", help="Unmutes a muted user", usage="@user")
     @commands.has_permissions(administrator=True)
@@ -98,28 +98,28 @@ class Moderator(commands.Cog):
         if not role: await ctx.send("User isn't muted"); return
         await member.remove_roles(role)
         await ctx.send(f"Unmuted {member.mention}. Refrain from having to be muted again")
-        await self.log("Unmute", f"{str(member)} was unmuted", str(ctx.author), reason="Null")
+        await log("Unmute", f"{str(member)} was unmuted", str(ctx.author), reason="Null")
 
     @commands.command(brief="Kicks a user", help="Kicks a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def kick(self, ctx, member: discord.Member, *, reason):
         await member.kick(reason=reason)
         await ctx.send(f"{member.name} was kicked from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
-        await self.log("Kick", f"{str(member)} was kicked", str(ctx.author), reason)
+        await log("Kick", f"{str(member)} was kicked", str(ctx.author), reason)
 
     @commands.command(brief='Bans a user', help="Bans a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def ban(self, ctx, member:discord.Member, *, reason):
         await member.ban(reason=reason)
         await ctx.send(f"{member.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
-        await self.log("Ban", f"{str(member)} was banned", str(ctx.author), reason)
+        await log("Ban", f"{str(member)} was banned", str(ctx.author), reason)
     
     @commands.command(brief="Puts channel in slowmode", help="Use this to apply or disable a channel's slowmode", usage="duration")
     @commands.has_permissions(administrator=True)
     async def slow(self, ctx, duration: int):
         await ctx.channel.edit(slowmode_delay=duration)
         await ctx.send(f"Messages from same user will be in {duration} second intervals")
-        await self.log("SLOW", f"{ctx.channel.name} has been slowed to {duration}", str(ctx.author), reason="None")
+        await log("SLOW", f"{ctx.channel.name} has been slowed to {duration}", str(ctx.author), reason="None")
 
     @commands.command(brief="Shows the 10 members with the highest warnstate", help="Shows the naughtiest 10 members in the server who have a warnstate")
     @commands.has_permissions(administrator=True)
@@ -141,7 +141,7 @@ class Moderator(commands.Cog):
             user['WARNLEVEL'] = 0
 
         await ctx.send("Cleared everyone's crimes")
-        await self.log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
+        await log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
 
     @commands.command(brief="Deletes x amount of messages", help="Used to bulk delete messages")
     @commands.has_permissions(administrator=True)
@@ -395,83 +395,6 @@ For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : 
         roles_to_give = [discord.utils.get(member.guild.roles, response) for response in responses]
         return roles_to_give
 
-    @commands.Cog.listener()
-    async def on_member_ban(self, member):
-        bann = await member.guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
-        ban = bann[0]
-
-        embed = discord.Embed(
-            title="I see... Now you're banned",
-            description=f"{str(ban.target)} has been banned by {str(ban.user)}",
-            color=randint(0, 0xffffff)
-        )
-
-        embed.add_field(name="Reason", value=ban.reason)
-        embed.set_footer(text=f"Target ID {ban.target.id}. Banner ID {ban.user.id}")
-
-        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
-
-    
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        embed = discord.Embed(
-            title="Leaving",
-            description=f"It would seem as though {str(member)} has left the server",
-            color=randint(0, 0xffffff)
-        )
-
-        entry = await member.guild.audit_logs(limit=1).flatten()
-        entry = entry[0]
-        if entry.action is discord.AuditLogAction.kick:
-            embed.add_field(name=":o , It was a kick", value=f"{str(entry.target)} was kicked by {str(entry.user)} for {entry.reason}")
-        
-        await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
-
-
-    @commands.Cog.listener()
-    async def on_message_edit(self, before, after):
-        if before.embeds: return
-        embed = discord.Embed(
-            description=f"{str(before.author)} made an edit to a message in {after.channel.name}",
-            title="A message has been edited.",
-            color=randint(0, 0xffffff)
-        )
-
-        embed.add_field(name="Before", value=before.content or "Unknown")
-        embed.add_field(name="After", value=after.content or "Unknown", inline=False)
-        embed.add_field(name="Jump URL", value=after.jump_url)
-        embed.set_footer(text=f"User ID: {before.author.id}")
-
-        await before.guild.get_channel(channels["MESSAGE_LOGS"]).send(embed=embed)
-        
-
-
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        error_channel = ctx.guild.get_channel(channels["ERROR_ROOM"])
-        if isinstance(error, commands.CommandNotFound):
-            all_cogs = self.bot.cogs
-            msg = ctx.message.content.lower().split(".")[1]
-            
-            potential = []
-            for v in all_cogs.values():
-                mycommands = v.get_commands()
-                if not mycommands: continue
-                yes = [name.name for name in mycommands if msg in name.name.lower()]
-                if yes:
-                    for i in yes: potential.append(i)
-
-            if potential:
-                await ctx.send(f"I don't know that command, maybe one of these: {', '.join(potential)}")
-            else:
-                await ctx.send("Uhm... Try p.help for a list of my commands because I don't know that one")
-            return
-        
-        await ctx.send(error)
-        print(error)
-        await error_channel.send(error)
-
-
     # Tasks
     @tasks.loop(seconds=250)
     async def saving(self):
@@ -497,23 +420,7 @@ For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : 
             return toreturn[0]
         return None
 
-    logs = []
 
-    if os.path.exists("logs.json"):
-        with open("logs.json") as f:
-            try:
-                logs = json.load(f)
-            except json.JSONDecodeError:
-                pass
-
-    async def log(self, modcmd, action, culprit, reason):
-
-        mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason, "Time": time.ctime()}
-        
-        self.logs.append(mydict)
-
-        with open("logs.json", "w") as f:
-            json.dump(self.logs, f, indent=4)
 
 def setup(bot):
     bot.add_cog(Moderator(bot))

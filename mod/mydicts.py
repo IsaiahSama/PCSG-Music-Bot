@@ -1,4 +1,7 @@
 """A file containing all of the data to be used with the PCSG server"""
+import json
+from os import path
+from time import ctime 
 
 guild_id = 693608235835326464
 
@@ -106,3 +109,21 @@ cape_subjects = {
 "💃":"cape spanish",
 "🏖":"cape tourism"
 }
+
+logs = []
+
+if path.exists("logs.json"):
+    with open("logs.json") as f:
+        try:
+            logs = json.load(f)
+        except json.JSONDecodeError:
+            pass
+
+async def log(self, modcmd, action, culprit, reason):
+    """Function used to save logs"""
+    mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason, "Time": ctime()}
+    
+    self.logs.append(mydict)
+
+    with open("logs.json", "w") as f:
+        json.dump(self.logs, f, indent=4)
