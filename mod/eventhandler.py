@@ -5,10 +5,10 @@ from discord.ext import commands
 from random import randint
 from os import path
 
-class EventHandling(commands.cog):
+class EventHandling(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
-        bot.loops.create_task(self.async_init())
+        bot.loop.create_task(self.async_init())
 
     async def async_init(self):
         await self.bot.wait_until_ready()
