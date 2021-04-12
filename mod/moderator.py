@@ -241,7 +241,7 @@ Please follow The Registration Process <:blueexclamation:830938893204455454>:
 
 We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999> 
 Feel free to invite your family & friends: <a:animalscheering:830938963761299456> https://discord.com/invite/4muGPHHwar 
-For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900>: Please visit https://www.pcsgfamily.org/""")
+https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif""")
 
         await self.handle_new_user(member)
 
@@ -250,7 +250,7 @@ For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900>: P
         await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
         await self.handle_name(member)
-        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People\n🕒3 People\n🕓4 People\n🕔5 people\n🕙10 People\n👪10+")
+        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet")
         group_size_role = await self.handle_group_size(member, group_size_message)
 
         proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?")
