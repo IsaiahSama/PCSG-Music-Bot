@@ -378,7 +378,7 @@ For more information about <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> : 
             return True
 
         def check(m):
-            m.author == member
+            return m.author == member
 
         while True:
             
