@@ -183,14 +183,17 @@ class EventHandling(commands.Cog):
         # This innermost dict will match the stringified emoji to role name, and then assign. Simple :D
         role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
 
-
         if payload.event_type == "REACTION_ADD":
             if role.name == "Pending Member":
-                await member.remove_roles(role)
-                family_role = member.guild.get_role(roles["FAMILY"])
-                newbie_role = member.guild.get_role(roles["NEWBIE"])
-                await member.add_roles(family_role, newbie_role)
-                msg = "Excellent, you're now an official member :D"
+                legit = await self.handle_pending(member)
+                if not legit:
+                    msg = "You have not selected your cape or csec role and therefore cannot be verified"
+                else:
+                    await member.remove_roles(role)
+                    family_role = member.guild.get_role(roles["FAMILY"])
+                    newbie_role = member.guild.get_role(roles["NEWBIE"])
+                    await member.add_roles(family_role, newbie_role)
+                    msg = "Excellent, you're now an official member :D"
             else:
                 await member.add_roles(role)
                 msg = f"There you go, {role.name} is now yours."
@@ -202,9 +205,17 @@ class EventHandling(commands.Cog):
     
         try:    
             await member.send(msg)
+            await bot_channel.send(f"Notice: {member.name}: {msg}")
         except HTTPException:
             await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
 
+    async def handle_pending(self, member):
+        csec_role = discord.utils.get(member.guild.roles, id=roles["CSEC"])        
+        cape_role = discord.utils.get(member.guild.roles, id=roles["CAPE"])    
+        
+        if not cape_role in member.roles and csec_role not in member.roles:
+            return False
+        return True
 
 def setup(bot):
     bot.add_cog(EventHandling(bot))
