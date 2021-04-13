@@ -195,6 +195,8 @@ class EventHandling(commands.Cog):
                 await member.add_roles(role)
                 msg = f"There you go, {role.name} is now yours."
         else:
+            if role.name == "Pending Member":
+                return
             await member.remove_roles(role)
             msg = f"I have removed {role.name} from you."
     
