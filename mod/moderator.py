@@ -307,7 +307,7 @@ https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WEL
     @commands.cooldown(1, 3600, BucketType.guild)
     async def retrack(self, ctx):
         pending_role = ctx.guild.get_role(roles["PENDING_MEMBER"])
-        unverified = [member for member in ctx.guild if pending_role in member.roles]
+        unverified = [member for member in ctx.guild.members if pending_role in member.roles]
         if not unverified:
             await ctx.send("Everyone is verified :D")
             return 
