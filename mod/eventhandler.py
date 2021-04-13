@@ -183,20 +183,21 @@ class EventHandling(commands.Cog):
         # This innermost dict will match the stringified emoji to role name, and then assign. Simple :D
         role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
 
-        if role.name == "Pending Member":
-            await member.remove_roles(role)
-            family_role = member.guild.get_role(roles["FAMILY"])
-            newmbie_role = member.guild.get_role(roles["NEWBIE"])
-            await member.add_roles(family_role, newmbie_role)
-            msg = "Excellent, you're now an official member :D"
-        else:
-            if payload.event_type == "REACTION_ADD":
+
+        if payload.event_type == "REACTION_ADD":
+            if role.name == "Pending Member":
+                await member.remove_roles(role)
+                family_role = member.guild.get_role(roles["FAMILY"])
+                newbie_role = member.guild.get_role(roles["NEWBIE"])
+                await member.add_roles(family_role, newbie_role)
+                msg = "Excellent, you're now an official member :D"
+            else:
                 await member.add_roles(role)
                 msg = f"There you go, {role.name} is now yours."
-            else:
-                await member.remove_roles(role)
-                msg = f"I have removed {role.name} from you."
-        
+        else:
+            await member.remove_roles(role)
+            msg = f"I have removed {role.name} from you."
+    
         try:    
             await member.send(msg)
         except HTTPException:
