@@ -185,6 +185,9 @@ class EventHandling(commands.Cog):
 
         if role.name == "Pending Member":
             await member.remove_roles(role)
+            family_role = member.guild.get_role(roles["FAMILY"])
+            newmbie_role = member.guild.get_role(roles["NEWBIE"])
+            await member.add_roles(family_role, newmbie_role)
             msg = "Excellent, you're now an official member :D"
         else:
             if payload.event_type == "REACTION_ADD":
