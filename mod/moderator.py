@@ -1,5 +1,6 @@
 import discord, time, asyncio, aiosqlite, os, json, sqlite3, time
 from discord import utils
+from discord.ext.commands.cooldowns import BucketType
 from mydicts import *
 from discord.ext import commands, tasks
 from random import randint
@@ -292,6 +293,29 @@ https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WEL
         raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
 
         return utils.get(member.guild.roles, id=roles[pro_dict[str(raw_proficiency[0].emoji)]])
+
+    @commands.command(brief="A command used to go through the verification process", help="This is a command that allows an unverified user to take part in the verification process.")
+    async def verify(self, ctx):
+        pending_role = ctx.guild.get_role(roles["PENDING_MEMBER"])
+        if pending_role not in ctx.author.roles:
+            await ctx.send("You are already Verified")
+            return 
+        
+        await self.handle_new_user(ctx.author)
+
+    @commands.command(brief="A command used to find all members that have yet to verify", help="Prompts all unverified users to take part in the verification process")
+    @commands.cooldown(1, 3600, BucketType.guild)
+    async def retrack(self, ctx):
+        pending_role = ctx.guild.get_role(roles["PENDING_MEMBER"])
+        unverified = [member for member in ctx.guild if pending_role in member.roles]
+        if not unverified:
+            await ctx.send("Everyone is verified :D")
+            return 
+        
+        veri_channel = ctx.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+
+        for stranger in unverified:
+            await veri_channel.send(f"Hey, {stranger.mention}. You still aren't verified. Aren't you feeling lonely out there? Simply type `p.verify` to begin the verification process and come join the rest of the school")
 
     # Tasks
     @tasks.loop(seconds=250)
