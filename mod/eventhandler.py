@@ -1,4 +1,5 @@
 from discord.errors import HTTPException
+from discord.message import PartialMessage
 from mydicts import *
 import discord 
 from discord.ext import commands 
@@ -190,6 +191,8 @@ class EventHandling(commands.Cog):
                     msg = "You have not selected your cape or csec role and therefore cannot be verified"
                     notif_channel = member.guild.get_channel(channels["VERIFY"])
                     await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again")
+                    partial_message = PartialMessage(notif_channel, payload.message_id)
+                    partial_message.remove_reaction(payload.emoji, member)
                 else:
                     await member.remove_roles(role)
                     family_role = member.guild.get_role(all_roles["FAMILY"])

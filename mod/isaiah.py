@@ -262,7 +262,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
     @commands.command()
     @commands.is_owner()
     async def lets_not_mess_up_please(self, ctx):
-        role = ctx.guild.get_role(roles["PENDING_MEMBER"])
+        role = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
         await ctx.send(f"Got {role.name}. Moving into stage 2")
 
         for channel in ctx.guild.channels:
@@ -276,7 +276,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
     @commands.command()
     @commands.is_owner()
     async def lets_test_this_first(self, ctx):
-        role = ctx.guild.get_role(roles["PENDING_MEMBER"])
+        role = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
         await ctx.send(f"Got {role.name}. Moving into stage 2")
         og_overwrites = ctx.channel.overwrites
         og_overwrites[role] = discord.PermissionOverwrite(view_channel=False)
