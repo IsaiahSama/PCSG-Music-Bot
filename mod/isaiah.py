@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import random, re
-from mydicts import roles
+from mydicts import all_roles
 
 class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
