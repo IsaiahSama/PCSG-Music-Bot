@@ -188,6 +188,8 @@ class EventHandling(commands.Cog):
                 legit = await self.handle_pending(member)
                 if not legit:
                     msg = "You have not selected your cape or csec role and therefore cannot be verified"
+                    notif_channel = member.guild.get_channel(channels["VERIFY"])
+                    await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again")
                 else:
                     await member.remove_roles(role)
                     family_role = member.guild.get_role(all_roles["FAMILY"])
