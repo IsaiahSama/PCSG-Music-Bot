@@ -190,8 +190,8 @@ class EventHandling(commands.Cog):
                     msg = "You have not selected your cape or csec role and therefore cannot be verified"
                 else:
                     await member.remove_roles(role)
-                    family_role = member.guild.get_role(roles["FAMILY"])
-                    newbie_role = member.guild.get_role(roles["NEWBIE"])
+                    family_role = member.guild.get_role(all_roles["FAMILY"])
+                    newbie_role = member.guild.get_role(all_roles["NEWBIE"])
                     await member.add_roles(family_role, newbie_role)
                     msg = "Excellent, you're now an official member :D"
             else:
@@ -210,8 +210,8 @@ class EventHandling(commands.Cog):
             await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
 
     async def handle_pending(self, member):
-        csec_role = discord.utils.get(member.guild.roles, id=roles["CSEC"])        
-        cape_role = discord.utils.get(member.guild.roles, id=roles["CAPE"])    
+        csec_role = discord.utils.get(member.guild.roles, id=all_roles["CSEC"])        
+        cape_role = discord.utils.get(member.guild.roles, id=all_roles["CAPE"])    
         
         if not cape_role in member.roles and csec_role not in member.roles:
             return False

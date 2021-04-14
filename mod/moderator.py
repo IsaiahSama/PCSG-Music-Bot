@@ -72,7 +72,7 @@ class Moderator(commands.Cog):
     @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
     async def timeout(self, ctx, member: discord.Member, time, *, reason):
-        role = discord.utils.get(ctx.guild.roles, id=roles["MUTED"])
+        role = discord.utils.get(ctx.guild.roles, id=all_roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been timed out for {time} minutes for {reason} by {ctx.author.name}")
         time *= 60
@@ -86,7 +86,7 @@ class Moderator(commands.Cog):
     @commands.command(brief="Mutes a user until unmuted", help="Mutes a user until unmuted", usage="@user duration_in_seconds")
     @commands.has_permissions(administrator=True)
     async def mute(self, ctx, member: discord.Member, *, reason):
-        role = discord.utils.get(ctx.guild.roles, id=roles["MUTED"])
+        role = discord.utils.get(ctx.guild.roles, id=all_roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been muted by {ctx.author}. Reason: {reason}")
         await log("Mute", f"{str(member)} was muted", str(ctx.author), reason)
@@ -94,7 +94,7 @@ class Moderator(commands.Cog):
     @commands.command(brief="Unmutes a user that has been muted.", help="Unmutes a muted user", usage="@user")
     @commands.has_permissions(administrator=True)
     async def unmute(self, ctx, member: discord.Member):
-        role = discord.utils.get(member.roles, id=roles["MUTED"])
+        role = discord.utils.get(member.roles, id=all_roles["MUTED"])
         if not role: await ctx.send("User isn't muted"); return
         await member.remove_roles(role)
         await ctx.send(f"Unmuted {member.mention}. Refrain from having to be muted again")
@@ -187,7 +187,7 @@ class Moderator(commands.Cog):
 
         if user['WARNLEVEL'] >= 4: 
             await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
-            role = discord.utils.get(message.guild.roles, id=roles["MUTED"])
+            role = discord.utils.get(message.guild.roles, id=all_roles["MUTED"])
             await message.author.add_roles(role)
             await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
 
@@ -204,7 +204,7 @@ class Moderator(commands.Cog):
         user = await self.getuser(member)
         if user:
             if user['WARNLEVEL'] >= 4:
-                role = discord.utils.get(member.guild.roles, id=roles["MUTED"])
+                role = discord.utils.get(member.guild.roles, id=all_roles["MUTED"])
                 await member.add_roles(role)
                 try:
                     await member.send("As your offenses have not been wiped, you are muted.")
@@ -221,7 +221,7 @@ class Moderator(commands.Cog):
         embed.add_field(name="Joined at", value=time.ctime())
         await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
 
-        pending_member_role = discord.utils.get(member.guild.roles, id=roles["PENDING_MEMBER"])
+        pending_member_role = discord.utils.get(member.guild.roles, id=all_roles["PENDING_MEMBER"])
 
         await member.add_roles(pending_member_role)
 
@@ -252,15 +252,19 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
         await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
         await self.handle_name(member)
-        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet")
-        group_size_role = await self.handle_group_size(member, group_size_message)
+        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Press all the emojis below that apply to you, then press ✅ to confirm")
+        group_size_roles = await self.handle_group_size(member, group_size_message)
 
-        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?")
-        proficiency_role = await self.handle_proficiency(member, proficiency_message)
-
-        await member.add_roles(group_size_role, proficiency_role)
-        prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_role.name.upper()])
-        await channel.send(f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects")
+        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?\nPress all the emojis below that apply to you, then press ✅ to confirm")
+        proficiency_roles = await self.handle_proficiency(member, proficiency_message)
+        
+        await member.add_roles(*group_size_roles, *proficiency_roles)
+        prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
+        msg = f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects"
+        if len(proficiency_roles) > 1:
+            prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
+            msg += f"and {prof_channel2}"
+        await channel.send(msg)
 
     async def handle_name(self, member):
         def check(m):
@@ -277,10 +281,15 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
         
         for key in list(group_roles.keys()):
             await message.add_reaction(key)
-
-        group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check)
-
-        return utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]])
+        
+        roles = []
+        while True:
+            group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check)
+            if str(group_size_raw_emoji[0].emoji) == "✅":
+                if roles:
+                    break
+            roles.append(utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]]))
+        return roles
 
     async def handle_proficiency(self, member, message):
         pro_dict = {"📘": "CSEC", "📖": "CAPE"}
@@ -291,13 +300,19 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
         for key in list(pro_dict.keys()):
             await message.add_reaction(key)
 
-        raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
+        roles = []
+        while True:
+            raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
+            if str(raw_proficiency[0].emoji) == "✅":
+                if roles:
+                    break
+            roles.append(utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(raw_proficiency[0].emoji)]]))
 
-        return utils.get(member.guild.roles, id=roles[pro_dict[str(raw_proficiency[0].emoji)]])
+        return roles
 
     @commands.command(brief="A command used to go through the verification process", help="This is a command that allows an unverified user to take part in the verification process.")
     async def verify(self, ctx):
-        pending_role = ctx.guild.get_role(roles["PENDING_MEMBER"])
+        pending_role = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
         if pending_role not in ctx.author.roles:
             await ctx.send("You are already Verified")
             return 
@@ -307,7 +322,7 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
     @commands.command(brief="A command used to find all members that have yet to verify", help="Prompts all unverified users to take part in the verification process")
     @commands.cooldown(1, 3600, BucketType.guild)
     async def retrack(self, ctx):
-        pending_role = ctx.guild.get_role(roles["PENDING_MEMBER"])
+        pending_role = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
         unverified = [member for member in ctx.guild.members if pending_role in member.roles]
         if not unverified:
             await ctx.send("Everyone is verified :D")

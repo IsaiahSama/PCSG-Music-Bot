@@ -5,7 +5,7 @@ from time import ctime
 
 guild_id = 693608235835326464
 
-roles = {
+all_roles = {
     "CAPE": 764214191782756392,
     "CSEC": 764214207192760401,
     "PENDING_MEMBER": 830907979301388368,
