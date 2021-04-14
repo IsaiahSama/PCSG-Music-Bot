@@ -68,7 +68,8 @@ raw_react_channel_ids = {
 reactions = {
     "PROFICIENCY": {
         "📘": "csec",
-        "📖": "cape"
+        "📖": "cape",
+        "✅": "Confirm"
         },
     "CSEC": {
         "📈":"csec add maths",
