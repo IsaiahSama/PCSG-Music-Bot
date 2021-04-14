@@ -303,10 +303,11 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
         roles = []
         while True:
             raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
-            if str(raw_proficiency[0].emoji) == "✅":
+            emoji = str(raw_proficiency[0].emoji)
+            if emoji == "✅":
                 if roles:
                     break
-            roles.append(utils.get(member.guild.roles, id=reactions[pro_dict[str(raw_proficiency[0].emoji)]]))
+            roles.append(utils.get(member.guild.roles, id=all_roles[pro_dict[emoji]]))
 
         return roles
 
