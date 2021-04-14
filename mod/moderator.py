@@ -292,7 +292,7 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
         return roles
 
     async def handle_proficiency(self, member, message):
-        pro_dict = {"📘": "CSEC", "📖": "CAPE"}
+        pro_dict = {"📘": "CSEC", "📖": "CAPE", "✅":"Confirm"}
 
         def check(reaction, user):
             return user == member and str(reaction.emoji) in pro_dict

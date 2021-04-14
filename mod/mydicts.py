@@ -23,6 +23,7 @@ group_roles = {
     "🕒": "trio",
     "🕓": "quartet",
     "🕔": "qunitet",
+    "✅": "Confirm"
 }
 
 group_roles_ids = {
