@@ -306,7 +306,7 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
             if str(raw_proficiency[0].emoji) == "✅":
                 if roles:
                     break
-            roles.append(utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(raw_proficiency[0].emoji)]]))
+            roles.append(utils.get(member.guild.roles, id=reactions[group_roles[str(raw_proficiency[0].emoji)]]))
 
         return roles
 
