@@ -237,7 +237,7 @@ Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311
 Please follow The Registration Process <:blueexclamation:830938893204455454>:
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["REP_FLAG"]).mention}  to select your country.
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to personalize The E-School to your criteria.
-<a:blacktick:830938918262013952> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify yourself.
+<a:blacktick:830938918262013952>Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to personalize the server to accomodate your CXC subjects and UNLOCK the FULL E-School
 ***DONE***  <a:party:830939382944628766>
 
 We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999> 
