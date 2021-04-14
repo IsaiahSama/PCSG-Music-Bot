@@ -123,24 +123,6 @@ class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
         if not users: await ctx.send("No members with that role could be found"); return
         await ctx.send(f"{len(users)} members have the role {role.name}")
 
-
-    @commands.command(hidden=True)
-    async def roleall(self, ctx):
-        await ctx.send("Beginning") 
-        role = [role for role in ctx.guild.roles if role.id in [762190942316134400, 755633133600112651]]
-        members = [user for user in ctx.guild.members if not user.bot]
-
-        role_channel = ctx.guild.get_channel(762068938686595152)
-        intro_channel = ctx.guild.get_channel(762060265520365568)
-        count = 0
-        for member in members: 
-            if role[0] in member.roles and role[1] in member.roles: continue
-            await member.add_roles(role[0])
-            await member.add_roles(role[1])
-            await member.guild.get_channel(700214669003980801).send(f"Welcome to the **PCSG FAMILY** {member.mention}:heart: \nThis server is designed to help you understand how you study best and achieve every **STUDY-GOAL!!!** :partying_face: Press here: {intro_channel.mention} and introduce yourself, then press here: {role_channel.mention} to start getting your roles.")
-            count += 1
-            
-        await ctx.send(f"Gave roles to {count} members")
         
     @commands.command(hidden=True)
     @commands.is_owner()

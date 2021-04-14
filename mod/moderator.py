@@ -241,8 +241,9 @@ Please follow The Registration Process <:blueexclamation:830938893204455454>:
 ***DONE***  <a:party:830939382944628766>
 
 We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999> 
-Feel free to invite your family & friends: <a:animalscheering:830938963761299456> https://discord.com/invite/4muGPHHwar 
-https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif""")
+Feel free to invite your family & friends: <a:animalscheering:830938963761299456> https://youtu.be/9B1-1Wgi9lw 
+""")
+        await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send("https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif")
 
         await self.handle_new_user(member)
 
