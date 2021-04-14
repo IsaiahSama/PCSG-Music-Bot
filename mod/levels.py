@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 import random
 from random import randint
 import asyncio, aiosqlite, sqlite3
-from mydicts import roles
+from mydicts import all_roles
 
 
 class Person:
@@ -157,7 +157,7 @@ class Progression(commands.Cog):
                 color=randint(0, 0xffffff)
             )
             if person.didrole():
-                role_to_give = discord.utils.get(message.guild.roles, id=roles[self.roles[(person.level // 20) - 1]])
+                role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person.level // 20) - 1]])
                 if person.level // 20 >= len(self.roles):
                     return
                 await message.author.add_role(role_to_give)
