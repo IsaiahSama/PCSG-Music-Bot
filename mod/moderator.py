@@ -234,14 +234,13 @@ class Moderator(commands.Cog):
 f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the {sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375>
 Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311>
 
-Please follow The Registration Process <:blueexclamation:830938893204455454>:
-<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["REP_FLAG"]).mention}  to select your country.
-<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to personalize The E-School to your criteria.
-<a:blacktick:830938918262013952>Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to personalize the server to accomodate your CXC subjects and UNLOCK the FULL E-School
-***DONE***  <a:party:830939382944628766>
+However, joining was only the first step, and to gain full access to the E-School, the below steps MUST be followed
+<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to get registered with our Bot.
+<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify the completion of the registration.
+3 MIN Introduction-Tutorial: https://youtu.be/9B1-1Wgi9lw / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}
+<a:blacktick:830938918262013952>CONGRATS, you have UNLOCKED the FULL STUDY-GOALS E-SCHOOL<a:blacktick:830938918262013952>
 
-We look forward to learning with you, Newbie E-Schooler! <a:catmovinghead:830939036033875999> 
-Feel free to invite your family & friends: <a:animalscheering:830938963761299456> https://youtu.be/9B1-1Wgi9lw 
+We look forward to studying with you, Newbie E-Schooler! <a:party:830939382944628766>
 """)
         await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send("https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif")
 
