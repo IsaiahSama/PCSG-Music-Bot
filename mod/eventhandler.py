@@ -192,7 +192,7 @@ class EventHandling(commands.Cog):
                     notif_channel = member.guild.get_channel(channels["VERIFY"])
                     await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again")
                     partial_message = PartialMessage(channel=notif_channel, id=payload.message_id)
-                    partial_message.remove_reaction(payload.emoji, member)
+                    await partial_message.remove_reaction(payload.emoji, member)
                 else:
                     await member.remove_roles(role)
                     family_role = member.guild.get_role(all_roles["FAMILY"])
