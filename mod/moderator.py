@@ -251,12 +251,12 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
         await self.handle_name(member)
-        country_list = ""
+        # country_list = ""
 
-        for k, v in country_dict.items():
-            country_list += f"\n{k}: {v}"
+        # for k, v in country_dict.items():
+        #     country_list += f"\n{k}: {v}"
             
-        country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\n {country_list}\nPlease press your country's flag below")
+        country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nPlease press your country's flag below")
         country_role = await self.handle_country(member, country_message)
         group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Press all the emojis below that apply to you, then press ✅ to confirm")
         group_size_roles = await self.handle_group_size(member, group_size_message)
