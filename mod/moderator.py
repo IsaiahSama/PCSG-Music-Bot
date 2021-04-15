@@ -307,7 +307,8 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
             if str(group_size_raw_emoji[0].emoji) == "✅":
                 if roles:
                     break
-            roles.append(utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]]))
+            else:
+                roles.append(utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]]))
         return list(set(roles))
 
     async def handle_proficiency(self, member, message):
@@ -326,7 +327,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
             if emoji == "✅":
                 if roles:
                     break
-            if emoji == "📚":
+            elif emoji == "📚":
                 roles.append(member.guild.get_role(all_roles["CAPE"]))
                 roles.append(member.guild.get_role(all_roles["CSEC"]))
             else:
