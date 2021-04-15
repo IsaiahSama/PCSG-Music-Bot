@@ -231,14 +231,17 @@ class Moderator(commands.Cog):
             await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
             
         await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
-f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the {sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375>
-Thank You for joining The Study-Goals' E-School <a:movingstar:830939250513674311>
+f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the **{sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375>**
+Thank You for joining **The Study-Goals' E-School <a:movingstar:830939250513674311>**
 
-However, joining was only the first step, and to gain full access to the E-School, the below steps MUST be followed
+However, joining was only the first step, and to gain **FULL** access to the E-School, the below steps **MUST** be completed
+
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to get registered with our Bot.
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify the completion of the registration.
-3 MIN Introduction-Tutorial: https://youtu.be/9B1-1Wgi9lw / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}
-<a:blacktick:830938918262013952>CONGRATS, you have UNLOCKED the FULL STUDY-GOALS E-SCHOOL<a:blacktick:830938918262013952>
+
+**3 MIN Introduction-Tutorial: https://youtu.be/9B1-1Wgi9lw / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}**
+
+***<a:blacktick:830938918262013952>CONGRATS, you have ***UNLOCKED*** the FULL STUDY-GOALS E-SCHOOL<a:blacktick:830938918262013952>***
 
 We look forward to studying with you, Newbie E-Schooler! <a:party:830939382944628766>
 """)
@@ -250,7 +253,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         channel = member.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
         await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
-        await self.handle_name(member)
+        await self.handle_name(member, channel)
         # country_list = ""
 
         # for k, v in country_dict.items():
@@ -261,21 +264,22 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Press all the emojis below that apply to you, then press ✅ to confirm")
         group_size_roles = await self.handle_group_size(member, group_size_message)
 
-        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?\nPress all the emojis below that apply to you, then press ✅ to confirm")
+        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC\n📖 CAPE?\n📚 BOTH\nPress all the emojis below that apply to you, then press ✅ to confirm")
         proficiency_roles = await self.handle_proficiency(member, proficiency_message)
         
         await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
 
         prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
-        msg = f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects"
+        msg = f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects."
         if len(proficiency_roles) > 1:
             prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
-            msg += f"and {prof_channel2}"
+            msg += f" and {prof_channel2.mention}"
+        msg += f"After completion go to {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School"
         await channel.send(msg)
 
-    async def handle_name(self, member):
+    async def handle_name(self, member, channel):
         def check(m):
-            return m.author == member
+            return m.author == member and m.channel == channel
 
         response = await self.bot.wait_for("message", check=check)
         name = response.content 
