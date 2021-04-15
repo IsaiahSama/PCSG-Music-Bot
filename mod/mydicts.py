@@ -155,7 +155,7 @@ reactions = {
     "VERIFY": {"✅": "Pending Member"}
 }
 
-countries = {
+country_dict = {
     "\U0001f1f2\U0001f1f8" : "Montserrat",
     "\U0001f1e6\U0001f1ec" : "Antigua and Barbuda",
     "\U0001f1e7\U0001f1f8": "Bahamas",

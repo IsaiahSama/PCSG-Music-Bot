@@ -252,13 +252,21 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
         await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
         
         await self.handle_name(member)
+        country_list = ""
+
+        for k, v in country_dict.items():
+            country_list += f"\n{k}: {v}"
+            
+        country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\n {country_list}\nPlease press your country's flag below")
+        country_role = await self.handle_country(member, country_message)
         group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Press all the emojis below that apply to you, then press ✅ to confirm")
         group_size_roles = await self.handle_group_size(member, group_size_message)
 
         proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC or 📖 CAPE?\nPress all the emojis below that apply to you, then press ✅ to confirm")
         proficiency_roles = await self.handle_proficiency(member, proficiency_message)
         
-        await member.add_roles(*group_size_roles, *proficiency_roles)
+        await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
+
         prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
         msg = f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects"
         if len(proficiency_roles) > 1:
@@ -275,6 +283,18 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
 
         await member.edit(nick=name)
 
+    async def handle_country(self, member, message):
+        def check(reaction, user):
+            return user == member and str(reaction.emoji) in list(country_dict.keys())
+
+        for key in list(country_dict.keys()):
+            await message.add_reaction(key)
+
+        raw_country = await self.bot.wait_for("reaction_add", check=check)
+        emoji = raw_country[0].emoji
+
+        return utils.get(member.guild.roles, name=country_dict[str(emoji)])
+
     async def handle_group_size(self, member, message):
         def check(reaction, user):
             return user == member and str(reaction.emoji) in list(group_roles.keys())
@@ -289,10 +309,10 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
                 if roles:
                     break
             roles.append(utils.get(member.guild.roles, id=group_roles_ids[group_roles[str(group_size_raw_emoji[0].emoji)]]))
-        return roles
+        return list(set(roles))
 
     async def handle_proficiency(self, member, message):
-        pro_dict = {"📘": "CSEC", "📖": "CAPE", "✅":"Confirm"}
+        pro_dict = {"📘": "CSEC", "📖": "CAPE", "📚": "Both", "✅":"Confirm"}
 
         def check(reaction, user):
             return user == member and str(reaction.emoji) in pro_dict
@@ -307,9 +327,13 @@ Feel free to invite your family & friends: <a:animalscheering:830938963761299456
             if emoji == "✅":
                 if roles:
                     break
-            roles.append(utils.get(member.guild.roles, id=all_roles[pro_dict[emoji]]))
+            if emoji == "📚":
+                roles.append(member.guild.get_role(all_roles["CAPE"]))
+                roles.append(member.guild.get_role(all_roles["CSEC"]))
+            else:
+                roles.append(utils.get(member.guild.roles, id=all_roles[pro_dict[emoji]]))
 
-        return roles
+        return list(set(roles))
 
     @commands.command(brief="A command used to go through the verification process", help="This is a command that allows an unverified user to take part in the verification process.")
     async def verify(self, ctx):
