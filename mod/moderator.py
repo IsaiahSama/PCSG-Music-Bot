@@ -261,20 +261,20 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
             country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nClick the emoji that matches your country's flag below.")
             country_role = await self.handle_country(member, country_message)
-            group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n\U00000032 2 People / duo\n\n\U00000033 3 People / trio\n\n\U00000034 4 People / quartet\n\n\U00000035 5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
+            group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑 2 People / duo\n\n🕒 3 People / trio\n\n🕓 4 People / quartet\n\n🕔 5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
             group_size_roles = await self.handle_group_size(member, group_size_message)
 
-            proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your cxc-proficiency?\n📘 CSEC\n📖 CAPE?\n📚 BOTH\nClick the emoji that matches your cxc-proficiency below, then press ✅ to confirm")
+            proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your cxc-proficiency?\n📘: CSEC\n📖: CAPE?\n📚: BOTH\nClick the 📘 emoji below if you do CSEC, the 📖 emoji below if you do CAPE, and the 📚 emoji below if you do both, then press ✅ to confirm")
             proficiency_roles = await self.handle_proficiency(member, proficiency_message)
             
             await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
 
             prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
-            msg = f"\n\nAlright {member.mention} press here: {prof_channel.mention} to select your subjects"
+            msg = f"\n\nAlright {member.mention} press here: {prof_channel.mention} "
             if len(proficiency_roles) > 1:
                 prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
                 msg += f" and here: {prof_channel2.mention}"
-            msg += f".After completion press here: {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School"
+            msg += f" to select your subjects. After completion press here: {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School. Note: ***YOU WILL NOT UNLOCK FULL E-SCHOOL IF YOU DO NOT VERIFY YOURSELF***"
             await channel.send(msg)
         except asyncio.TimeoutError:
             await channel.send(f"Ok {member.mention}, you have taken far too long to respond to me. When you are ready, type `p.verify` to begin the process again.")
