@@ -155,6 +155,24 @@ reactions = {
     "VERIFY": {"✅": "Pending Member"}
 }
 
+countries = {
+    "\U0001f1f2\U0001f1f8" : "Montserrat",
+    "\U0001f1e6\U0001f1ec" : "Antigua and Barbuda",
+    "\U0001f1e7\U0001f1f8": "Bahamas",
+    "\U0001f1e7\U0001f1ff" : "Belize",
+    "\U0001f1e9\U0001f1f2" : "Dominica",
+    "\U0001f1ec\U0001f1e9" : "Grenada",
+    "\U0001f1ec\U0001f1fe" : "Guyana",
+    "\U0001f1ed\U0001f1f9" : "Haiti",
+    "\U0001f1f1\U0001f1e8" : "St.Lucia",
+    "\U0001f1f0\U0001f1f3" : "St.Kitts and Nevis",
+    "\U0001f1f8\U0001f1f7" : "Suriname",
+    "\U0001f1ef\U0001f1f2" : "Jamaica",
+    "\U0001f1f9\U0001f1f9" : "Trinidad and Tobago",
+    "\U0001f1e7\U0001f1e7" : "Barbados",
+    "\U0001f1fb\U0001f1e8" : "St.Vincent and the Grenadines"
+}
+
 
 logs = []
 
