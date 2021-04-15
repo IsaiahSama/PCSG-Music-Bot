@@ -254,37 +254,36 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         await channel.send(f"Hello there {member.mention}. First, watch the below video, then answer my questions:  https://youtu.be/9B1-1Wgi9lw.")
         
         await asyncio.sleep(2)
-        await channel.send("Firstly, what is your name?")
-        
-        await self.handle_name(member, channel)
-        # country_list = ""
-
-        # for k, v in country_dict.items():
-        #     country_list += f"\n{k}: {v}"
+        try:
+            await channel.send("Firstly, what is your name?")
             
-        country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nClick the emoji that matches your country's flag below.")
-        country_role = await self.handle_country(member, country_message)
-        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
-        group_size_roles = await self.handle_group_size(member, group_size_message)
+            await self.handle_name(member, channel)
 
-        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your cxc-proficiency?\n📘 CSEC\n📖 CAPE?\n📚 BOTH\nClick the emoji that matches your cxc-proficiency below, then press ✅ to confirm")
-        proficiency_roles = await self.handle_proficiency(member, proficiency_message)
-        
-        await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
+            country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nClick the emoji that matches your country's flag below.")
+            country_role = await self.handle_country(member, country_message)
+            group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n\U00000032 2 People / duo\n\n\U00000033 3 People / trio\n\n\U00000034 4 People / quartet\n\n\U00000035 5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
+            group_size_roles = await self.handle_group_size(member, group_size_message)
 
-        prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
-        msg = f"\n\nAlright {member.mention} press here: {prof_channel.mention} to select your subjects"
-        if len(proficiency_roles) > 1:
-            prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
-            msg += f" and here: {prof_channel2.mention}"
-        msg += f".After completion press here: {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School"
-        await channel.send(msg)
+            proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your cxc-proficiency?\n📘 CSEC\n📖 CAPE?\n📚 BOTH\nClick the emoji that matches your cxc-proficiency below, then press ✅ to confirm")
+            proficiency_roles = await self.handle_proficiency(member, proficiency_message)
+            
+            await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
+
+            prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
+            msg = f"\n\nAlright {member.mention} press here: {prof_channel.mention} to select your subjects"
+            if len(proficiency_roles) > 1:
+                prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
+                msg += f" and here: {prof_channel2.mention}"
+            msg += f".After completion press here: {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School"
+            await channel.send(msg)
+        except asyncio.TimeoutError:
+            await channel.send(f"Ok {member.mention}, you have taken far too long to respond to me. When you are ready, type `p.verify` to begin the process again.")
 
     async def handle_name(self, member, channel):
         def check(m):
             return m.author == member and m.channel == channel
 
-        response = await self.bot.wait_for("message", check=check)
+        response = await self.bot.wait_for("message", check=check, timeout=300)
         name = response.content 
 
         await member.edit(nick=name)
@@ -296,7 +295,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         for key in list(country_dict.keys()):
             await message.add_reaction(key)
 
-        raw_country = await self.bot.wait_for("reaction_add", check=check)
+        raw_country = await self.bot.wait_for("reaction_add", check=check, timeout=300)
         emoji = raw_country[0].emoji
 
         return utils.get(member.guild.roles, name=country_dict[str(emoji)])
@@ -310,7 +309,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         
         roles = []
         while True:
-            group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check)
+            group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check, timeout=300)
             if str(group_size_raw_emoji[0].emoji) == "✅":
                 if roles:
                     break
@@ -329,7 +328,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
         roles = []
         while True:
-            raw_proficiency = await self.bot.wait_for("reaction_add", check=check)
+            raw_proficiency = await self.bot.wait_for("reaction_add", check=check, timeout=300)
             emoji = str(raw_proficiency[0].emoji)
             if emoji == "✅":
                 if roles:

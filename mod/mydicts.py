@@ -19,10 +19,10 @@ all_roles = {
 }
 
 group_roles = {
-    "🕑": "duo",
-    "🕒": "trio",
-    "🕓": "quartet",
-    "🕔": "qunitet",
+    "\U00000032": "duo",
+    "\U00000033": "trio",
+    "\U00000034": "quartet",
+    "\U00000035": "qunitet",
     "✅": "Confirm"
 }
 
