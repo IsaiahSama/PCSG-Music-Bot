@@ -251,7 +251,10 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
     async def handle_new_user(self, member):
         channel = member.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
-        await channel.send(f"Hello there {member.mention}. I just need to ask you a few questions before you're all ready to go. Firstly, what is your name?")
+        await channel.send(f"Hello there {member.mention}. First, watch the below video, then answer my questions:  https://youtu.be/9B1-1Wgi9lw.")
+        
+        await asyncio.sleep(2)
+        await channel.send("Firstly, what is your name?")
         
         await self.handle_name(member, channel)
         # country_list = ""
@@ -259,22 +262,22 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         # for k, v in country_dict.items():
         #     country_list += f"\n{k}: {v}"
             
-        country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nPlease press your country's flag below")
+        country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nClick the emoji that matches your country's flag below.")
         country_role = await self.handle_country(member, country_message)
-        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Press all the emojis below that apply to you, then press ✅ to confirm")
+        group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑2 People / duo\n\n🕒3 People / trio\n\n🕓4 People / quartet\n\n🕔5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
         group_size_roles = await self.handle_group_size(member, group_size_message)
 
-        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your proficiency?\n📘 CSEC\n📖 CAPE?\n📚 BOTH\nPress all the emojis below that apply to you, then press ✅ to confirm")
+        proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your cxc-proficiency?\n📘 CSEC\n📖 CAPE?\n📚 BOTH\nClick the emoji that matches your cxc-proficiency below, then press ✅ to confirm")
         proficiency_roles = await self.handle_proficiency(member, proficiency_message)
         
         await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
 
         prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
-        msg = f"\n\nAlright {member.mention} head over to {prof_channel.mention} to select your subjects."
+        msg = f"\n\nAlright {member.mention} press here: {prof_channel.mention} to select your subjects"
         if len(proficiency_roles) > 1:
             prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
-            msg += f" and {prof_channel2.mention}"
-        msg += f"After completion go to {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School"
+            msg += f" and here: {prof_channel2.mention}"
+        msg += f".After completion press here: {utils.get(member.guild.text_channels, id=channels['VERIFY']).mention} to complete registration and gain access to the full E-School"
         await channel.send(msg)
 
     async def handle_name(self, member, channel):
