@@ -128,6 +128,7 @@ reactions = {
         "🗂":"cape financial services studies",
         "🍔":"cape food and nutrition",
         "🇨":"cape french",
+        "🏝️": "cape geography",
         "🌍":"cape geography",
         "♻":"cape green engineering",
         "🗾":"cape history",
