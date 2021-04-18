@@ -196,9 +196,9 @@ class EventHandling(commands.Cog):
             if role.name == "Pending Member":
                 legit = await self.handle_pending(member)
                 if not legit:
-                    msg = "You have not selected your cape or csec role and therefore cannot be verified"
+                    msg = f"{member.mention}, You have not selected your cape or csec role and therefore cannot be verified"
                     notif_channel = member.guild.get_channel(channels["VERIFY"])
-                    await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again")
+                    await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again", delete_after=10)
                     partial_message = PartialMessage(channel=notif_channel, id=payload.message_id)
                     await partial_message.remove_reaction(payload.emoji, member)
                 else:
