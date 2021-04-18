@@ -70,7 +70,7 @@ reactions = {
     "PROFICIENCY": {
         "📘": "csec",
         "📖": "cape",
-        "✅": "Confirm"
+        "✅": "Confirm",
         },
     "CSEC": {
         "📈":"csec add maths",

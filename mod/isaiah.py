@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import random, re
+
+from discord.permissions import PermissionOverwrite
 from mydicts import all_roles
 
 class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
@@ -86,19 +88,48 @@ class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
         
 
     @commands.command(hidden=True)
-    async def sortchan(self, ctx, category_id: int):
+    @commands.is_owner()
+    async def sortchanv2(self, ctx, category_id: int, kind, has_emoji=False):
         await ctx.send("Beginning to sort channels now")
-        cate = ctx.guild.get_channel(category_id)
-        allchan = cate.voice_channels
-        channames = [chan.name for chan in allchan]
-        channames.sort()
-        print("\n".join(channames))
-        for i, v in enumerate(channames):
-            channel = discord.utils.get(cate.voice_channels, name=v)
+        category = ctx.guild.get_channel(category_id)
+        if kind == "voice":
+            channels = category.voice_channels
+        elif kind == "text":
+            channels = category.text_channels
+        elif kind == "all":
+            channels = category.channels
+        else:
+            await ctx.send("Kind should be `voice`, `text` or `all`")
+            return
+
+        restoration_dict = None
+        if has_emoji:
+            og_names = [channel.name for channel in channels]
+            names = []
+            for channel in channels:
+                emoji = channel.name[0]
+                name = channel.name[1:]
+                await channel.edit(name=f"{name}{emoji}")
+                names.append(channel.name)
+
+            restoration_dict = dict(zip(names, og_names))
+        else:
+            names = [channel.name for channel in channels]
+
+        names.sort()
+        print("\n".join(names))
+        for i, v in enumerate(names):
+            channel = discord.utils.get(channels, name=v)
             print(f"setting {v} to position {i}")
             await channel.edit(position=i)
 
         await ctx.send("Sorted")
+
+        if restoration_dict:
+            await ctx.send("Restoring emojis to their position")
+            for k, v in restoration_dict.items():
+                channel = discord.utils.get(channels, name=k)
+                await channel.edit(name=v)
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -285,10 +316,43 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def send_msg(self, ctx):
+    async def send_msg(self, ctx, msg):
         await ctx.message.delete()
-        msg = await ctx.send("Simply press the check mark below to complete your verification")
-        await msg.add_reaction("✅")
+        msg = await ctx.send("🕑: Duo\n🕒:Trio\n🕓:Quartet\n🕔: Quintet\nPress the emoji below that matches your preferred study group size.")
+        emojis = ["🕑","🕒","🕓", "🕔"]
+        for emoji in emojis:
+            await msg.add_reaction(emoji)
+
+    @commands.command()
+    @commands.is_owner()
+    async def send_msg_2(self, ctx):
+        await ctx.message.delete()
+        msg = await ctx.send("📘: CSEC\n📖: CAPE\nPress the emoji below that matches your preferred study group size")
+        emojis = ["📖", "📘"]
+        for emoji in emojis:
+            await msg.add_reaction(emoji)
+
+    @commands.command()
+    @commands.is_owner()
+    async def set_perms(self, ctx, cid:int):
+        from re import compile
+        compiled = compile(r"[A-Za-z]+")
+        category = ctx.guild.get_channel(cid)
+        for channel in category.voice_channels:
+            letters_only = " ".join(compiled.findall(channel.name))
+            role = discord.utils.get(ctx.guild.roles, name=letters_only)
+            if not role:
+                await ctx.send(f"Could not find role for {channel.name}. Letters found were {letters_only}")            
+                continue
+            
+            overwrites = {
+                ctx.guild.default_role: PermissionOverwrite(connect=False, view_channel=False),
+                role: PermissionOverwrite(connect=True, view_channel=True)
+            }
+
+            await channel.edit(overwrites=overwrites)
+
+        await ctx.send("Done")
 
 def setup(bot):
     bot.add_cog(Isaiah(bot))

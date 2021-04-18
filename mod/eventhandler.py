@@ -182,8 +182,12 @@ class EventHandling(commands.Cog):
         # raw_react_channel_ids will link the id of the channel to a name
         # This name when put in of reactions, will link it to it's respective dictionaries of reactions
         # This innermost dict will match the stringified emoji to role name, and then assign. Simple :D
-        role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
-
+        try:
+            role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
+        except Exception as err:
+            await bot_channel.send(err)
+            return
+            
         if payload.event_type == "REACTION_ADD":
             if role.name == "Pending Member":
                 legit = await self.handle_pending(member)

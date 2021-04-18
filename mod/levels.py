@@ -160,7 +160,7 @@ class Progression(commands.Cog):
                 role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person.level // 20) - 1]])
                 if person.level // 20 >= len(self.roles):
                     return
-                await message.author.add_role(role_to_give)
+                await message.author.add_roles(role_to_give)
 
                 embed.add_field(name="New role", value=f"Congrats {message.author.name}. You now have the role of {role_to_give.name}")
 
