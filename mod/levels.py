@@ -138,33 +138,33 @@ class Progression(commands.Cog):
 
         
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
+    # @commands.Cog.listener()
+    # async def on_message(self, message):
         
-        if message.author.bot: return
+    #     if message.author.bot: return
 
-        person = await self.getperson(message)
-        if not person:
-            return
+    #     person = await self.getperson(message)
+    #     if not person:
+    #         return
 
-        person.incexp()
-        if person.exp >= person.expthresh:
-            person.levelup()
+    #     person.incexp()
+    #     if person.exp >= person.expthresh:
+    #         person.levelup()
 
-            embed = discord.Embed(
-                title="LEVEL UP",
-                description=f"{message.author.mention} has reached level {person.level}. Keep Studying hard",
-                color=randint(0, 0xffffff)
-            )
-            if person.didrole():
-                role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person.level // 20) - 1]])
-                if person.level // 20 >= len(self.roles):
-                    return
-                await message.author.add_roles(role_to_give)
+    #         embed = discord.Embed(
+    #             title="LEVEL UP",
+    #             description=f"{message.author.mention} has reached level {person.level}. Keep Studying hard",
+    #             color=randint(0, 0xffffff)
+    #         )
+    #         if person.didrole():
+    #             role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person.level // 20) - 1]])
+    #             if person.level // 20 >= len(self.roles):
+    #                 return
+    #             await message.author.add_roles(role_to_give)
 
-                embed.add_field(name="New role", value=f"Congrats {message.author.name}. You now have the role of {role_to_give.name}")
+    #             embed.add_field(name="New role", value=f"Congrats {message.author.name}. You now have the role of {role_to_give.name}")
 
-            await message.channel.send(embed=embed)
+    #         await message.channel.send(embed=embed)
     
     # Tasks    
     @tasks.loop(minutes=5)

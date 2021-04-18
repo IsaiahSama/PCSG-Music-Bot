@@ -362,6 +362,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         veri_channel = ctx.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
 
         for stranger in unverified:
+            await stranger.send(f"Hey, {stranger.mention}. You still aren't verified. Aren't you feeling lonely out there? Head into the Study Goals Server, go to #registration, and then simply type `p.verify` to begin the verification process and come join the rest of the school")
             await veri_channel.send(f"Hey, {stranger.mention}. You still aren't verified. Aren't you feeling lonely out there? Simply type `p.verify` to begin the verification process and come join the rest of the school")
 
     # Tasks

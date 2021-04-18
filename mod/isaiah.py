@@ -327,7 +327,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
     @commands.is_owner()
     async def send_msg_2(self, ctx):
         await ctx.message.delete()
-        msg = await ctx.send("📘: CSEC\n📖: CAPE\nPress the emoji below that matches your preferred study group size")
+        msg = await ctx.send("📘: CSEC\n📖: CAPE\nPress the emoji below that matches your cxc proficiency")
         emojis = ["📖", "📘"]
         for emoji in emojis:
             await msg.add_reaction(emoji)
