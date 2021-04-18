@@ -187,6 +187,10 @@ class EventHandling(commands.Cog):
         except Exception as err:
             await bot_channel.send(err)
             return
+
+        if not role:
+            await bot_channel.send(f"ERROR: Could not get role matching emoji {payload.emoji}.")
+            return
             
         if payload.event_type == "REACTION_ADD":
             if role.name == "Pending Member":
