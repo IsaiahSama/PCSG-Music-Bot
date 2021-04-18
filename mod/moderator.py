@@ -230,7 +230,7 @@ class Moderator(commands.Cog):
 
         if human_count % 100 == 0:
             await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(f"CONGRATULATIONS TO {member.mention} FOR BEING THE {human_count}th HUMAN TO JOIN THE PCSG FAMILY!!!")
-            
+        
         await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send(
 f"""Welcome {member.mention} to the <:PCSGLETTERSWITHOUTBACKGROUND:828392100729978900> Family! <a:catholdheart:830938992081371157> You're the **{sum(not user.bot for user in member.guild.members)}th Family Member <:holdheart:830939097518178375>**
 Thank You for joining **The Study-Goals' E-School <a:movingstar:830939250513674311>**
@@ -247,11 +247,16 @@ However, joining was only the first step, and to gain **FULL** access to the E-S
 We look forward to studying with you, Newbie E-Schooler! <a:party:830939382944628766>
 """)
         await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send("https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif")
+        perso_channel = member.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+        try:
+            msg = await member.send(f"Hello {member.name}")
+            await perso_channel.send(f"Hey {member.mention}, I've sent you a message in your dms. Check it out so you can get verified")
+            channel = msg.channel
+        except Exception:
+            channel = perso_channel
+        await self.handle_new_user(member, channel, perso_channel)
 
-        await self.handle_new_user(member)
-
-    async def handle_new_user(self, member):
-        channel = member.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+    async def handle_new_user(self, member, channel, perso_channel):
         await channel.send(f"Hello there {member.mention}. First, watch the below video, then answer my questions:  https://youtu.be/9B1-1Wgi9lw.")
         
         await asyncio.sleep(2)
@@ -271,6 +276,11 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
             await member.add_roles(country_role, *group_size_roles, *proficiency_roles)
 
             prof_channel = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[0].name.upper()])
+            
+            if not hasattr(channel, "guild"):
+                await channel.send("All done. Come into the server again to complete the final steps")
+                channel = perso_channel
+
             msg = f"\n\nAlright {member.mention} press here: {prof_channel.mention} "
             if len(proficiency_roles) > 1:
                 prof_channel2 = discord.utils.get(member.guild.text_channels, id=channels[proficiency_roles[1].name.upper()])
@@ -284,7 +294,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         def check(m):
             return m.author == member and m.channel == channel
 
-        response = await self.bot.wait_for("message", check=check, timeout=300)
+        response = await self.bot.wait_for("message", check=check, timeout=600)
         name = response.content 
 
         await member.edit(nick=name)
@@ -296,7 +306,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         for key in list(country_dict.keys()):
             await message.add_reaction(key)
 
-        raw_country = await self.bot.wait_for("reaction_add", check=check, timeout=300)
+        raw_country = await self.bot.wait_for("reaction_add", check=check, timeout=600)
         emoji = raw_country[0].emoji
 
         return utils.get(member.guild.roles, name=country_dict[str(emoji)])
@@ -310,7 +320,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         
         roles = []
         while True:
-            group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check, timeout=300)
+            group_size_raw_emoji = await self.bot.wait_for("reaction_add", check=check, timeout=600)
             if str(group_size_raw_emoji[0].emoji) == "✅":
                 if roles:
                     break
@@ -329,7 +339,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
         roles = []
         while True:
-            raw_proficiency = await self.bot.wait_for("reaction_add", check=check, timeout=300)
+            raw_proficiency = await self.bot.wait_for("reaction_add", check=check, timeout=600)
             emoji = str(raw_proficiency[0].emoji)
             if emoji == "✅":
                 if roles:
@@ -344,12 +354,28 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
     @commands.command(brief="A command used to go through the verification process", help="This is a command that allows an unverified user to take part in the verification process.")
     async def verify(self, ctx):
-        pending_role = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
-        if pending_role not in ctx.author.roles:
-            await ctx.send("You are already Verified")
+        guild = discord.utils.get(self.bot.guilds, id=guild_id)
+        
+        member = guild.get_member(ctx.author.id)
+        if not member:
+            await member.send("IDK how you did this... but you're not in the PCSG server")
+            return
+
+        pending_role = guild.get_role(all_roles["PENDING_MEMBER"])
+        if pending_role not in member.roles:
+            await member.send("You are already Verified")
             return 
         
-        await self.handle_new_user(ctx.author)
+        perso_channel = guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+        
+        try:
+            msg = await member.send(f"Hello {member.name}")
+            await perso_channel.send(f"Hey {member.mention}, I've sent you a message in your dms. Check it out so you can get verified")
+            channel = msg.channel
+        except Exception:
+            channel = perso_channel
+        
+        await self.handle_new_user(member, channel, perso_channel)
 
     @commands.command(brief="A command used to find all members that have yet to verify", help="Prompts all unverified users to take part in the verification process")
     @commands.cooldown(1, 3600, BucketType.guild)
