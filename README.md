@@ -1,7 +1,7 @@
 ﻿# Private Caribbean Study Goals Discord Server Bots
 
 ## Below are the 7 Discord Bots belonging to the PCSG Discord Server created by Isaiah Sama. 
-You can join the server using the following link [Official PCSG Server](https://discord.gg/chZQjkn Official Discord Server for the Private Caribbean Study Goals.)
+You can join the server using the following link [Official PCSG Server](https://discord.gg/GD5MP2Aq4T "Official Discord Server for the Private Caribbean Study Goals")
 
 ## Your Moderator/ PCSG Mod
 Your Moderator/ PCSG Mod is the moderator bot responsible for the moderation of the PCSG Discord Server. The welcome messages, The assignment of reaction roles, monitoring and stopping profanity,  tracking server changes and much more, are all part of his responsibilities.
