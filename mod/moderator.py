@@ -240,7 +240,7 @@ However, joining was only the first step, and to gain **FULL** access to the E-S
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to get registered with our Bot.
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify the completion of the registration.
 
-**3 MIN Introduction-Tutorial: https://youtu.be/9B1-1Wgi9lw / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}**
+**3 MIN Introduction-Tutorial: https://www.youtube.com/watch?v=vzETbx22UeE / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}**
 
 ***<a:blacktick:830938918262013952>CONGRATS, you have ***UNLOCKED*** the FULL STUDY-GOALS E-SCHOOL<a:blacktick:830938918262013952>***
 
@@ -267,7 +267,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
             country_message = await channel.send(f"Nice to meet you {member.display_name}. What country are you from?\nClick the emoji that matches your country's flag below.")
             country_role = await self.handle_country(member, country_message)
-            group_size_message = await channel.send(f"\nNice to meet you {member.display_name}. Now, what size group do you prefer to study in?\n\n🕑 2 People / duo\n\n🕒 3 People / trio\n\n🕓 4 People / quartet\n\n🕔 5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
+            group_size_message = await channel.send(f"\nNow, what size group do you prefer to study in?\n\n🕑 2 People / duo\n\n🕒 3 People / trio\n\n🕓 4 People / quartet\n\n🕔 5 people / quintet\n Select your preferred size of Study Group by clicking the emoji that matches the size Study-Group you want, then click ✅ to confirm.")
             group_size_roles = await self.handle_group_size(member, group_size_message)
 
             proficiency_message = await channel.send(f"\n\nSo {member.mention}, what's your cxc-proficiency?\n📘: CSEC\n📖: CAPE?\n📚: BOTH\nClick the 📘 emoji below if you do CSEC, the 📖 emoji below if you do CAPE, and the 📚 emoji below if you do both, then press ✅ to confirm")

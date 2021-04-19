@@ -338,7 +338,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
         from re import compile
         compiled = compile(r"[A-Za-z]+")
         category = ctx.guild.get_channel(cid)
-        for channel in category.voice_channels:
+        for channel in category.channels:
             letters_only = " ".join(compiled.findall(channel.name))
             role = discord.utils.get(ctx.guild.roles, name=letters_only)
             if not role:
@@ -353,6 +353,16 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             await channel.edit(overwrites=overwrites)
 
         await ctx.send("Done")
+
+    @commands.command()
+    @commands.is_owner()
+    async def clear_perms(self, ctx, cid:int):
+        category = ctx.guild.get_channel(cid)
+        overwrites = {ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False)}
+        for channel in category.channels:
+            await channel.edit(overwrites=overwrites)
+
+        await ctx.send("DONE BOSS")
 
 def setup(bot):
     bot.add_cog(Isaiah(bot))
