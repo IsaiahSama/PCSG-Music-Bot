@@ -364,5 +364,16 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
         await ctx.send("DONE BOSS")
 
+    @commands.command()
+    @commands.is_owner()
+    async def change_names(self, ctx, cid:int):
+        category = ctx.guild.get_channel(cid)
+        from re import compile
+        reg = compile(r"[A-Za-z]+")
+        for channel in category.channels:
+            letters = ' '.join(reg.findall(channel.name))
+            topic = letters + " class now"
+            await channel.edit(topic=topic.upper())
+
 def setup(bot):
     bot.add_cog(Isaiah(bot))
