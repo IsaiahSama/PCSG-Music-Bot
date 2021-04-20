@@ -1,3 +1,4 @@
+from typing import Awaitable
 import discord
 from discord.ext import commands, tasks
 import asyncio
@@ -366,7 +367,16 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def change_names(self, ctx, cid:int):
+    async def clear_topics(self, ctx, cid:int):
+        category = ctx.guild.get_channel(cid)
+        for channel in category.channels:
+            await channel.edit(topic=None)
+
+        await ctx.send("Set all topics to None")
+
+    @commands.command()
+    @commands.is_owner()
+    async def change_topics(self, ctx, cid:int):
         category = ctx.guild.get_channel(cid)
         from re import compile
         reg = compile(r"[A-Za-z]+")

@@ -377,9 +377,9 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         
         await self.handle_new_user(member, channel, perso_channel)
 
-    @commands.command(brief="Moves all members in the user's vc to another one", help="Used to move all members in the same vc as the user to another vc, whose id is specified", usage="name or id of vc to move to")
+    @commands.command(brief="Moves all members in the user's vc to another one", help="Used to move all members in the same vc as the user to another vc, whose id is specified", usage="name_or_id_of_vc_to_move_to")
     @commands.has_guild_permissions(move_members=True)
-    async def move_members_to(self, ctx, *, name_or_id_of_vc):
+    async def moveto(self, ctx, *, name_or_id_of_vc):
         if not ctx.author.voice.channel:
             await ctx.send("You are not currently connected to a voice channel")
             return 
