@@ -4,7 +4,6 @@ from mydicts import *
 import discord 
 from discord.ext import commands 
 from random import randint
-from os import path
 
 class EventHandling(commands.Cog):
     def __init__(self, bot) -> None:
@@ -193,14 +192,18 @@ class EventHandling(commands.Cog):
             return
             
         if payload.event_type == "REACTION_ADD":
-            if role.name == "Pending Member":
+            if role.id == 830907979301388368:
+                notif_channel = member.guild.get_channel(channels["VERIFY"])
+                partial_message = PartialMessage(channel=notif_channel, id=payload.message_id)
                 legit = await self.handle_pending(member)
-                if not legit:
+                if legit == 0:
                     msg = f"{member.mention}, You have not selected your cape or csec role and therefore cannot be verified"
-                    notif_channel = member.guild.get_channel(channels["VERIFY"])
                     await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again", delete_after=10)
-                    partial_message = PartialMessage(channel=notif_channel, id=payload.message_id)
                     await partial_message.remove_reaction(payload.emoji, member)
+                elif legit == 1:
+                    msg = f"{member.mention}, You have not selected any subject roles as of yet. Please go to your csec/cape subject-select and do so now."
+                    await partial_message.remove_reaction(payload.emoji, member)
+                    await notif_channel.send(f"{msg}")
                 else:
                     await member.remove_roles(role)
                     family_role = member.guild.get_role(all_roles["FAMILY"])
@@ -211,7 +214,7 @@ class EventHandling(commands.Cog):
                 await member.add_roles(role)
                 msg = f"There you go, {role.name} is now yours."
         else:
-            if role.name == "Pending Member":
+            if role.id == 830907979301388368:
                 return
             await member.remove_roles(role)
             msg = f"I have removed {role.name} from you."
@@ -227,7 +230,10 @@ class EventHandling(commands.Cog):
         cape_role = discord.utils.get(member.guild.roles, id=all_roles["CAPE"])    
         
         if not cape_role in member.roles and csec_role not in member.roles:
-            return False
+            return 0
+        
+        if len(member.roles) <= 4:
+            return 1
         return True
 
 def setup(bot):

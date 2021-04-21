@@ -396,5 +396,24 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             new_name = f"{letters} streamroom"
             await channel.edit(name=new_name)
 
+    @commands.command()
+    @commands.is_owner()
+    async def find_stranger(self, ctx):
+        family = ctx.guild.get_role(all_roles["FAMILY"])
+        pending = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
+        humans = [member for member in ctx.guild.members if not member.bot]
+        strangers = [human for human in humans if not pending in human.roles and not family in human.roles]
+
+        newbie = ctx.guild.get_role(all_roles["NEWBIE"])
+
+        i = 0
+
+        for stranger in strangers:
+            await stranger.add_roles(family, newbie)
+            i += 1
+
+        await ctx.send(f"Found {i} strangers and gave them their roles")
+
+
 def setup(bot):
     bot.add_cog(Isaiah(bot))
