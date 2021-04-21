@@ -50,6 +50,7 @@ class EventHandling(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         if before.embeds: return
+        if not before.guild:return
         embed = discord.Embed(
             description=f"{str(before.author)} made an edit to a message in {after.channel.name}",
             title="A message has been edited.",
@@ -181,8 +182,12 @@ class EventHandling(commands.Cog):
         # raw_react_channel_ids will link the id of the channel to a name
         # This name when put in of reactions, will link it to it's respective dictionaries of reactions
         # This innermost dict will match the stringified emoji to role name, and then assign. Simple :D
+        
         try:
-            role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
+            if payload.channel_id == 831265040434331649:
+                role = discord.utils.get(guild.roles, id=reactions[raw_react_channel_ids[831265040434331649]][str(payload.emoji)])
+            else:
+                role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
         except Exception as err:
             await bot_channel.send(err)
             return
@@ -196,14 +201,10 @@ class EventHandling(commands.Cog):
                 notif_channel = member.guild.get_channel(channels["VERIFY"])
                 partial_message = PartialMessage(channel=notif_channel, id=payload.message_id)
                 legit = await self.handle_pending(member)
-                if legit == 0:
+                if not legit:
                     msg = f"{member.mention}, You have not selected your cape or csec role and therefore cannot be verified"
                     await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again", delete_after=10)
                     await partial_message.remove_reaction(payload.emoji, member)
-                elif legit == 1:
-                    msg = f"{member.mention}, You have not selected any subject roles as of yet. Please go to your csec/cape subject-select and do so now."
-                    await partial_message.remove_reaction(payload.emoji, member)
-                    await notif_channel.send(f"{msg}")
                 else:
                     await member.remove_roles(role)
                     family_role = member.guild.get_role(all_roles["FAMILY"])
@@ -230,10 +231,8 @@ class EventHandling(commands.Cog):
         cape_role = discord.utils.get(member.guild.roles, id=all_roles["CAPE"])    
         
         if not cape_role in member.roles and csec_role not in member.roles:
-            return 0
+            return False
         
-        if len(member.roles) <= 4:
-            return 1
         return True
 
 def setup(bot):
