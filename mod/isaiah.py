@@ -385,5 +385,16 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             topic = letters + " class now"
             await channel.edit(topic=topic.upper())
 
+    @commands.command()
+    @commands.is_owner()
+    async def fix_channel_names(self, ctx, cid:int):
+        category = ctx.guild.get_channel(cid)
+        from re import compile
+        exp = compile(r"[A-Za-z]+")
+        for channel in category.channels:
+            letters = ' '.join(exp.findall(channel.name))
+            new_name = f"{letters} streamroom"
+            await channel.edit(name=new_name)
+
 def setup(bot):
     bot.add_cog(Isaiah(bot))

@@ -257,7 +257,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         await self.handle_new_user(member, channel, perso_channel)
 
     async def handle_new_user(self, member, channel, perso_channel):
-        await channel.send(f"Hello there {member.mention}. First, watch the below video, then answer my questions:  https://youtu.be/9B1-1Wgi9lw.")
+        await channel.send(f"Hello there {member.mention}. First, watch the below video, then answer my questions: https://youtu.be/vzETbx22UeE.")
         
         await asyncio.sleep(2)
         try:
