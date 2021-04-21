@@ -154,7 +154,7 @@ reactions = {
         "🕙": "decuplet",
         "👪": "vigintet"
     },
-    "VERIFY": {"✅": "Pending Member"}
+    "VERIFY": {"✅": "Unverified Students"}
 }
 
 country_dict = {
