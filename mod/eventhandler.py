@@ -1,3 +1,4 @@
+from discord import utils
 from discord.errors import HTTPException
 from discord.message import PartialMessage
 from mydicts import *
@@ -136,6 +137,18 @@ class EventHandling(commands.Cog):
 
         await messagelist[0].guild.get_channel(channels["BULK_DELETES"]).send(embed=embed)
     
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot: return
+        if message.channel.id == 834839533978779718:
+            try:
+                await message.author.edit(nick=message.content)
+                stage_0 = message.guild.get_role(834837579433115709)
+                stage_1 = message.guild.get_role(785341063984316476)
+                await message.author.remove_roles(stage_0)
+                await message.author.add_roles(stage_1)
+            except:
+                await message.channel.send("Your name was too long. Try telling me a shortened version?")
 
 
     @commands.Cog.listener()
@@ -166,56 +179,87 @@ class EventHandling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if payload.channel_id in list(raw_react_channel_ids.keys()):
+        if payload.channel_id in list(register_channels.keys()):
             await self.handle_reaction(payload)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if payload.channel_id in list(raw_react_channel_ids.keys()):
+        if payload.channel_id in list(register_channels.keys()):
             await self.handle_reaction(payload)
 
     async def handle_reaction(self, payload):
         guild = discord.utils.get(self.bot.guilds, id=payload.guild_id)
+        me = guild.get_member(493839592835907594)
         member = payload.member or discord.utils.get(guild.members, id=payload.user_id)
+        if member.bot:return
         bot_channel = guild.get_channel(channels["BOT_ROOM"])
+        partial_channel = member.guild.get_channel(payload.channel_id)
+        partial_message = PartialMessage(channel=partial_channel, id=payload.message_id)
+
         # So this will get a bit confusing... even for me, so let's take this slow
-        # raw_react_channel_ids will link the id of the channel to a name
+        # register_channels will link the id of the channel to a name
         # This name when put in of reactions, will link it to it's respective dictionaries of reactions
         # This innermost dict will match the stringified emoji to role name, and then assign. Simple :D
-        
-        try:
-            if payload.channel_id == 831265040434331649:
-                role = discord.utils.get(guild.roles, id=reactions[raw_react_channel_ids[831265040434331649]][str(payload.emoji)])
-            else:
-                role = discord.utils.get(guild.roles, name=reactions[raw_react_channel_ids[payload.channel_id]][str(payload.emoji)])
-        except Exception as err:
-            await bot_channel.send(err)
-            return
 
-        if not role:
-            await bot_channel.send(f"ERROR: Could not get role matching emoji {payload.emoji}.")
-            return
+        if str(payload.emoji) != "✅":
+    
+            try:
+                role_value = reactions[register_channels[payload.channel_id]][str(payload.emoji)]
+            except KeyError as err:
+                await bot_channel.send(err)
+                await partial_message.remove_reaction(payload.emoji, member)
+                await me.send(err)
+                return
+
+            role = utils.get(guild.roles, name=role_value)
+
+            if not role:
+                await bot_channel.send(f"ERROR: Could not get role matching emoji {payload.emoji} in {register_channels[payload.channel_id]}")
+                await me.send(f"ERROR: Could not get role matching emoji {payload.emoji} in {register_channels[payload.channel_id]}")
+                await partial_message.remove_reaction(payload.emoji, member)
+                return
+        else:
+            role = None
             
         if payload.event_type == "REACTION_ADD":
-            if role.id == 830907979301388368:
-                notif_channel = member.guild.get_channel(channels["VERIFY"])
-                partial_message = PartialMessage(channel=notif_channel, id=payload.message_id)
-                legit = await self.handle_pending(member)
-                if not legit:
-                    msg = f"{member.mention}, You have not selected your cape or csec role and therefore cannot be verified"
-                    await notif_channel.send(f"{msg}. Go to {member.guild.get_channel(channels['PROFICIENCY']).mention} and select your cape/csec role, then come and press the check mark here again", delete_after=10)
-                    await partial_message.remove_reaction(payload.emoji, member)
+            if str(payload.emoji) == "✅":
+                family_role = guild.get_role(all_roles["FAMILY"])
+                if family_role in member.roles:
+                    return
+                to_remove = guild.get_role(register_channels_to_progression_roles[payload.channel_id])
+                value = progression_roles[to_remove.id]
+                
+                if [x for x in member.roles if x.name in list(reactions[register_channels[payload.channel_id]].values())] or payload.channel_id == channels["VERIFY"]:
+
+                    if payload.channel_id == channels["PROFICIENCY"]:
+                        value = [proficiency_to_stage[x.id] for x in member.roles if x.name.lower() in ["cape", "csec"]]
+                        if len(value) == 1:
+                            value = value[0]
+                
+                    await member.remove_roles(to_remove)
+
+                    if isinstance(value, list):
+                        roles = [guild.get_role(tag) for tag in value]
+                        await member.add_roles(*roles)
+                        if to_remove.id == all_roles["PENDING_MEMBER"]:
+                            msg = f"{member.name} is now verified"
+                        else:
+                            msg = f"has received both Proficiency roles"
+                    else:
+                        role = guild.get_role(value)
+                        await member.add_roles(role)
+                        msg = f"Has just received the {role.name} role."
+                
                 else:
-                    await member.remove_roles(role)
-                    family_role = member.guild.get_role(all_roles["FAMILY"])
-                    newbie_role = member.guild.get_role(all_roles["NEWBIE"])
-                    await member.add_roles(family_role, newbie_role)
-                    msg = "Excellent, you're now an official member :D"
+                    await partial_message.remove_reaction(payload.emoji, member)
+                    await partial_channel.send(f"{member.mention}, you have not selected any of the provided roles", delete_after=5)
+                    return
+                
             else:
                 await member.add_roles(role)
                 msg = f"There you go, {role.name} is now yours."
         else:
-            if role.id == 830907979301388368:
+            if not role:
                 return
             await member.remove_roles(role)
             msg = f"I have removed {role.name} from you."
@@ -225,15 +269,6 @@ class EventHandling(commands.Cog):
             await bot_channel.send(f"Notice: {member.name}: {msg}")
         except HTTPException:
             await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
-
-    async def handle_pending(self, member):
-        csec_role = discord.utils.get(member.guild.roles, id=all_roles["CSEC"])        
-        cape_role = discord.utils.get(member.guild.roles, id=all_roles["CAPE"])    
-        
-        if not cape_role in member.roles and csec_role not in member.roles:
-            return False
-        
-        return True
 
 def setup(bot):
     bot.add_cog(EventHandling(bot))

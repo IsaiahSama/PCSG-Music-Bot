@@ -1,11 +1,10 @@
-from typing import Awaitable
 import discord
-from discord.ext import commands, tasks
-import asyncio
+from discord import utils
+from discord.ext import commands
 import random, re
 
 from discord.permissions import PermissionOverwrite
-from mydicts import all_roles
+from mydicts import *
 
 class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -317,12 +316,11 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def send_msg(self, ctx, msg):
+    async def send_veri_msg(self, ctx, *, msg):
         await ctx.message.delete()
-        msg = await ctx.send("🕑: Duo\n🕒:Trio\n🕓:Quartet\n🕔: Quintet\nPress the emoji below that matches your preferred study group size.")
-        emojis = ["🕑","🕒","🕓", "🕔"]
-        for emoji in emojis:
-            await msg.add_reaction(emoji)
+        message = await ctx.send(msg)
+    
+        await message.add_reaction("✅")
 
     @commands.command()
     @commands.is_owner()
@@ -413,6 +411,32 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             i += 1
 
         await ctx.send(f"Found {i} strangers and gave them their roles")
+
+    @commands.command()
+    @commands.is_owner()
+    async def set_up_new_perms(self, ctx):
+        roles = [utils.get(ctx.guild.roles, id=k) for k in list(progression_role_ids.keys())]
+
+        for channel in ctx.guild.channels:
+            overwrites = channel.overwrites
+            for role in roles:
+                overwrites[role] = PermissionOverwrite(view_channel=False, send_messages=False)
+            
+            await channel.edit(overwrites=overwrites)
+
+        await ctx.send("Completed")
+
+    @commands.command()
+    @commands.is_owner()
+    async def transition(self, ctx):
+        pending_role = utils.get(ctx.guild.roles, id=all_roles["PENDING_MEMBER"])
+        stage_0 = utils.get(ctx.guild.roles, id=all_roles["STAGE_0"])
+
+        unverified = [member for member in ctx.guild.members if pending_role in member.roles]
+        for person in unverified:
+            await person.edit(roles=[stage_0])
+
+        await ctx.send("DONE")
 
 
 def setup(bot):

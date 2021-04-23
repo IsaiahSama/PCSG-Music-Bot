@@ -15,7 +15,49 @@ all_roles = {
     "EXPERIENCED": 762192810924441610,
     "ADVANCED": 762870198481977375,
     "ELITIST": 762193027979542581,
-    "MUTED": 701972373053636649
+    "MUTED": 701972373053636649,
+    "STAGE_0": 834837579433115709,
+    "STAGE_1": 785341063984316476, 
+    "STAGE_2": 834837741937098823,
+    "STAGE_3": 834838252670025769,
+    "STAGE_4_CSEC": 834838264581587055,
+    "STAGE_4_CAPE": 834838268150415370
+}
+
+register_channels = {
+    700174264782815232: "COUNTRIES",
+    762068609278410752: "GROUPS",
+    762068938686595152: "PROFICIENCY",
+    718473529452003329: "CAPE",
+    755875615587958814: "CSEC",
+    831265040434331649: "VERIFY"
+}
+
+progression_role_ids = {
+    785341063984316476: "Stage 1",
+    834837741937098823: "Stage 2",
+    834838252670025769: "Stage 3",
+    834838268150415370: "Stage 4 CAPE",
+    834838264581587055: "Stage 4 CSEC",
+    830907979301388368: "Unverified Student"
+}
+
+proficiency_to_stage = {
+    764214191782756392: 834838268150415370,
+    764214207192760401: 834838264581587055
+}
+
+# Links the respective registration channel to the role needed to view it
+register_channels_to_progression_roles = dict(zip(list(register_channels.keys()), list(progression_role_ids.keys())))
+
+progression_roles = {
+    834837579433115709: 785341063984316476,
+    785341063984316476: 834837741937098823,
+    834837741937098823: 834838252670025769,
+    834838252670025769: 0,
+    834838268150415370: 830907979301388368,
+    834838264581587055: 830907979301388368,
+    830907979301388368: [755633133600112651, 762190942316134400]
 }
 
 group_roles = {
@@ -55,22 +97,11 @@ channels = {
     "INTRO_VIDEO": 832043773973364747
 }
 
-
-# Dictionary linking channel ids to names
-raw_react_channel_ids = {
-    762068938686595152: "PROFICIENCY",
-    755875615587958814: "CSEC",
-    718473529452003329: "CAPE",
-    762068609278410752: "GROUPS",
-    831265040434331649: "VERIFY"
-}
-
 # Dictionary containing all emojis and their links to their roles.
 reactions = {
     "PROFICIENCY": {
         "📘": "csec",
         "📖": "cape",
-        "✅": "Confirm",
         },
     "CSEC": {
         "📈":"csec add maths",
@@ -106,7 +137,7 @@ reactions = {
         "🇪":"csec spanish",
         "✏":"csec technical drawing",
         "🎭":"csec theatre arts",
-        "🎨":"csec visual arts"
+        "🎨":"csec visual arts",
     },
     "CAPE": {
         "💲":"cape accounting",
@@ -144,17 +175,34 @@ reactions = {
         "📐":"cape pure maths",
         "🗿":"cape sociology",
         "🇻":"cape spanish",
-        "🏖":"cape tourism"
+        "🏖":"cape tourism",
     },
     "GROUPS": {
         "🕑": "duo",
         "🕒": "trio",
         "🕓": "quartet",
         "🕔": "qunitet",
-        "🕙": "decuplet",
-        "👪": "vigintet"
     },
-    "VERIFY": {"✅": all_roles["PENDING_MEMBER"]}
+    "COUNTRIES": {
+        "\U0001f1f2\U0001f1f8" : "Montserrat",
+        "\U0001f1e6\U0001f1ec" : "Antigua and Barbuda",
+        "\U0001f1e7\U0001f1f8": "Bahamas",
+        "\U0001f1e7\U0001f1ff" : "Belize",
+        "\U0001f1e9\U0001f1f2" : "Dominica",
+        "\U0001f1ec\U0001f1e9" : "Grenada",
+        "\U0001f1ec\U0001f1fe" : "Guyana",
+        "\U0001f1ed\U0001f1f9" : "Haiti",
+        "\U0001f1f1\U0001f1e8" : "St.Lucia",
+        "\U0001f1f0\U0001f1f3" : "St.Kitts and Nevis",
+        "\U0001f1f8\U0001f1f7" : "Suriname",
+        "\U0001f1ef\U0001f1f2" : "Jamaica",
+        "\U0001f1f9\U0001f1f9" : "Trinidad and Tobago",
+        "\U0001f1e7\U0001f1e7" : "Barbados",
+        "\U0001f1fb\U0001f1e8" : "St.Vincent and the Grenadines",
+    },
+    "VERIFY": {
+        "✅": [all_roles["FAMILY"], all_roles["NEWBIE"]]
+        }
 }
 
 country_dict = {
