@@ -181,7 +181,7 @@ reactions = {
         "🕑": "duo",
         "🕒": "trio",
         "🕓": "quartet",
-        "🕔": "qunitet",
+        "🕔": "quintet",
     },
     "COUNTRIES": {
         "\U0001f1f2\U0001f1f8" : "Montserrat",
