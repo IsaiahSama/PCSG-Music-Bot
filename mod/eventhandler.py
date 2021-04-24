@@ -142,11 +142,14 @@ class EventHandling(commands.Cog):
         if message.author.bot: return
         if message.channel.id == 834839533978779718:
             try:
-                await message.author.edit(nick=message.content)
+                await message.author.edit(nick=message.content.strip())
                 stage_0 = message.guild.get_role(834837579433115709)
                 stage_1 = message.guild.get_role(785341063984316476)
+                flag_channel = message.guild.get_channel(channels["REP_FLAG"])
+                await message.channel.send(f"Nice to meet you {message.author.display_name}. Next press here: {flag_channel.mention} to move onto the next step")
                 await message.author.remove_roles(stage_0)
                 await message.author.add_roles(stage_1)
+                
             except:
                 await message.channel.send("Your name was too long. Try telling me a shortened version?")
 
@@ -239,6 +242,11 @@ class EventHandling(commands.Cog):
                     await member.remove_roles(to_remove)
 
                     if isinstance(value, list):
+                        if to_remove.id == all_roles["PENDING_MEMBER"]:
+                            if any([x for x in member.roles if "stage" in x.name.lower()]):
+                                await partial_message.remove_reaction(payload.emoji, member)
+                                await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process.")
+                                return
                         roles = [guild.get_role(tag) for tag in value]
                         await member.add_roles(*roles)
                         if to_remove.id == all_roles["PENDING_MEMBER"]:
