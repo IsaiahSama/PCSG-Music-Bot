@@ -237,7 +237,6 @@ Thank You for joining **The Study-Goals' E-School <a:movingstar:8309392505136743
 
 However, joining was only the first step, and to gain **FULL** access to the E-School, the below steps **MUST** be completed
 
-<a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["PERSONALIZE_CHANNEL"]).mention} to get registered with our Bot.
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify the completion of the registration.
 
 **3 MIN Introduction-Tutorial: https://www.youtube.com/watch?v=vzETbx22UeE / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}**
