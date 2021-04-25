@@ -126,7 +126,7 @@ reactions = {
         "📉":"csec maths",
         "⚙":"csec mechanical engineering",
         "🎶":"csec music",
-        "⚽📠":"csec office admin",
+        "📠":"csec office admin",
         "⚽":"csec physical education",
         "🧲":"csec physics",
         "💵":"csec poa",
