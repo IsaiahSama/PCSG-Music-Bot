@@ -239,8 +239,6 @@ However, joining was only the first step, and to gain **FULL** access to the E-S
 
 <a:greentick:830939074712961035> Press here: {member.guild.get_channel(channels["VERIFY"]).mention} to verify the completion of the registration.
 
-**3 MIN Introduction-Tutorial: https://www.youtube.com/watch?v=vzETbx22UeE / {member.guild.get_channel(channels['INTRO_VIDEO']).mention}**
-
 ***<a:blacktick:830938918262013952>CONGRATS, you have ***UNLOCKED*** the FULL STUDY-GOALS E-SCHOOL<a:blacktick:830938918262013952>***
 
 We look forward to studying with you, Newbie E-Schooler! <a:party:830939382944628766>
