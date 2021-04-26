@@ -146,9 +146,9 @@ class EventHandling(commands.Cog):
                 stage_0 = message.guild.get_role(834837579433115709)
                 stage_1 = message.guild.get_role(785341063984316476)
                 flag_channel = message.guild.get_channel(channels["REP_FLAG"])
-                await message.channel.send(f"Nice to meet you {message.author.display_name}. Next press here: {flag_channel.mention} to move onto the next step")
                 await message.author.remove_roles(stage_0)
                 await message.author.add_roles(stage_1)
+                await message.channel.send(f"Nice to meet you {message.author.display_name}. Next press here: {flag_channel.mention} to move onto the next step")
                 
             except:
                 await message.channel.send("Your name was too long. Try telling me a shortened version?")
