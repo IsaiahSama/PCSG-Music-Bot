@@ -1,6 +1,5 @@
-import discord, time, asyncio, aiosqlite, os, json, sqlite3, time
+import discord, time, asyncio, aiosqlite, sqlite3, time
 from discord import utils
-from discord.errors import Forbidden
 from discord.ext.commands.cooldowns import BucketType
 from mydicts import *
 from discord.ext import commands, tasks
@@ -350,30 +349,20 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
     #     return list(set(roles))
 
-    @commands.command(brief="A command used to go through the verification process", help="This is a command that allows an unverified user to take part in the verification process.")
-    async def verify(self, ctx):
-        guild = discord.utils.get(self.bot.guilds, id=guild_id)
-        
-        member = guild.get_member(ctx.author.id)
-        if not member:
-            await member.send("IDK how you did this... but you're not in the PCSG server")
-            return
 
-        pending_role = guild.get_role(all_roles["PENDING_MEMBER"])
-        if pending_role not in member.roles:
-            await member.send("You are already Verified")
-            return 
-        
-        perso_channel = guild.get_channel(channels["PERSONALIZE_CHANNEL"])
-        
-        try:
-            msg = await member.send(f"Hello {member.name}")
-            await perso_channel.send(f"Hey {member.mention}, I've sent you a message in your dms. Check it out so you can get verified")
-            channel = msg.channel
-        except Exception:
-            channel = perso_channel
-        
-        await self.handle_new_user(member, channel, perso_channel)
+    @commands.command(brief="Used to get all members that would have been left alone because of bot being offline", help="Yes")
+    @commands.has_guild_permissions(manage_members=True)
+    async def register(self, ctx):
+        unknown = [member for member in ctx.guild.members if len(member.roles) <= 1]
+
+        stage_0 = ctx.guild.get_role(all_roles["STAGE_0"])
+
+        for person in unknown:
+            await person.add_roles(stage_0)
+
+        channel = ctx.guild.get_channel(834839533978779718)
+
+        await channel.send(f"WELCOME {ctx.guild.default_role.mention}. Please tell me your names")
 
     @commands.command(brief="Moves all members in the user's vc to another one", help="Used to move all members in the same vc as the user to another vc, whose id is specified", usage="name_or_id_of_vc_to_move_to")
     @commands.has_guild_permissions(move_members=True)
