@@ -233,11 +233,11 @@ if path.exists("logs.json"):
         except json.JSONDecodeError:
             pass
 
-async def log(self, modcmd, action, culprit, reason):
+async def log(modcmd, action, culprit, reason):
     """Function used to save logs"""
     mydict = {"Command":modcmd, "Action":action, "Done By":culprit, "Reason": reason, "Time": ctime()}
     
-    self.logs.append(mydict)
+    logs.append(mydict)
 
     with open("logs.json", "w") as f:
-        json.dump(self.logs, f, indent=4)
+        json.dump(logs, f, indent=4)
