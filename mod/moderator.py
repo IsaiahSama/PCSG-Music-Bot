@@ -351,7 +351,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
 
     @commands.command(brief="Used to get all members that would have been left alone because of bot being offline", help="Yes")
-    @commands.has_guild_permissions(manage_members=True)
+    @commands.has_guild_permissions(administrator=True)
     async def register(self, ctx):
         unknown = [member for member in ctx.guild.members if len(member.roles) <= 1]
 
