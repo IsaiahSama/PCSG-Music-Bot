@@ -141,6 +141,9 @@ class EventHandling(commands.Cog):
     async def on_message(self, message):
         if message.author.bot: return
         if message.channel.id == 834839533978779718:
+            stage_0 = message.guild.get_role(all_roles["STAGE_0"])
+
+            if stage_0 not in message.author.roles: return
             try:
                 await message.author.edit(nick=message.content.strip())
                 stage_0 = message.guild.get_role(834837579433115709)
