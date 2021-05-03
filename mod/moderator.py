@@ -21,6 +21,8 @@ class Moderator(commands.Cog):
                 WarnLevel INTEGER NOT NULL
             )""")
 
+            await db.execute("CREATE TABLE IF NOT EXISTS MonitorTable(ID INTEGER PRIMARY KEY UNIQUE NOT NULL)")
+
             await db.commit()
 
         await self.setup()
@@ -299,6 +301,8 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
                 else:
                     await db.execute("REMOVE * FROM MonitorTable WHERE ID == (?)", (member.id, ))
                     await ctx.send(f"Okay. I will no longer monitor {member.name}")
+
+            await db.commit()
 
     async def moderate_message(self, message):
         user = await self.getuser(message)
