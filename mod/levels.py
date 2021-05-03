@@ -136,8 +136,6 @@ class Progression(commands.Cog):
         user = await self.getperson(member)
         self.users.remove(user)
 
-        
-
     # @commands.Cog.listener()
     # async def on_message(self, message):
         

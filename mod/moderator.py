@@ -159,39 +159,12 @@ class Moderator(commands.Cog):
 
         if message.author.bot: return
         
-        user = await self.getuser(message)
-        if not user: return
-
-        for x in ["hentai", "porn"]:
-            if x in message.content.lower():
-                user["WARNLEVEL"] += 1
-                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user['WARNLEVEL']} / 4 strikes")
-                try:
-                    await message.delete()
-                except discord.errors.NotFound:
-                    pass
-        
-        tempmsg = message.content.lower().split(" ")
-        for word in tempmsg:
-            if word in self.profane:
-
-                user['WARNLEVEL'] += 0.5
-                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user['WARNLEVEL']} / 4 strikes")
-                try:
-                    await message.delete()
-                except discord.errors.NotFound:
-                    pass
-                await asyncio.sleep(5)
-                await msg.delete()
-                break
-
-        if user['WARNLEVEL'] >= 4: 
-            await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
-            role = discord.utils.get(message.guild.roles, id=all_roles["MUTED"])
-            await message.author.add_roles(role)
-            await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
-
-        if message.content == "p.": await message.channel.send("Use p.help for a list of my commands.")
+        await self.moderate_message(message)
+        target = await self.is_monitored(message.author)
+        if target:
+            monitor_channel = message.guild.get_channel(channels["MONITOR"])
+            await monitor_channel.send(f"{message.author.mention}: {message.content}")
+            
 
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
@@ -315,23 +288,53 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         for person in ctx.author.voice.channel.members:
             await person.move_to(channel)
 
-    @commands.command(brief="A command used to find all members that have yet to verify", help="Prompts all unverified users to take part in the verification process")
-    @commands.cooldown(1, 3600, BucketType.guild)
-    async def retrack(self, ctx):
-        pending_role = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
-        unverified = [member for member in ctx.guild.members if pending_role in member.roles]
-        if not unverified:
-            await ctx.send("Everyone is verified :D")
-            return 
-        
-        veri_channel = ctx.guild.get_channel(channels["PERSONALIZE_CHANNEL"])
+    @commands.command(brief="Command used to monitor a user", help="To be used to monitor all content the target posts within the server", usage="@user")
+    @commands.has_guild_permissions(manage_channels=True)
+    async def monitor(self, ctx, member:discord.Member):
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            async with db.execute("SELECT * FROM MonitorTable WHERE ID == (?)", (member.id, )) as cursor:
+                if not cursor:
+                    await db.execute("INSERT INTO MonitorTable (ID) VALUES (?)", (member.id, ))
+                    await ctx.send(f"I will now be monitoring {member.name}")
+                else:
+                    await db.execute("REMOVE * FROM MonitorTable WHERE ID == (?)", (member.id, ))
+                    await ctx.send(f"Okay. I will no longer monitor {member.name}")
 
-        for stranger in unverified:
-            try:
-                await stranger.send(f"Hey, {stranger.mention}. You still aren't verified. Aren't you feeling lonely out there? Head into the Study Goals Server, go to #registration, and then simply type `p.verify` to begin the verification process and come join the rest of the school")
-            except Exception:
-                pass
-            await veri_channel.send(f"Hey, {stranger.mention}. You still aren't verified. Aren't you feeling lonely out there? Simply type `p.verify` to begin the verification process and come join the rest of the school")
+    async def moderate_message(self, message):
+        user = await self.getuser(message)
+        if not user: return
+
+        for x in ["hentai", "porn"]:
+            if x in message.content.lower():
+                user["WARNLEVEL"] += 1
+                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user['WARNLEVEL']} / 4 strikes")
+                try:
+                    await message.delete()
+                except discord.errors.NotFound:
+                    pass
+        
+        tempmsg = message.content.lower().split(" ")
+        for word in tempmsg:
+            if word in self.profane:
+
+                user['WARNLEVEL'] += 0.5
+                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user['WARNLEVEL']} / 4 strikes")
+                try:
+                    await message.delete()
+                except discord.errors.NotFound:
+                    pass
+                await asyncio.sleep(5)
+                await msg.delete()
+                break
+
+        if user['WARNLEVEL'] >= 4: 
+            await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
+            role = discord.utils.get(message.guild.roles, id=all_roles["MUTED"])
+            await message.author.add_roles(role)
+            await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
+
+        if message.content == "p.": await message.channel.send("Use p.help for a list of my commands.")
+
 
     # Tasks
     @tasks.loop(seconds=250)
@@ -358,7 +361,13 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
             return toreturn[0]
         return None
 
-
+    async def is_monitored(self, member):
+        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+            async with db.execute("SELECT * FROM MonitorTable WHERE ID == (?)", (member.id, )) as cursor:
+                if cursor:
+                    return True
+                
+        return False
 
 def setup(bot):
     bot.add_cog(Moderator(bot))

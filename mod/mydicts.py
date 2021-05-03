@@ -94,7 +94,7 @@ channels = {
     "MEMBERS_IN_VC_COUNT_CHANNEL": 764427421876748298,
     "BOT_ROOM": 831275896429477980,
     "PROFICIENCY": 762068938686595152,
-    "INTRO_VIDEO": 832043773973364747
+    "MONITOR": 838916745062383616
 }
 
 # Dictionary containing all emojis and their links to their roles.
