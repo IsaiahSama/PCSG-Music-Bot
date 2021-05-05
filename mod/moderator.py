@@ -165,7 +165,7 @@ class Moderator(commands.Cog):
         target = await self.is_monitored(message.author)
         if target:
             monitor_channel = message.guild.get_channel(channels["MONITOR"])
-            await monitor_channel.send(f"{message.author.mention}: {message.content}")
+            await monitor_channel.send(f"{message.author.mention} in {message.channel.mention}: {message.content}")
             
 
     @commands.Cog.listener()
@@ -293,16 +293,18 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
     @commands.command(brief="Command used to monitor a user", help="To be used to monitor all content the target posts within the server", usage="@user")
     @commands.has_guild_permissions(manage_channels=True)
     async def monitor(self, ctx, member:discord.Member):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            async with db.execute("SELECT * FROM MonitorTable WHERE ID == (?)", (member.id, )) as cursor:
-                if not cursor:
-                    await db.execute("INSERT INTO MonitorTable (ID) VALUES (?)", (member.id, ))
-                    await ctx.send(f"I will now be monitoring {member.name}")
-                else:
-                    await db.execute("REMOVE * FROM MonitorTable WHERE ID == (?)", (member.id, ))
-                    await ctx.send(f"Okay. I will no longer monitor {member.name}")
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM MonitorTable WHERE (ID) == (?)", (member.id, ))
+        row = await cursor.fetchone()
+        if not row:
+            await db.execute("INSERT INTO MonitorTable (ID) VALUES (?)", (member.id, ))
+            await ctx.send(f"I will now be monitoring {member.name}")
+        else:
+            await db.execute("DELETE FROM MonitorTable WHERE ID == (?)", (member.id, ))
+            await ctx.send(f"Okay. I will no longer monitor {member.name}")
 
-            await db.commit()
+        await db.commit()
+        await db.close()
 
     async def moderate_message(self, message):
         user = await self.getuser(message)
@@ -366,11 +368,13 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         return None
 
     async def is_monitored(self, member):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            async with db.execute("SELECT * FROM MonitorTable WHERE ID == (?)", (member.id, )) as cursor:
-                if cursor:
-                    return True
-                
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM MonitorTable WHERE (ID) == (?)", (member.id, ))
+        row = await cursor.fetchone()
+
+        await db.close()
+
+        if row: return True
         return False
 
 def setup(bot):
