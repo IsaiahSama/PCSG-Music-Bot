@@ -27,24 +27,17 @@ class Moderator(commands.Cog):
 
         await self.setup()
 
-    users = []
 
     async def setup(self):
         guild = self.bot.get_guild(guild_id)
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for member in guild.members:
-                if member.bot: continue
-                await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)",
-                (member.id, 0))
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        for member in guild.members:
+            if member.bot: continue
+            await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)",
+            (member.id, 0))
 
-            await db.commit()
-
-            async with db.execute("SELECT * FROM WarnUser") as cursor:
-                async for row in cursor:
-                    userdict = {"TAG": row[0], "WARNLEVEL":row[1]}
-                    self.users.append(userdict)
-
-        self.saving.start()
+        await db.commit()
+        await db.close()
 
     # Commands
 
@@ -52,24 +45,26 @@ class Moderator(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def warnstate(self, ctx, member: discord.Member):
         user = await self.getuser(member)
-        await ctx.send(f"{member.name} has {user['WARNLEVEL']}/4 warns")
+        await ctx.send(f"{member.name} has {user[1]}/4 warns")
 
     @commands.command(brief="Applies +1 warn to the user mentioned", help="This can be used to warn a user about something that the bot did not catch. Use with disgression", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
         user = await self.getuser(member)
-        user["WARNLEVEL"] += 1
-        await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user['WARNLEVEL']} / 4")
+        user[1] += 1
+        await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user[1]} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
         await log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
+        await self.update_warns(member.id, user[1])
         
     @commands.command(brief="This resets the warns that a person has back to 0", help="This sets the warns of a user back to 0.", usage="@user")
     @commands.has_permissions(administrator=True)
     async def resetwarn(self, ctx, member: discord.Member):
         user = await self.getuser(member)
-        user['WARNLEVEL'] = 0
+        user[1] = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
         await log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
+        await self.update_warns(member.id, user[1])
 
     @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
@@ -77,13 +72,13 @@ class Moderator(commands.Cog):
         role = discord.utils.get(ctx.guild.roles, id=all_roles["MUTED"])
         await member.add_roles(role)
         await ctx.send(f"{member.mention} has been timed out for {time} minutes for {reason} by {ctx.author.name}")
+        await log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
         time *= 60
 
         await asyncio.sleep(time)
 
         await ctx.send(f"{member.mention}. Your timeout has come to an end. Refrain from having to be timed out again")
         await member.remove_roles(role)
-        await log("Timeout", f"{str(member)} was timed-out for {time} seconds", str(ctx.author), reason)
 
     @commands.command(brief="Mutes a user until unmuted", help="Mutes a user until unmuted", usage="@user duration_in_seconds")
     @commands.has_permissions(administrator=True)
@@ -127,23 +122,38 @@ class Moderator(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def warned(self, ctx):
         warned = []
-        for user in self.users:
-            temp = discord.utils.get(ctx.guild.members, id=user['TAG'])
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM WarnUser")
+        users = await cursor.fetchall()
+        for user in users:
+            temp = discord.utils.get(ctx.guild.members, id=user[0])
             if not temp: continue
-            if user['WARNLEVEL'] > 0: warned.append(f"Name: {temp.name}, Warns: {user['WARNLEVEL']}")
+            if user[1] > 0: warned.append(f"Name: {temp.name}, Warns: {user[1]}")
+        
+        await db.close()
 
         if not warned: await ctx.send("Everyone seems to be innocent. Excellent"); return
+        warned.sort()
         await ctx.send("Showing 10 members with highest warns")
         await ctx.send('\n'.join(warned[:10]))
 
     @commands.command(brief="Resets the warnstate of EVERYONE in the server", help="Clears the warnstate of everyone in the server")
     @commands.has_permissions(administrator=True)
     async def warnreset(self, ctx):
-        for user in self.users:
-            user['WARNLEVEL'] = 0
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM WarnUser WHERE WarnLevel > 0")
+        warned = await cursor.fetchall()
+        if not warned:
+            await ctx.send("Everyone is clean")
+            return
 
+        for person in warned:
+            await db.execute("UPDATE WarnUser SET WarnLevel = 0 where (ID) == ?", (person[0],))
+        await db.commit()
+        await db.close()
         await ctx.send("Cleared everyone's crimes")
-        await log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="Unknown")
+        await log("Warn Reset", "Everyone had their crimes cleared", str(ctx.author), reason="For purity.")
+
 
     @commands.command(brief="Deletes x amount of messages", help="Used to bulk delete messages")
     @commands.has_permissions(administrator=True)
@@ -171,14 +181,14 @@ class Moderator(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
         if member.bot: return
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", (member.id, 0))
-
-            await db.commit()
-
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        await db.execute("INSERT OR IGNORE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", (member.id, 0))
+        await db.commit()
+        await db.close()
+        
         user = await self.getuser(member)
         if user:
-            if user['WARNLEVEL'] >= 4:
+            if user[1] >= 4:
                 role = discord.utils.get(member.guild.roles, id=all_roles["MUTED"])
                 await member.add_roles(role)
                 try:
@@ -196,9 +206,7 @@ class Moderator(commands.Cog):
         embed.add_field(name="Joined at", value=time.ctime())
         await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
 
-        stage_0 = member.guild.get_role(834837579433115709)
-
-        await member.add_roles(stage_0)
+        await member.add_roles(member.guild.get_role(all_roles["STAGE_0"]))
 
         human_count = sum(not human.bot for human in member.guild.members)
 
@@ -297,11 +305,11 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         cursor = await db.execute("SELECT * FROM MonitorTable WHERE (ID) == (?)", (member.id, ))
         row = await cursor.fetchone()
         if not row:
-            await db.execute("INSERT INTO MonitorTable (ID) VALUES (?)", (member.id, ))
             await ctx.send(f"I will now be monitoring {member.name}")
+            await db.execute("INSERT INTO MonitorTable (ID) VALUES (?)", (member.id, ))
         else:
-            await db.execute("DELETE FROM MonitorTable WHERE ID == (?)", (member.id, ))
             await ctx.send(f"Okay. I will no longer monitor {member.name}")
+            await db.execute("DELETE FROM MonitorTable WHERE ID == (?)", (member.id, ))
 
         await db.commit()
         await db.close()
@@ -312,8 +320,8 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
         for x in ["hentai", "porn"]:
             if x in message.content.lower():
-                user["WARNLEVEL"] += 1
-                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user['WARNLEVEL']} / 4 strikes")
+                user[1] += 1
+                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user[1]} / 4 strikes")
                 try:
                     await message.delete()
                 except discord.errors.NotFound:
@@ -323,8 +331,8 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         for word in tempmsg:
             if word in self.profane:
 
-                user['WARNLEVEL'] += 0.5
-                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user['WARNLEVEL']} / 4 strikes")
+                user[1] += 0.5
+                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user[1]} / 4 strikes")
                 try:
                     await message.delete()
                 except discord.errors.NotFound:
@@ -333,7 +341,12 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
                 await msg.delete()
                 break
 
-        if user['WARNLEVEL'] >= 4: 
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (user[1], user[0]))
+        await db.commit()
+        await db.close()
+
+        if user[1] >= 4: 
             await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
             role = discord.utils.get(message.guild.roles, id=all_roles["MUTED"])
             await message.author.add_roles(role)
@@ -342,30 +355,44 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         if message.content == "p.": await message.channel.send("Use p.help for a list of my commands.")
 
 
-    # Tasks
-    @tasks.loop(seconds=250)
-    async def saving(self):
-        try:
-            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-                for user in self.users:
-                    await db.execute("INSERT OR REPLACE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", 
-                    (user['TAG'], user['WARNLEVEL']))
-                await db.commit()
-        except sqlite3.OperationalError:
-            print("Database is in use.")
-            await asyncio.sleep(120)
-            self.saving.restart()
+    # # Tasks
+    # @tasks.loop(seconds=250)
+    # async def saving(self):
+    #     try:
+    #         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
+    #             for user in self.users:
+    #                 await db.execute("INSERT OR REPLACE INTO WarnUser (ID, WarnLevel) VALUES (?, ?)", 
+    #                 (user[0], user[1]))
+    #             await db.commit()
+    #     except sqlite3.OperationalError:
+    #         print("Database is in use.")
+    #         await asyncio.sleep(120)
+    #         self.saving.restart()
         
 
     # Functions
     async def getuser(self, m):
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
         if hasattr(m, "author"):
-            toreturn = [x for x in self.users if m.author.id == x['TAG']]
+            tag = m.author.id
         else:
-            toreturn = [x for x in self.users if m.id == x['TAG']]
-        if toreturn:
-            return toreturn[0]
+            tag = m.id
+
+        cursor = await db.execute("SELECT * FROM WarnUser WHERE (ID) == ?", (tag, ))
+
+        row = await cursor.fetchone()
+
+        await db.close()
+
+        if row:
+            return list(row)
         return None
+
+    async def update_warns(self, tag, warns):
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (warns, tag))
+        await db.commit()
+        await db.close()
 
     async def is_monitored(self, member):
         db = await aiosqlite.connect("PCSGDB.sqlite3")
