@@ -317,6 +317,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
     async def moderate_message(self, message):
         user = await self.getuser(message)
         if not user: return
+        original = user[1]
 
         for x in ["hentai", "porn"]:
             if x in message.content.lower():
@@ -340,11 +341,12 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
                 await asyncio.sleep(5)
                 await msg.delete()
                 break
-
-        db = await aiosqlite.connect("PCSGDB.sqlite3")
-        await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (user[1], user[0]))
-        await db.commit()
-        await db.close()
+        
+        if original != user[1]:
+            db = await aiosqlite.connect("PCSGDB.sqlite3")
+            await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (user[1], user[0]))
+            await db.commit()
+            await db.close()
 
         if user[1] >= 4: 
             await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")

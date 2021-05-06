@@ -1,31 +1,38 @@
 import discord
-from discord.ext import commands, tasks
-import random
+from discord import user
+from discord.errors import HTTPException
+from discord.ext import commands
 from random import randint
-import asyncio, aiosqlite, sqlite3
-from mydicts import all_roles
+import aiosqlite
+from mydicts import *
 
 
 class Person:
     def __init__(self, tag, level, exp, expthresh):
-        self.tag = tag
-        self.level = level
-        self.exp = exp
-        self.expthresh = expthresh
+        self[columns['ID']] = tag
+        self[columns['LEVEL']] = level
+        self[columns['EXP']] = exp
+        self[columns['EXPTHRESH']] = expthresh
 
     def incexp(self):
-        self.exp += 5
+        self[columns['EXP']] += 5
 
     def levelup(self):
-        self.exp = 0
-        self.expthresh += 50
-        self.level += 1
+        self[columns['EXP']] = 0
+        self[columns['EXPTHRESH']] += 50
+        self[columns['LEVEL']] += 1
 
     def didrole(self):
-        if self.level > 1 and self.level % 20 == 0:
+        if self[columns['LEVEL']] > 1 and self[columns['LEVEL']] % 20 == 0:
             return True
         return False
 
+columns = {
+    "ID": 0,
+    "LEVEL": 1,
+    "EXP": 2,
+    "EXPTHRESH":3
+}
 
 class Progression(commands.Cog):
     """Competition is good :) and these commands will let you know all that's going on competitively. Strive to be #1"""
@@ -33,14 +40,13 @@ class Progression(commands.Cog):
         self.bot = bot
         bot.loop.create_task(self.async_init())
 
-    users = []
     roles = ["SEASONED", "EXPERIENCED", "ADVANCED", "ELITIST"]
 
     # Set up
     async def async_init(self):
         await self.bot.wait_until_ready()
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS Users (
+            await db.execute("""CREATE TABLE IF NOT EXISTS StudentTable (
                 ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
                 Level INTEGER NOT NULL,
                 Exp INTEGER NOT NULL,
@@ -49,61 +55,67 @@ class Progression(commands.Cog):
 
             await db.commit()
         await self.setup()
-        self.saving.start()
 
     async def setup(self):
-        guild = self.bot.get_guild(693608235835326464)
+        guild = self.bot.get_guild(guild_id)
 
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             for member in guild.members:
                 if member.bot: continue
-                await db.execute("INSERT OR IGNORE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+                await db.execute("INSERT OR IGNORE INTO StudentTable (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
                 (member.id, 0, 0, 50))
 
             await db.commit()
 
-            async with db.execute("SELECT * FROM Users") as cursor:
-                async for row in cursor:
-                    x = Person(row[0], row[1], row[2], row[3])
-                    self.users.append(x)
-
-                print("All users have been added")
-
     # Commands
 
-    @commands.command(brief="Used to view your profile.", help="Shows your levels and highest role")
-    async def profile(self, ctx):
-        person = await self.getperson(ctx)
+    @commands.command(brief="Shows your PCSG Student Profile", help="Used to view a PCSG Student Profile, either yours or the person you @mention", usage="optional[@mention]")
+    async def profile(self, ctx, member:discord.Member=None):
+        student = member or ctx.author
+        person = await self.getuser(student)
+
         if not person:
             return
 
-        probed = discord.Embed(
-            title=f"Showing Profile for {ctx.author}",
+        user_subjects = [ctx.guild.get_role(role.id).mention for role in student.roles if role.name.lower() in list(reactions["CSEC"].values()) or role.name.lower() in list(reactions["CAPE"].values())]
+
+        embed = discord.Embed(
+            title=f"Showing Profile for {student}",
             color=randint(0, 0xffffff)
         )
 
-        probed.set_thumbnail(url=ctx.author.avatar_url)
-        probed.add_field(name="Name:", value=ctx.author.name)
-        probed.add_field(name="Level:", value=person.level)
-        probed.add_field(name="Exp:", value=f"{person.exp}/{person.expthresh}")
-        probed.add_field(name="Highest Role:", value=ctx.author.top_role)
+        embed.set_thumbnail(url=student.avatar_url)
+        embed.add_field(name="Name:", value=student.name)
+        embed.add_field(name="Level:", value=person[columns['LEVEL']])
+        embed.add_field(name="Exp:", value=f"{person[columns['EXP']]}/{person[columns['EXPTHRESH']]}")
+        embed.add_field(name="Highest Role:", value=student.top_role)
+        embed.add_field(name="Subjects:", value=''.join(user_subjects[:25]) or "No subjects")
 
-        await ctx.send(embed=probed)
+        await ctx.send(embed=embed)
 
     @commands.command(brief="Shows your rank", help="Shows your rank in terms of leveling with your fellow students")
-    async def rank(self, ctx):
-        person = await self.getperson(ctx)
-        x = self.users
-        x = sorted(x, key= lambda item: (item.level, item.exp), reverse=True)
+    async def rank(self, ctx, member:discord.Member=None):
+        student = member or ctx.author
+        person = await self.getuser(student)
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM StudentTable")
+        rows = await cursor.fetchall()
+        await db.close()
+        rows.append(person)
+        rows = sorted(rows, key= lambda x: (x[columns['LEVEL']], x[columns['EXP']]), reverse=True)
 
-        rk = x.index(person)
-        await ctx.send(f"You are ranked {rk + 1} of {len(x)} members")
+        rank = rows.index(person)
+        await ctx.send(f"{student.display_name} is ranked {rank} of {len(rows)} members")
 
 
     @commands.command(brief="Shows top 5 studious learners", help="Used to see the top 5 most active users")
     async def top(self, ctx):
-        x = self.users
-        x = sorted(x, key= lambda item: (item.level, item.exp), reverse=True)
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM StudentTable")
+        students = await cursor.fetchall()
+        await db.close()
+        
+        students = sorted(students, key= lambda x: (x[columns['LEVEL']], x[columns['EXP']]), reverse=True)
 
         embed = discord.Embed(
             title=f"Showing top 5 Studious Learners",
@@ -111,9 +123,9 @@ class Progression(commands.Cog):
         )
 
         embed.set_thumbnail(url=ctx.guild.icon_url)
-        for u in x[:5]:
-            name = ctx.guild.get_member(u.tag).name
-            embed.add_field(name=name, value=f"Level: {u.level} Exp: {u.exp}", inline=False)
+        for student in students[:5]:
+            name = ctx.guild.get_member(student[columns['ID']]).name
+            embed.add_field(name=name, value=f"Level: {student[columns['LEVEL']]} Exp: {student[columns['EXP']]}", inline=False)
 
         await ctx.send(embed=embed)
     # Listeners
@@ -121,42 +133,37 @@ class Progression(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("INSERT OR IGNORE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
+            await db.execute("INSERT OR IGNORE INTO StudentTable (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
             (member.id, 0, 0, 50))
-
-        self.users.append(Person(member.id, 0, 0, 50))
 
     @commands.Cog.listener()
     async def on_memeber_remove(self, member:discord.Member):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            await db.execute("DELETE FROM Users WHERE ID = ?", (member.id,))
+            await db.execute("DELETE FROM StudentTable WHERE ID = ?", (member.id,))
 
             await db.commit()
 
-        user = await self.getperson(member)
-        self.users.remove(user)
-
-    # @commands.Cog.listener()
-    # async def on_message(self, message):
+    @commands.Cog.listener()
+    async def on_message(self, message):
         
-    #     if message.author.bot: return
+        if message.author.bot: return
 
-    #     person = await self.getperson(message)
+    #     person = await self.getuser(message)
     #     if not person:
     #         return
 
     #     person.incexp()
-    #     if person.exp >= person.expthresh:
-    #         person.levelup()
+    #     if person[columns['EXP']] >= person[columns['EXPTHRESH']]:
+    #         # level up here
 
     #         embed = discord.Embed(
     #             title="LEVEL UP",
-    #             description=f"{message.author.mention} has reached level {person.level}. Keep Studying hard",
+    #             description=f"{message.author.mention} has reached level {person[columns['LEVEL']]}. Keep Studying hard",
     #             color=randint(0, 0xffffff)
     #         )
     #         if person.didrole():
-    #             role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person.level // 20) - 1]])
-    #             if person.level // 20 >= len(self.roles):
+    #             role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person[columns['LEVEL']] // 20) - 1]])
+    #             if person[columns['LEVEL']] // 20 >= len(self.roles):
     #                 return
     #             await message.author.add_roles(role_to_give)
 
@@ -164,53 +171,19 @@ class Progression(commands.Cog):
 
     #         await message.channel.send(embed=embed)
     
-    # Tasks    
-    @tasks.loop(minutes=5)
-    async def saving(self):
-        try:
-            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-                for member in self.users:
-                    await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
-                    (member.tag, member.level, member.exp, member.expthresh))
-
-                await db.commit()
-
-        except sqlite3.OperationalError:
-            print("Database is in use.")
-            await asyncio.sleep(120)
-            self.saving.restart()
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def savelevel(self, ctx):
-        async with aiosqlite.connect("PCSGDB.sqlite3") as db:
-            for member in self.users:
-                await db.execute("INSERT OR REPLACE INTO Users (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
-                (member.tag, member.level, member.exp, member.expthresh))
-
-            await db.commit()
-
-        await ctx.send("SAVED")
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def givelevel(self, ctx, member:discord.Member, amount:int):
-        user = await self.getperson(member)
-        user.level += amount
-        await ctx.send("Successful")
-
-        # pass
-
     # Functions
-    async def getperson(self, m):
-        if hasattr(m, "author"):
-            toreturn = [x for x in self.users if m.author.id == x.tag]
-        else:
-            toreturn = [x for x in self.users if m.id == x.tag]
-        if toreturn:
-            return toreturn[0]
-        return None
+    async def getuser(self, m):
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
 
+        cursor = await db.execute("SELECT * FROM StudentTable WHERE (ID) == ?", (m.id, ))
+
+        row = await cursor.fetchone()
+
+        await db.close()
+
+        if row:
+            return list(row)
+        return None
 
 
 def setup(bot):
