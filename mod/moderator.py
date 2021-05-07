@@ -227,12 +227,9 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
     @commands.command(brief="Used to get all members that would have been left alone because of bot being offline", help="Yes")
     @commands.has_guild_permissions(administrator=True)
     async def register(self, ctx):
-        unknown = [member for member in ctx.guild.members if len(member.roles) <= 1]
-
         stage_0 = ctx.guild.get_role(all_roles["STAGE_0"])
 
-        for person in unknown:
-            await person.add_roles(stage_0)
+        await ctx.author.edit(roles=[stage_0])
 
         channel = ctx.guild.get_channel(834839533978779718)
 
