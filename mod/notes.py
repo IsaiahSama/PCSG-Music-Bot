@@ -82,7 +82,7 @@ class Notes(commands.Cog):
         if not to_send: await ctx.send("No notes exist as yet. Make one with p.takenote. Use p.note for an example"); return
         
         to_send = list(set(to_send))
-        await ctx.send(f"**__{', '.join(to_send)}__**")
+        await ctx.send('\n'.join(to_send))
 
     @commands.command(brief="Shows the titles of all notes created by you", help="Used to view a list of notes created by you or the person you mentioned.", usage="optional[@mention]")
     async def notesby(self, ctx, member:discord.Member=None):
@@ -98,7 +98,7 @@ class Notes(commands.Cog):
         if not to_send: await ctx.send("I didn't seem to be able to find any notes created by you. Make some with p.takenote"); return
         
         to_send = list(set(to_send))
-        await ctx.send(f"**__{'\n'.join(to_send)}__**")
+        await ctx.send('\n'.join(to_send))
 
 
     @commands.command(brief="Used to view a note", usage="[title of note or ID of note]", help="Use this to read a note created by you, or one of your fellow students here in the PCSG server.")
