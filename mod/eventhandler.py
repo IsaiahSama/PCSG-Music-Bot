@@ -212,10 +212,11 @@ class EventHandling(commands.Cog):
             try:
                 role_value = reactions[register_channels[payload.channel_id]][str(payload.emoji)]
             except KeyError as err:
-                await bot_channel.send(err)
-                await partial_message.remove_reaction(payload.emoji, member)
-                await me.send(err)
-                return
+                if payload.event_type == "REACTION_ADD":
+                    await bot_channel.send(err)
+                    await partial_message.remove_reaction(payload.emoji, member)
+                    await me.send(err)
+                    return
 
             role = utils.get(guild.roles, name=role_value)
 
