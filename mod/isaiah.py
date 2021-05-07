@@ -316,6 +316,12 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
+    async def send_message(self, ctx, *, msg):
+        await ctx.message.delete()
+        await ctx.send(msg)
+
+    @commands.command()
+    @commands.is_owner()
     async def send_veri_msg(self, ctx, *, msg):
         await ctx.message.delete()
         message = await ctx.send(msg)
@@ -323,13 +329,10 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
         await message.add_reaction("✅")
 
     @commands.command()
-    @commands.is_owner()
-    async def send_msg_2(self, ctx):
+    async def add_reaction(self, ctx, mid:int, reaction):
+        message = await ctx.channel.fetch_message(mid)
+        await message.add_reaction(reaction)
         await ctx.message.delete()
-        msg = await ctx.send("📘: CSEC\n📖: CAPE\nPress the emoji below that matches your cxc proficiency")
-        emojis = ["📖", "📘"]
-        for emoji in emojis:
-            await msg.add_reaction(emoji)
 
     @commands.command()
     @commands.is_owner()
@@ -437,6 +440,26 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             await person.edit(roles=[stage_0])
 
         await ctx.send("DONE")
+
+    @commands.command()
+    @commands.is_owner()
+    async def sleepy_boy(self, ctx):
+        stage_5 = ctx.guild.get_role(all_roles["STAGE_5_YEAR"])
+
+        for channel in ctx.guild.channels:
+            overwrites = channel.overwrites
+            overwrites[stage_5] = PermissionOverwrite(view_channel=False, connect=False)
+            await channel.edit(overwrites=overwrites)
+
+        await ctx.send("Finished I am sleepy boy")
+
+    @commands.command()
+    @commands.is_owner()
+    async def edit_message(self, ctx, mid:int, *, new_message):
+        message = await ctx.channel.fetch_message(mid)
+        await message.edit(content=new_message)
+
+        await ctx.message.delete()
 
 
 def setup(bot):

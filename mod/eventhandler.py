@@ -5,6 +5,7 @@ from mydicts import *
 import discord 
 from discord.ext import commands 
 from random import randint
+import asyncio
 
 class EventHandling(commands.Cog):
     def __init__(self, bot) -> None:
@@ -149,9 +150,10 @@ class EventHandling(commands.Cog):
                 stage_0 = message.guild.get_role(834837579433115709)
                 stage_1 = message.guild.get_role(785341063984316476)
                 flag_channel = message.guild.get_channel(channels["REP_FLAG"])
+                await message.channel.send(f"Nice to meet you {message.author.display_name}. Next press here: {flag_channel.mention} to move onto the next step")
+                await asyncio.sleep(1)
                 await message.author.remove_roles(stage_0)
                 await message.author.add_roles(stage_1)
-                await message.channel.send(f"Nice to meet you {message.author.display_name}. Next press here: {flag_channel.mention} to move onto the next step")
                 
             except:
                 await message.channel.send("Your name was too long. Try telling me a shortened version?")
@@ -199,6 +201,7 @@ class EventHandling(commands.Cog):
         member = payload.member or discord.utils.get(guild.members, id=payload.user_id)
         if member.bot:return
         bot_channel = guild.get_channel(channels["BOT_ROOM"])
+        error_channel = guild.get_channel(channels["ERROR_ROOM"])
         partial_channel = member.guild.get_channel(payload.channel_id)
         partial_message = PartialMessage(channel=partial_channel, id=payload.message_id)
 
@@ -213,15 +216,15 @@ class EventHandling(commands.Cog):
                 role_value = reactions[register_channels[payload.channel_id]][str(payload.emoji)]
             except KeyError as err:
                 if payload.event_type == "REACTION_ADD":
-                    await bot_channel.send(err)
+                    await error_channel.send(err)
                     await partial_message.remove_reaction(payload.emoji, member)
-                    await me.send(err)
+                    await me.send(f"{err}: in {register_channels[payload.channel_id]}")
                     return
 
             role = utils.get(guild.roles, name=role_value)
 
             if not role:
-                await bot_channel.send(f"ERROR: Could not get role matching emoji {payload.emoji} in {register_channels[payload.channel_id]}")
+                await error_channel.send(f"ERROR: Could not get role matching emoji {payload.emoji} in {register_channels[payload.channel_id]}")
                 await me.send(f"ERROR: Could not get role matching emoji {payload.emoji} in {register_channels[payload.channel_id]}")
                 await partial_message.remove_reaction(payload.emoji, member)
                 return
@@ -249,7 +252,7 @@ class EventHandling(commands.Cog):
                         if to_remove.id == all_roles["PENDING_MEMBER"]:
                             if any([x for x in member.roles if "stage" in x.name.lower()]):
                                 await partial_message.remove_reaction(payload.emoji, member)
-                                await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process.")
+                                await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process.", delete_after=5)
                                 return
                         roles = [guild.get_role(tag) for tag in value]
                         await member.add_roles(*roles)
