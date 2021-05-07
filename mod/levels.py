@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord import user
 from discord.errors import HTTPException
@@ -90,6 +91,7 @@ class Progression(commands.Cog):
         embed.add_field(name="Exp:", value=f"{person[columns['EXP']]}/{person[columns['EXPTHRESH']]}")
         embed.add_field(name="Highest Role:", value=student.top_role)
         embed.add_field(name="Subjects:", value=''.join(user_subjects[:25]) or "No subjects")
+        embed.add_field(name="On Cooldown:", value=await self.on_chilldown(person))
 
         await ctx.send(embed=embed)
 
@@ -143,33 +145,50 @@ class Progression(commands.Cog):
 
             await db.commit()
 
+    on_cooldown = []
+
     @commands.Cog.listener()
     async def on_message(self, message):
-        
         if message.author.bot: return
 
-    #     person = await self.getuser(message)
-    #     if not person:
-    #         return
+        if message.content.lower().startswith("p."): return
 
-    #     person.incexp()
-    #     if person[columns['EXP']] >= person[columns['EXPTHRESH']]:
-    #         # level up here
+        student = await self.getuser(message.author)
+        if not student: return
 
-    #         embed = discord.Embed(
-    #             title="LEVEL UP",
-    #             description=f"{message.author.mention} has reached level {person[columns['LEVEL']]}. Keep Studying hard",
-    #             color=randint(0, 0xffffff)
-    #         )
-    #         if person.didrole():
-    #             role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(person[columns['LEVEL']] // 20) - 1]])
-    #             if person[columns['LEVEL']] // 20 >= len(self.roles):
-    #                 return
-    #             await message.author.add_roles(role_to_give)
+        if await self.on_chilldown(student):
+            return
+        
+        student[columns["EXP"]] += 5
 
-    #             embed.add_field(name="New role", value=f"Congrats {message.author.name}. You now have the role of {role_to_give.name}")
+        if student[columns["EXP"]] >= student[columns["EXPTHRESH"]]:
+            student[columns['EXP']] = 0
+            student[columns['EXPTHRESH']] += 50
+            student[columns['LEVEL']] += 1
 
-    #         await message.channel.send(embed=embed)
+            embed = discord.Embed(
+                title="LEVEL UP",
+                description=f"{message.author.mention} has reached level {student[columns['LEVEL']]}. Keep Studying hard",
+                color=randint(0, 0xffffff)
+            )
+
+            if student[columns['LEVEL']] > 1 and student[columns['LEVEL']] % 20 == 0:
+
+                role_to_give = discord.utils.get(message.guild.roles, id=all_roles[self.roles[(student[columns['LEVEL']] // 20) - 1]])
+                
+                if not role_to_give: return
+
+                await message.author.add_roles(role_to_give)
+
+                embed.add_field(name="New role", value=f"Congrats {message.author.mention}. You now have the role of {role_to_give.mention}")
+
+            await message.channel.send(embed=embed)
+
+        self.on_cooldown.append(student)
+        await self.update_user(student)
+        await asyncio.sleep(10)
+        self.on_cooldown.remove(student)
+
     
     # Functions
     async def getuser(self, m):
@@ -184,6 +203,17 @@ class Progression(commands.Cog):
         if row:
             return list(row)
         return None
+
+    async def on_chilldown(self, user):
+        if [person for person in self.on_cooldown if user[columns["ID"]] == person[columns["ID"]]]:
+            return True
+        return False
+
+    async def update_user(self, user):
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        await db.execute("UPDATE StudentTable SET LEVEL = ?, EXP = ?, EXPTHRESH = ? WHERE ID == ?", (user[columns["LEVEL"]], user[columns["EXP"]], user[columns["EXPTHRESH"]], user[columns["ID"]]))
+        await db.commit()
+        await db.close()
 
 
 def setup(bot):
