@@ -59,8 +59,8 @@ class EventHandling(commands.Cog):
             color=randint(0, 0xffffff)
         )
 
-        embed.add_field(name="Before", value=before.content or "Unknown")
-        embed.add_field(name="After", value=after.content or "Unknown", inline=False)
+        embed.add_field(name="Before", value=before.content[:1020] or "Unknown")
+        embed.add_field(name="After", value=after.content[:1020] or "Unknown", inline=False)
         embed.add_field(name="Jump URL", value=after.jump_url)
         embed.set_footer(text=f"User ID: {before.author.id}")
 
@@ -161,6 +161,7 @@ class EventHandling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        ctx.guild = self.bot.get_guild(guild_id)
         error_channel = ctx.guild.get_channel(channels["ERROR_ROOM"])
 
         if isinstance(error, commands.CommandNotFound):
