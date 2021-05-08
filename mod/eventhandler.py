@@ -219,7 +219,7 @@ class EventHandling(commands.Cog):
                     await error_channel.send(err)
                     await partial_message.remove_reaction(payload.emoji, member)
                     await me.send(f"{err}: in {register_channels[payload.channel_id]}")
-                    return
+                return
 
             role = utils.get(guild.roles, name=role_value)
 
