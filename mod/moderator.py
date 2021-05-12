@@ -295,6 +295,19 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         for person in ctx.author.voice.channel.members:
             await person.move_to(channel)
 
+    @commands.command(brief="Finds users that joined when bot was offline", help="Allows users that joined when bot was offline to go through the registration process")
+    async def recover(self, ctx):
+        family_role = ctx.guild.get_role(all_roles["FAMILY"])
+        victims = [member for member in ctx.guild.members if family_role not in member.roles]
+        stage_0 = ctx.guild.get_role(all_roles["STAGE_0"])
+
+        await ctx.send(f"Found {len(victims)} victims.")
+        if not victims:
+            return 
+
+        for victim in victims:
+            await victim.edit(roles=[stage_0])
+
     @commands.command(brief="Command used to monitor a user", help="To be used to monitor all content the target posts within the server", usage="@user")
     @commands.has_guild_permissions(manage_channels=True)
     async def monitor(self, ctx, member:discord.Member):
