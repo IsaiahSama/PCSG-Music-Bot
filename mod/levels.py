@@ -76,6 +76,7 @@ class Progression(commands.Cog):
         person = await self.getuser(student)
 
         if not person:
+            await ctx.send(f"Could not find {member.name} in my database.")
             return
 
         user_subjects = [ctx.guild.get_role(role.id).mention for role in student.roles if role.name.lower() in list(reactions["CSEC"].values()) or role.name.lower() in list(reactions["CAPE"].values())]
@@ -137,6 +138,8 @@ class Progression(commands.Cog):
         async with aiosqlite.connect("PCSGDB.sqlite3") as db:
             await db.execute("INSERT OR IGNORE INTO StudentTable (ID, Level, Exp, ExpThresh) VALUES (?, ?, ?, ?)",
             (member.id, 0, 0, 50))
+
+            await db.commit()
 
     @commands.Cog.listener()
     async def on_memeber_remove(self, member:discord.Member):
