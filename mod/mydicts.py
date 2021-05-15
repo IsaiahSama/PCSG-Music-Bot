@@ -203,6 +203,10 @@ reactions = {
         "\U0001f1f9\U0001f1f9" : "Trinidad and Tobago",
         "\U0001f1e7\U0001f1e7" : "Barbados",
         "\U0001f1fb\U0001f1e8" : "St.Vincent and the Grenadines",
+        "\U0001f1fb\U0001f1ec" : "British Virgin Islands",
+        "\U0001f1e6\U0001f1ee" : "Anguilla",
+        "\U0001f1e9\U0001f1ea" : "Germany",
+        "\U0001f1f0\U0001f1fe" : "Cayman Islands"
     },
     "SPECIALTIES": {
         "\U0001f4ab": "Unit 1",
@@ -230,7 +234,11 @@ country_dict = {
     "\U0001f1ef\U0001f1f2" : "Jamaica",
     "\U0001f1f9\U0001f1f9" : "Trinidad and Tobago",
     "\U0001f1e7\U0001f1e7" : "Barbados",
-    "\U0001f1fb\U0001f1e8" : "St.Vincent and the Grenadines"
+    "\U0001f1fb\U0001f1e8" : "St.Vincent and the Grenadines",
+    "\U0001f1fb\U0001f1ec" : "British Virgin Islands",
+    "\U0001f1e6\U0001f1ee" : "Anguilla",
+    "\U0001f1e9\U0001f1ea" : "Germany",
+    "\U0001f1f0\U0001f1fe" : "Cayman Islands"
 }
 
 
