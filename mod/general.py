@@ -271,6 +271,32 @@ class General(commands.Cog):
         
         await ctx.send(''.join(channel[:49]))
 
+    @commands.command(brief="Used to find resources for a subject")
+    async def resource(self, ctx, proficiency, *, subject_name):
+        """Attempts to find resources for a given subject name"""
+
+        if proficiency.lower() not in ["csec", "cape"]:
+            await ctx.send("`proficiency` must be CSEC or CAPE")
+            return
+
+        to_search = resource_categories[proficiency.upper()]
+
+        subject = None
+        category = None
+        found = False
+        for topic, subject_list in to_search.items():
+            subject = [course for course in subject_list if subject_name.lower() == course]
+            if subject:
+                subject = subject[0]
+                found = True
+                break
+        
+        if found:
+            base_url = "https://sites.google.com/view/ppresources"
+            url = base_url + f"/{proficiency.lower()}/{topic.lower()}/{subject.replace(' ', '-').lower()}"
+            await ctx.send(url, delete_after=5)
+        else:
+            await ctx.send(f"Could not find a {subject_name} past paper in the {proficiency} category")
 
 def setup(bot):
     bot.add_cog(General(bot))

@@ -241,6 +241,15 @@ country_dict = {
     "\U0001f1f0\U0001f1fe" : "Cayman Islands"
 }
 
+resource_categories = {
+    "CAPE": {
+        "business": ["accounting", "management of business", "economics", "entrepreneurship", "financial services studies", "logistics and supply chain", "tourism"],
+        "humanities": ["art and design", "caribbean studies", "communication studies", "food and nutrition", "geography", "history", "law", "performing arts", "sociology"],
+        "languages": ["french", "literatures in english", "spanish"],
+        "sciences": ["agricultural science", "applied mathematics", "biology", "chemisty", "environmental science", "physical education", "physics", "pure mathematics", "integrated maths"],
+        "technology": ["animation and game design", "building and mechanical engineering drawing", "computer science", "digital media", "electronic and electrical engineering technology", "geometrical and mechanical engineering", "green engineering", "information technology"]
+    }
+}
 
 logs = []
 
