@@ -294,7 +294,7 @@ class General(commands.Cog):
         if found:
             base_url = "https://sites.google.com/view/ppresources"
             url = base_url + f"/{proficiency.lower()}/{topic.lower()}/{subject.replace(' ', '-').lower()}"
-            await ctx.send(url, delete_after=5)
+            await ctx.send(url, delete_after=60)
         else:
             await ctx.send(f"Could not find a {subject_name} past paper in the {proficiency} category")
 
