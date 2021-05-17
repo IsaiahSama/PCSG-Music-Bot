@@ -281,17 +281,16 @@ class General(commands.Cog):
 
         to_search = resource_categories[proficiency.upper()]
 
-        subjects = None
-        found = False
+        subjects = {}
         for topic, subject_list in to_search.items():
-            subjects = [course for course in subject_list if subject_name.lower() in course]
-            if subjects:
-                found = True
-                break
+            for subject in subject_list:
+                if subject_name.lower() == subject:
+                    subjects[topic] = subject
         
-        if found:
+        if subjects:
             base_url = "https://sites.google.com/view/ppresources"
-            for subject in subjects:
+            for topic, subject in subjects.items():
+                if topic == "sciences": topic = "sciences-and-maths"
                 url = base_url + f"/{proficiency.lower()}/{topic.lower()}/{subject.replace(' ', '-').lower()}"
                 await ctx.send(url, delete_after=60)
         else:
