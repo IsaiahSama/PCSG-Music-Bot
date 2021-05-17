@@ -290,11 +290,10 @@ class General(commands.Cog):
         if subjects:
             base_url = "https://sites.google.com/view/ppresources"
             for topic, subject in subjects.items():
-                if topic == "sciences": topic = "sciences-and-maths"
                 url = base_url + f"/{proficiency.lower()}/{proficiency.lower()}-{topic.lower()}/{subject.replace(' ', '-').lower()}"
                 await ctx.send(url)
         else:
-            await ctx.send(f"Could not find a {subject_name} past paper in the {proficiency} category")
+            await ctx.send(f"Could not find a {subject_name} resource in the {proficiency} category")
 
 def setup(bot):
     bot.add_cog(General(bot))
