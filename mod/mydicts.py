@@ -246,8 +246,16 @@ resource_categories = {
         "business": ["accounting", "management of business", "economics", "entrepreneurship", "financial services studies", "logistics and supply chain", "tourism"],
         "humanities": ["art and design", "caribbean studies", "communication studies", "food and nutrition", "geography", "history", "law", "performing arts", "sociology"],
         "languages": ["french", "literatures in english", "spanish"],
-        "sciences": ["agricultural science", "applied mathematics", "biology", "chemisty", "environmental science", "physical education", "physics", "pure mathematics", "integrated maths"],
+        "sciences-and-maths": ["agricultural science", "applied mathematics", "biology", "chemisty", "environmental science", "physical education", "physics", "pure mathematics", "integrated maths"],
         "technology": ["animation and game design", "building and mechanical engineering drawing", "computer science", "digital media", "electronic and electrical engineering technology", "geometrical and mechanical engineering", "green engineering", "information technology"]
+    },
+    "CSEC":{
+        "business": ["electronic document preparation and management", "principles of accounts", "principles of business", "econimics", "office admin"],
+        "sciences-and-maths": ["biology", "chemistry", "physics", "physical education", "math", "add math", "hsb", "agricultural science", "integrated science"],
+        "technology": ["electronic electrical engineering technology", "mechanical engineering technology", "building technology", "information technology", "technical drawing"],
+        "languages": ["english A", "english b", "spanish", "french"],
+        "humanities": ["geography", "social studies", "history", "religious education", "clothing and texting", "food and nutrition", "resource and family management", "music", "visual arts", "theatre arts"],
+
     }
 }
 
