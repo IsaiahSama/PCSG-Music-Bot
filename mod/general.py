@@ -292,7 +292,7 @@ class General(commands.Cog):
             for topic, subject in subjects.items():
                 if topic == "sciences": topic = "sciences-and-maths"
                 url = base_url + f"/{proficiency.lower()}/{proficiency.lower()}-{topic.lower()}/{subject.replace(' ', '-').lower()}"
-                await ctx.send(url, delete_after=60)
+                await ctx.send(url)
         else:
             await ctx.send(f"Could not find a {subject_name} past paper in the {proficiency} category")
 
