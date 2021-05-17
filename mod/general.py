@@ -284,7 +284,7 @@ class General(commands.Cog):
         subjects = {}
         for topic, subject_list in to_search.items():
             for subject in subject_list:
-                if subject_name.lower() == subject:
+                if subject_name.lower() in subject:
                     subjects[topic] = subject
         
         if subjects:
