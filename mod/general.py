@@ -271,7 +271,7 @@ class General(commands.Cog):
         
         await ctx.send(''.join(channel[:49]))
 
-    @commands.command(brief="Used to find resources for a subject")
+    @commands.command(brief="Used to find resources for a subject", usage="proficiency (csec or cape) name of subject")
     async def resource(self, ctx, proficiency, *, subject_name):
         """Attempts to find resources for a given subject name"""
 
