@@ -251,9 +251,11 @@ class EventHandling(commands.Cog):
 
                     if isinstance(value, list):
                         if to_remove.id == all_roles["PENDING_MEMBER"]:
-                            if any([x for x in member.roles if "stage" in x.name.lower()]):
+                            stages = [x.mention for x in member.roles if "stage" in x.name.lower()]
+                            if stages:
                                 await partial_message.remove_reaction(payload.emoji, member)
-                                await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process.", delete_after=5)
+                                await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process. You are at {stages[0]}", delete_after=10)
+                                await bot_channel.send(f"Notice: {member.mention}: {stages}")
                                 return
                         roles = [guild.get_role(tag) for tag in value]
                         await member.add_roles(*roles)
@@ -282,7 +284,6 @@ class EventHandling(commands.Cog):
     
         try:    
             await member.send(msg)
-            await bot_channel.send(f"Notice: {member.name}: {msg}")
         except HTTPException:
             await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
 
