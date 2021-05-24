@@ -345,7 +345,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         
         tempmsg = message.content.lower()
         for word in self.profane:
-            mo = compile(rf".+{word.lower()}.+")
+            mo = compile(rf".*{word.lower()}.*")
             if mo.search(tempmsg):
                 user[1] += 0.5
                 await message.channel.send(f"You have been warned for saying {word}. WarnState: {user[1]} / 4 strikes", delete_after=5)
