@@ -417,17 +417,16 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def set_up_new_perms(self, ctx):
-        roles = [utils.get(ctx.guild.roles, id=k) for k in list(progression_role_ids.keys())]
+    async def set_up_new_perms2(self, ctx):
+        role = ctx.guild.get_role(all_roles['MUTED'])
 
         for channel in ctx.guild.channels:
             overwrites = channel.overwrites
-            for role in roles:
-                overwrites[role] = PermissionOverwrite(view_channel=False, send_messages=False)
+            overwrites[role] = PermissionOverwrite(view_channel=True, send_messages=False)
             
             await channel.edit(overwrites=overwrites)
 
-        await ctx.send("Completed")
+        await ctx.send("Set up muted role")
 
     @commands.command()
     @commands.is_owner()

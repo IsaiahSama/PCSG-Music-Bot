@@ -348,14 +348,11 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
             if word in self.profane:
 
                 user[1] += 0.5
-                msg = await message.channel.send(f"You have been warned for saying {word}. WarnState: {user[1]} / 4 strikes")
+                await message.channel.send(f"You have been warned for saying {word}. WarnState: {user[1]} / 4 strikes", delete_after=5)
                 try:
                     await message.delete()
                 except discord.errors.NotFound:
                     pass
-                await asyncio.sleep(5)
-                await msg.delete()
-                break
         
         if original != user[1]:
             db = await aiosqlite.connect("PCSGDB.sqlite3")
