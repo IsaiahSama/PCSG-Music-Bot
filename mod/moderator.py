@@ -4,6 +4,7 @@ from discord.ext.commands.cooldowns import BucketType
 from mydicts import *
 from discord.ext import commands, tasks
 from random import randint
+from re import compile
 
 class Moderator(commands.Cog):
     """These commands assist our mods with their job. Better be good... I'm also watching you"""
@@ -163,8 +164,7 @@ class Moderator(commands.Cog):
     # Events
 
     with open("swearWords.txt") as f:
-        words = f.read()
-        profane = words.split("\n")
+        profane = f.read().split("\n")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -343,10 +343,10 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
                 except discord.errors.NotFound:
                     pass
         
-        tempmsg = message.content.lower().split(" ")
-        for word in tempmsg:
-            if word in self.profane:
-
+        tempmsg = message.content.lower()
+        for word in self.profane:
+            mo = compile(rf".+{word.lower()}.+")
+            if mo.search(tempmsg):
                 user[1] += 0.5
                 await message.channel.send(f"You have been warned for saying {word}. WarnState: {user[1]} / 4 strikes", delete_after=5)
                 try:
