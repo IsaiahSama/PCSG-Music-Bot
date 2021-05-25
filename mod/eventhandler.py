@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands 
 from random import randint
 import asyncio
-from moderator import aiosqlite, 
+from moderator import aiosqlite
 
 class EventHandling(commands.Cog):
     def __init__(self, bot) -> None:
@@ -16,6 +16,9 @@ class EventHandling(commands.Cog):
     async def async_init(self):
         await self.bot.wait_until_ready()
         print("Event Handler is ready")
+
+    with open("swearWords.txt") as f:
+        profane = f.read().split("\n")
 
     @commands.Cog.listener()
     async def on_member_ban(self, member):

@@ -163,8 +163,7 @@ class Moderator(commands.Cog):
 
     # Events
 
-    with open("swearWords.txt") as f:
-        profane = f.read().split("\n")
+    
 
     @commands.Cog.listener()
     async def on_message(self, message):
