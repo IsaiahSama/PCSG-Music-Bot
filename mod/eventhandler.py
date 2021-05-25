@@ -65,6 +65,13 @@ class EventHandling(commands.Cog):
         embed.set_footer(text=f"User ID: {before.author.id}")
 
         await before.guild.get_channel(channels["MESSAGE_LOGS"]).send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        family = member.guild.get_role(all_roles["FAMILY"])
+        newbie = member.guild.get_role(all_roles["NEWBIE"])
+
+        await member.add_roles(family, newbie)
     
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -142,8 +149,10 @@ class EventHandling(commands.Cog):
     async def on_message(self, message):
         if message.author.bot: return
         if message.channel.id == 834839533978779718:
+
             family = message.guild.get_role(all_roles["FAMILY"])
             newbie = message.guild.get_role(all_roles["NEWBIE"])
+            
             try:
                 await message.author.edit(nick=message.content.strip())
                 flag_channel = message.guild.get_channel(channels["REP_FLAG"])
