@@ -152,6 +152,9 @@ class EventHandling(commands.Cog):
 
             family = message.guild.get_role(all_roles["FAMILY"])
             newbie = message.guild.get_role(all_roles["NEWBIE"])
+            staff = message.guild.get_role(all_roles["STAFF"])
+
+            if staff in message.author.roles: return
             
             try:
                 await message.author.edit(nick=message.content.strip())
