@@ -280,17 +280,17 @@ class EventHandling(commands.Cog):
                 
             # else:
             await member.add_roles(role)
-            msg = f"There you go, {role.name} is now yours."
+            # msg = f"There you go, {role.name} is now yours."
         else:
             if not role:
                 return
             await member.remove_roles(role)
-            msg = f"I have removed {role.name} from you."
+            # msg = f"I have removed {role.name} from you."
     
-        try:    
-            await member.send(msg)
-        except HTTPException:
-            await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
+        # try:    
+        #     await member.send(msg)
+        # except HTTPException:
+        #     await bot_channel.send(f"{member.mention}, I can't directly message you. To avoid this in the future, go into the server's privacy settings and enable direct messages. Anyway, your message:\n{msg}")       
 
 def setup(bot):
     bot.add_cog(EventHandling(bot))
