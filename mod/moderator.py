@@ -171,7 +171,6 @@ class Moderator(commands.Cog):
 
         if message.author.bot: return
         
-        await self.moderate_message(message)
         target = await self.is_monitored(message.author)
         if target:
             monitor_channel = message.guild.get_channel(channels["MONITOR"])
@@ -296,45 +295,6 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
         await db.commit()
         await db.close()
-
-    async def moderate_message(self, message):
-        user = await self.getuser(message)
-        if not user: return
-        original = user[1]
-
-        for x in ["hentai", "porn"]:
-            if x in message.content.lower():
-                user[1] += 1
-                await message.channel.send(f"You have been warned for using NSFW content. You are on your {user[1]} / 4 strikes")
-                try:
-                    await message.delete()
-                except discord.errors.NotFound:
-                    pass
-        
-        tempmsg = message.content.lower().split(" ")
-        for word in tempmsg:
-            if word in self.profane:
-                user[1] += 0.5
-                await message.channel.send(f"You have been warned for saying {word}. WarnState: {user[1]} / 4 strikes", delete_after=5)
-                try:
-                    await message.delete()
-                except discord.errors.NotFound:
-                    pass
-        
-        if original != user[1]:
-            db = await aiosqlite.connect("PCSGDB.sqlite3")
-            await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (user[1], user[0]))
-            await db.commit()
-            await db.close()
-
-        if user[1] >= 4: 
-            await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
-            role = discord.utils.get(message.guild.roles, id=all_roles["MUTED"])
-            await message.author.add_roles(role)
-            await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
-
-        if message.content == "p.": await message.channel.send("Use p.help for a list of my commands.")
-
 
     # # Tasks
     # @tasks.loop(seconds=250)
