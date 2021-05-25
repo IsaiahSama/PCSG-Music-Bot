@@ -206,8 +206,6 @@ class Moderator(commands.Cog):
         embed.add_field(name="Joined at", value=time.ctime())
         await member.guild.get_channel(channels["JOIN_LEAVES"]).send(embed=embed)
 
-        await member.add_roles(member.guild.get_role(all_roles["STAGE_0"]))
-
         human_count = sum(not human.bot for human in member.guild.members)
 
         if human_count % 100 == 0:
@@ -222,18 +220,6 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         await member.guild.get_channel(channels["WELCOME_CHANNEL"]).send("https://cdn.discordapp.com/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif")
         name_channel = member.guild.get_channel(834839533978779718)
         await name_channel.send(f"Hello {member.mention}, what is your name.")
-
-
-    @commands.command(brief="Used to get all members that would have been left alone because of bot being offline", help="Yes")
-    @commands.has_guild_permissions(administrator=True)
-    async def register(self, ctx):
-        stage_0 = ctx.guild.get_role(all_roles["STAGE_0"])
-
-        await ctx.author.edit(roles=[stage_0])
-
-        channel = ctx.guild.get_channel(834839533978779718)
-
-        await channel.send(f"WELCOME {ctx.guild.default_role.mention}. Please tell me your names")
 
     @commands.command(brief="Moves all members in the user's vc to another one", help="Used to move all members in the same vc as the user to another vc, whose id is specified", usage="name_or_id_of_vc_to_move_to")
     @commands.has_guild_permissions(move_members=True)
@@ -294,24 +280,6 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
 
         for person in ctx.author.voice.channel.members:
             await person.move_to(channel)
-
-    @commands.command(brief="Finds users that joined when bot was offline", help="Allows users that joined when bot was offline to go through the registration process")
-    async def recover(self, ctx):
-        family_role = ctx.guild.get_role(all_roles["FAMILY"])
-        victims = [member for member in ctx.guild.members if family_role not in member.roles and not member.bot]
-        stage_0 = ctx.guild.get_role(all_roles["STAGE_0"])
-
-        await ctx.send(f"Found {len(victims)} victims.")
-        if not victims:
-            return 
-
-        for victim in victims:
-            try:
-                await victim.edit(roles=[stage_0])
-            except:
-                continue
-
-        await ctx.send("Complete.")
 
     @commands.command(brief="Command used to monitor a user", help="To be used to monitor all content the target posts within the server", usage="@user")
     @commands.has_guild_permissions(manage_channels=True)

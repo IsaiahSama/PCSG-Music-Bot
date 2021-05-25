@@ -142,18 +142,14 @@ class EventHandling(commands.Cog):
     async def on_message(self, message):
         if message.author.bot: return
         if message.channel.id == 834839533978779718:
-            stage_0 = message.guild.get_role(all_roles["STAGE_0"])
-
-            if stage_0 not in message.author.roles: return
+            family = message.guild.get_role(all_roles["FAMILY"])
+            newbie = message.guild.get_role(all_roles["NEWBIE"])
             try:
                 await message.author.edit(nick=message.content.strip())
-                stage_0 = message.guild.get_role(834837579433115709)
-                stage_1 = message.guild.get_role(785341063984316476)
                 flag_channel = message.guild.get_channel(channels["REP_FLAG"])
                 await message.channel.send(f"Nice to meet you {message.author.display_name}. Next press here: {flag_channel.mention} to move onto the next step")
                 await asyncio.sleep(1)
-                await message.author.remove_roles(stage_0)
-                await message.author.add_roles(stage_1)
+                await message.author.add_roles(family, newbie)
                 
             except:
                 await message.channel.send("Your name was too long. Try telling me a shortened version?")
@@ -233,49 +229,49 @@ class EventHandling(commands.Cog):
             role = None
             
         if payload.event_type == "REACTION_ADD":
-            if str(payload.emoji) == "✅":
-                family_role = guild.get_role(all_roles["FAMILY"])
-                if family_role in member.roles:
-                    return
-                to_remove = guild.get_role(register_channels_to_progression_roles[payload.channel_id])
-                value = progression_roles[to_remove.id]
+            # if str(payload.emoji) == "✅":
+            #     family_role = guild.get_role(all_roles["FAMILY"])
+            #     if family_role in member.roles:
+            #         return
+            #     to_remove = guild.get_role(register_channels_to_progression_roles[payload.channel_id])
+            #     value = progression_roles[to_remove.id]
                 
-                if [x for x in member.roles if x.name in list(reactions[register_channels[payload.channel_id]].values())] or payload.channel_id == channels["VERIFY"]:
+            #     if [x for x in member.roles if x.name in list(reactions[register_channels[payload.channel_id]].values())] or payload.channel_id == channels["VERIFY"]:
 
-                    if payload.channel_id == channels["PROFICIENCY"]:
-                        value = [proficiency_to_stage[x.id] for x in member.roles if x.name.lower() in ["cape", "csec"]]
-                        if len(value) == 1:
-                            value = value[0]
+            #         if payload.channel_id == channels["PROFICIENCY"]:
+            #             value = [proficiency_to_stage[x.id] for x in member.roles if x.name.lower() in ["cape", "csec"]]
+            #             if len(value) == 1:
+            #                 value = value[0]
                 
-                    await member.remove_roles(to_remove)
+            #         await member.remove_roles(to_remove)
 
-                    if isinstance(value, list):
-                        if to_remove.id == all_roles["PENDING_MEMBER"]:
-                            stages = [x.mention for x in member.roles if "stage" in x.name.lower()]
-                            if stages:
-                                await partial_message.remove_reaction(payload.emoji, member)
-                                await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process. You are at {stages[0]}", delete_after=10)
-                                await bot_channel.send(f"Notice: {member.mention}: {stages}")
-                                return
-                        roles = [guild.get_role(tag) for tag in value]
-                        await member.add_roles(*roles)
-                        if to_remove.id == all_roles["PENDING_MEMBER"]:
-                            msg = f"{member.name} is now verified"
-                        else:
-                            msg = f"has received both Proficiency roles"
-                    else:
-                        role = guild.get_role(value)
-                        await member.add_roles(role)
-                        msg = f"Has just received the {role.name} role."
+            #         if isinstance(value, list):
+            #             if to_remove.id == all_roles["PENDING_MEMBER"]:
+            #                 stages = [x.mention for x in member.roles if "stage" in x.name.lower()]
+            #                 if stages:
+            #                     await partial_message.remove_reaction(payload.emoji, member)
+            #                     await partial_channel.send(f"{member.display_name}, There is a :white_check_mark: that you have not pressed. Find it, press it, then work your way back here by reselecting all of the others. It's a process. You are at {stages[0]}", delete_after=10)
+            #                     await bot_channel.send(f"Notice: {member.mention}: {stages}")
+            #                     return
+            #             roles = [guild.get_role(tag) for tag in value]
+            #             await member.add_roles(*roles)
+            #             if to_remove.id == all_roles["PENDING_MEMBER"]:
+            #                 msg = f"{member.name} is now verified"
+            #             else:
+            #                 msg = f"has received both Proficiency roles"
+            #         else:
+            #             role = guild.get_role(value)
+            #             await member.add_roles(role)
+            #             msg = f"Has just received the {role.name} role."
                 
-                else:
-                    await partial_message.remove_reaction(payload.emoji, member)
-                    await partial_channel.send(f"{member.mention}, you have not selected any of the provided roles", delete_after=5)
-                    return
+            #     else:
+            #         await partial_message.remove_reaction(payload.emoji, member)
+            #         await partial_channel.send(f"{member.mention}, you have not selected any of the provided roles", delete_after=5)
+            #         return
                 
-            else:
-                await member.add_roles(role)
-                msg = f"There you go, {role.name} is now yours."
+            # else:
+            await member.add_roles(role)
+            msg = f"There you go, {role.name} is now yours."
         else:
             if not role:
                 return

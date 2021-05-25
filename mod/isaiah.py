@@ -431,12 +431,11 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
     @commands.command()
     @commands.is_owner()
     async def transition(self, ctx):
-        pending_role = utils.get(ctx.guild.roles, id=all_roles["PENDING_MEMBER"])
-        stage_0 = utils.get(ctx.guild.roles, id=all_roles["STAGE_0"])
+        family = ctx.guild.get_role(all_roles["FAMILY"])
 
-        unverified = [member for member in ctx.guild.members if pending_role in member.roles]
+        unverified = [member for member in ctx.guild.members if family not in member.roles]
         for person in unverified:
-            await person.edit(roles=[stage_0])
+            await person.edit(roles=[])
 
         await ctx.send("DONE")
 
