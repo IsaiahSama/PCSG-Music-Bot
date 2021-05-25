@@ -18,7 +18,7 @@ class EventHandling(commands.Cog):
         print("Event Handler is ready")
 
     with open("swearWords.txt") as f:
-        profane = f.read().split("\n")
+        profane = f.read().split("\n")  
 
     @commands.Cog.listener()
     async def on_member_ban(self, member):
