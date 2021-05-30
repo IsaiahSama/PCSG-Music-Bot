@@ -2,9 +2,11 @@ import discord
 from discord import utils
 from discord.ext import commands
 import random, re
+from re import compile
 
 from discord.permissions import PermissionOverwrite
 from mydicts import *
+import traceback
 
 class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -417,27 +419,60 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def set_up_new_perms2(self, ctx):
-        role = ctx.guild.get_role(all_roles['MUTED'])
-
-        for channel in ctx.guild.channels:
+    async def sp(self, ctx, cid:int, term:str):
+        category = ctx.guild.get_channel(cid)
+        if not category:
+            await ctx.send("This category does not exist?")
+            return
+        proficiency = ctx.guild.get_role(all_roles[term.upper()])
+        mo = compile(rf".*({term}.+)")
+        for channel in category.channels:
+            role_name = mo.search(channel.name)[1].replace("-", " ").replace(" streamroom", "")
+            role = utils.get(ctx.guild.roles, name=role_name)
+            if not role:
+                print(f"Could not get role for {channel.name}")
+                continue
             overwrites = channel.overwrites
-            overwrites[role] = PermissionOverwrite(view_channel=True, send_messages=False)
-            
+            if not overwrites:
+                await ctx.send("This channel does not have any overwrites. Making them now")
+                overwrites = {}
+            overwrites[proficiency] = PermissionOverwrite(view_channel=False)
+            overwrites[role] = PermissionOverwrite(view_channel=True)
             await channel.edit(overwrites=overwrites)
 
-        await ctx.send("Set up muted role")
-
+        await ctx.send("Sync complete")
+       
     @commands.command()
     @commands.is_owner()
     async def transition(self, ctx):
         family = ctx.guild.get_role(all_roles["FAMILY"])
 
-        unverified = [member for member in ctx.guild.members if family not in member.roles]
+        unverified = [member for member in ctx.guild.members if family not in member.roles and not member.bot]
         for person in unverified:
-            await person.edit(roles=[])
+            try:
+                await person.edit(roles=[])
+            except:
+                await ctx.send(f"Could not edit {person.display_name}'s roles")
 
         await ctx.send("DONE")
+
+    @commands.command()
+    @commands.is_owner()
+    async def alert(self, ctx):
+        family = ctx.guild.get_role(all_roles["FAMILY"])
+        members = [member for member in ctx.guild.members if family not in member.roles and not member.bot]
+        channel = ctx.guild.get_channel(834839533978779718)
+
+        msg = "Sorry for the inconvenience. In an attempt to make the server easier to use, I ended up making it harder :sweat_smile: . The process has been removed entirely, so now all you need to do is state your name, and then select the roles that you want. Note, Selecting these roles ARE optional, but they greatly assist in making sure that you can get help when you need it."
+
+        for member in members:
+            try:
+                await member.send(msg)
+            except:
+                await channel.send(f"Hey {member.mention}. {msg}")
+        
+        await ctx.send("Informed everyone about the change")
+                
 
     @commands.command()
     @commands.is_owner()
