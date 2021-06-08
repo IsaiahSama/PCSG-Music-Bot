@@ -16,7 +16,7 @@ class Study(commands.Cog):
         await ctx.send("https://www.pastpapersforall.online/markschemes <- View mark schemes here")
 
     @commands.command(brief="Provides links to past papers", help="Used to instantly provide a link to past papers for subjects.")
-    async def pp(self, ctx, proficiency, *, subject_name=None):
+    async def pp(self, ctx):
         """ Attempts to find past papers for a given subject """
 
         await ctx.send("https://www.pastpapersforall.online/pastpapers")
