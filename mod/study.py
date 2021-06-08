@@ -15,27 +15,12 @@ class Study(commands.Cog):
     async def mark(self, ctx):
         await ctx.send("https://www.pastpapersforall.online/markschemes <- View mark schemes here")
 
-    @commands.command(brief="Provides links to past papers", help="Used to instantly provide a link to past papers for subjects.", usage="(csec or cape) name_of_subject")
-    async def pp(self, ctx, proficiency, *, subject_name):
+    @commands.command(brief="Provides links to past papers", help="Used to instantly provide a link to past papers for subjects.")
+    async def pp(self, ctx, proficiency, *, subject_name=None):
         """ Attempts to find past papers for a given subject """
 
-        proficiency = proficiency.lower()
+        await ctx.send("https://www.pastpapersforall.online/pastpapers")
 
-        if proficiency not in ["csec", "cape"]:
-            await ctx.send("Your proficiency must be either `csec` or `cape`")
-            return
-        
-        if proficiency == "cape":
-            await ctx.send("Sorry, but cape past papers are within google drives. Please visit here for them: https://www.pastpapersforall.online/pastpapers#h.gpa9rpry7b8")
-            return
-
-        base_url = "https://www.csecpastpapers.com/"
-
-        potentials = [subject for subject in csec_subjects.keys() if subject in subject_name]
-
-        await ctx.send(f"Getting all relevant matches for {ctx.author.mention}")
-        for potential in potentials:
-            await ctx.send(base_url + csec_subjects[potential])
 
     @commands.command(brief="Used to find resources for a subject", usage="proficiency (csec or cape) name of subject")
     async def resource(self, ctx, proficiency, *, subject_name):
