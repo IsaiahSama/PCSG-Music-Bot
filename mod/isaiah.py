@@ -22,8 +22,8 @@ class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def mutepls(self, ctx):
-        role = discord.utils.get(ctx.guild.roles, name="Muted")
+    async def mutepls2(self, ctx):
+        role = discord.utils.get(ctx.guild.roles, name="E-Muted")
         overwrites = {role: discord.PermissionOverwrite(send_messages=False)}
         role2 = ctx.guild.default_role
         overwrites[role2] = discord.PermissionOverwrite(mention_everyone=False)
@@ -32,8 +32,8 @@ class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
         for role in roles:
             overwrites[role] = discord.PermissionOverwrite.from_pair(discord.Permissions.all(), discord.Permissions.none())   
 
-        for category in ctx.guild.categories:
-            await category.edit(overwrites=overwrites)
+        for channel in ctx.guild.channels:
+            await channel.edit(overwrites=overwrites)
 
         await ctx.send("Done")
 
@@ -338,7 +338,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def set_perms(self, ctx, cid:int):
+    async def set_perms_2(self, ctx, cid:int):
         from re import compile
         compiled = compile(r"[A-Za-z]+")
         category = ctx.guild.get_channel(cid)
@@ -349,10 +349,16 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
                 await ctx.send(f"Could not find role for {channel.name}. Letters found were {letters_only}")            
                 continue
             
-            overwrites = {
-                ctx.guild.default_role: PermissionOverwrite(connect=False, view_channel=False),
-                role: PermissionOverwrite(connect=True, view_channel=True)
-            }
+            overwrites = channel.overwrites
+
+            overwrites[ctx.guild.default_role] = PermissionOverwrite(connect=False, view_channel=False, mention_everyone=False)
+            overwrites[role] = PermissionOverwrite(connect=True, view_channel=True)
+            if "cape" in letters_only:
+                x = ctx.guild.get_role(796519532628803584)
+            else:
+                x = ctx.guild.get_role(762189597059842058)
+
+            overwrites[x] = PermissionOverwrite(connect=True, view_channel=True)
 
             await channel.edit(overwrites=overwrites)
 
@@ -494,6 +500,18 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
         await ctx.message.delete()
 
+    @commands.command()
+    @commands.is_owner()
+    async def normies_cant_see(self, ctx):
+        ids = [785986612717944832, 761092169757884416, 700556455274610698, 700211825102553099, 764790530181300244, 762033167683026976, 825901516060885073, 754573710974779443, 827652047087468625]
+        categories = [ctx.guild.get_channel(id1) for id1 in ids]
 
+        for category in categories:
+            for channel in category.channels:
+                overwrites = channel.overwrites
+                overwrites[ctx.guild.default_role] = PermissionOverwrite(mention_everyone=False, view_channel=False)
+                await channel.edit(overwrites=overwrites)
+            
+        await ctx.send("Everything is now private")
 def setup(bot):
     bot.add_cog(Isaiah(bot))

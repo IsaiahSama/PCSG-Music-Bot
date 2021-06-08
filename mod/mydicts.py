@@ -251,7 +251,7 @@ resource_categories = {
         "technology": ["animation and game design", "building and mechanical engineering drawing", "computer science", "digital media", "electronic and electrical engineering technology", "geometrical and mechanical engineering", "green engineering", "information technology"]
     },
     "CSEC":{
-        "business": ["electronic document preparation management", "principles of accounts", "principles of business", "econimics", "office admin"],
+        "business": ["electronic document preparation management", "principles of accounts", "principles of business", "economics", "office admin"],
         "sciences-and-maths": ["biology", "chemistry", "physics", "physical education", "math", "add math", "hsb", "agricultural science", "integrated science"],
         "technology": ["electronic electrical engineering technology", "mechanical engineering technology", "building technology", "information technology", "technical drawing"],
         "languages": ["english A", "english b", "spanish", "french"],
