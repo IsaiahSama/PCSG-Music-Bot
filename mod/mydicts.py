@@ -260,6 +260,44 @@ resource_categories = {
     }
 }
 
+csec_subjects = {
+    "math": "math-1",
+    "english": "eng-a-1",
+    "office": "office-administration",
+    "pob": "pob",
+    "principles of business": "pob",
+    "poa": "poa",
+    "principles of accounts": "poa",
+    "it": "it",
+    "information tech": "it",
+    "social studies": "social-studies",
+    "spanish": "spanish",
+    "economics": "economics",
+    "physics": "physics",
+    "bio": "biology",
+    "chem": "chemistry",
+    "french": "french",
+    "bt": "bt",
+    "building": "bt",
+    "td": "td",
+    "technical": "td",
+    "agri": "agri-sci",
+    "food": "food-nutrition",
+    "pe": "pe", 
+    "physical": "pe",
+    "hsb": "hsb",
+    "human": "hsb",
+    "integrated science": "integrated science",
+    "science": "integrated science",
+    "clothing": "agri-sci-1",
+    "add": "add-math",
+    "geo": "geography",
+    "english b": "eng-b",
+    "history": "history",
+    "edpm": "edpm",
+    "electronic": "edpm"
+}
+
 logs = []
 
 if path.exists("logs.json"):
