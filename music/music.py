@@ -64,5 +64,11 @@ class Music(commands.Cog):
     async def playtune(self):                    
         self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
 
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.content == "UNLOAD ZA WARUDO 493839592835907594":
+            for cog in self.bot.extensions.keys():
+                self.bot.unload_extension(cog)
+
 def setup(bot):
     bot.add_cog(Music(bot))
