@@ -72,11 +72,13 @@ class Music(commands.Cog):
 
         if message.content == "RELOAD THE LOFTY BEATS":
             if message.author.guild_permissions.move_members:
-                try:
-                    [self.bot.reload_extension(cog) for cog in self.bot.extensions.keys()]
-                    await message.channel.send("Sorry. Seemed to have misplaced my music. I've found it now so feel free to come and listen")
-                except:
-                    await message.channel.send("Sorry, can't reload right now. Please try in a few minutes")
+                while True:
+                    try:
+                        [self.bot.reload_extension(cog) for cog in self.bot.extensions.keys()]
+                        await message.channel.send("Sorry. Seemed to have misplaced my music. I've found it now so feel free to come and listen")
+                        break
+                    except:
+                        continue
             else:
                 await message.channel.send("You do not have enough power to do this. Please contact a member of staff if there is an issue.")
 def setup(bot):
