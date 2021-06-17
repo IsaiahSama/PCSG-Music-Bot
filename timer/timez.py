@@ -101,6 +101,14 @@ class Timer(commands.Cog):
         if message.content == "UNLOAD ZA WARUDO 493839592835907594":
             for cog in self.bot.extensions.keys():
                 self.bot.unload_extension(cog)
-
+        if message.content == "START THE TIMER":
+            if message.author.guild_permissions.move_members:
+                try:
+                    [self.bot.reload_extension(cog) for cog in self.bot.extensions.keys()]
+                    await message.channel.send("I have been reloaded and ready for timing.")
+                except:
+                    await message.channel.send("Sorry, can't restart right now. Please try in a few minutes")
+            else:
+                await message.channel.send("You do not have enough power to do this. Please contact a member of staff if there is an issue.")
 def setup(bot):
     bot.add_cog(Timer(bot))
