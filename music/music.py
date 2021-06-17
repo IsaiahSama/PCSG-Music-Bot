@@ -39,7 +39,10 @@ class Music(commands.Cog):
             await self.data_dict["ERROR_CHANNEL"].send("HEY BOSS, MY VOICE CHANNEL IS MISSIN'")
             raise SystemExit
         
-        self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+        try:
+            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+        except:
+            print("Already connected")
         self.reconnect.start()
 
     @tasks.loop(minutes=1)
