@@ -55,7 +55,10 @@ class Music(commands.Cog):
 
         if self.data_dict["VC_OBJECT"].channel != self.data_dict["VOICE_CHANNEL"]:
             await self.data_dict["VC_OBJECT"].disconnect()
-            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+            try:
+                self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+            except ClientException:
+                pass
 
         if not self.data_dict["VC_OBJECT"].is_playing():
             try:
