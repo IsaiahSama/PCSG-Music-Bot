@@ -75,7 +75,7 @@ class Music(commands.Cog):
         except:
             print("Already connected, so disconnecting now")
             await self.bot.voice_clients[0].disconnect()
-            await self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
             print("Reconnected successfully")
 
     async def playtune(self):  
