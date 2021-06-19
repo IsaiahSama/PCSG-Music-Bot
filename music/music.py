@@ -41,6 +41,7 @@ class Music(commands.Cog):
         await self.get_bot_vc()
         await self.connect_to_bot_vc()
         
+        await self.playtune()
         self.reconnect.start()
 
     async def get_bot_songs_and_channel_ids(self) -> int:
@@ -82,6 +83,7 @@ class Music(commands.Cog):
         """Checks if the bot is currently playing a song. If not, then try to play it """      
         if not self.data_dict["VC_OBJECT"].is_playing():
             try:
+                print("Bot isn't playing music. Lets begin this")
                 self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
             except Exception as err:
                 print(f"An error occurred... Look at this {err}")
