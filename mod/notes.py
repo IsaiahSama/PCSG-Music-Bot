@@ -173,7 +173,7 @@ class Notes(commands.Cog):
 
     async def fetch_all(self):
         db = await aiosqlite.connect("PCSGDB.sqlite3")
-        cursor = await db.execute("SELECT * FROM NotesTable")
+        cursor = await db.execute("SELECT * FROM NoteTable")
         rows = await cursor.fetchall()
         await db.close()
         
