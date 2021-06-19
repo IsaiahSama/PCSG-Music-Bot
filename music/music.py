@@ -85,6 +85,7 @@ class Music(commands.Cog):
             try:
                 print("Bot isn't playing music. Lets begin this")
                 self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
+                print("Playing music")
             except Exception as err:
                 print(f"An error occurred... Look at this {err}")
                 await self.data_dict["ERROR_CHANNEL"].send(f"An error occurred... Look at this:\n{err}")            
