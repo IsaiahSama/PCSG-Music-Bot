@@ -71,6 +71,7 @@ class Music(commands.Cog):
         print("Got the bot's voice channel.")
 
     async def connect_to_bot_vc(self):
+        """Function that tries to create the vc object by connecting to it's voice channel. If this fails, disconnect the bot, then reconnect it"""
         try:
             self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
         except:
@@ -88,7 +89,9 @@ class Music(commands.Cog):
                 print("Playing music")
             except Exception as err:
                 print(f"An error occurred... Look at this {err}")
-                await self.data_dict["ERROR_CHANNEL"].send(f"An error occurred... Look at this:\n{err}")            
+                await self.data_dict["ERROR_CHANNEL"].send(f"An error occurred... Look at this:\n{err}")      
+                if "not connected" in str(err):
+                    await self.connect_to_bot_vc()
        
     @tasks.loop(minutes=1)
     async def reconnect(self):
