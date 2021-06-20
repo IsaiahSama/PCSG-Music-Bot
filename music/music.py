@@ -100,6 +100,11 @@ class Music(commands.Cog):
 
         await self.playtune()
 
+    @commands.command()
+    @commands.is_owner()
+    async def get_over_here(self, ctx):
+        await self.connect_to_bot_vc()
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.content == "UNLOAD ZA WARUDO 493839592835907594":

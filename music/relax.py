@@ -7,7 +7,7 @@ load_dotenv()
 
 intent = discord.Intents.default()
 
-bot = commands.Bot(command_prefix='<<<', case_insensitive=True, intents=intent)
+bot = commands.Bot(command_prefix='<<<<<', case_insensitive=True, intents=intent)
 bot.help_command = None
 
 bot.load_extension("music")
