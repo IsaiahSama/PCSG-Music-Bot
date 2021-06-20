@@ -1,6 +1,7 @@
 import discord
 from discord.errors import ClientException
 from discord.ext import commands, tasks
+from asyncio import sleep
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -103,8 +104,11 @@ class Music(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def get_over_here(self, ctx):
+        [await vc.disconnect() for vc in self.bot.voice_clients]
+        await sleep(2)
         await self.connect_to_bot_vc()
-
+        await ctx.send("Yes")
+        
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.content == "UNLOAD ZA WARUDO 493839592835907594":
