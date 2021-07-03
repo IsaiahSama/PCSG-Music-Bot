@@ -420,7 +420,8 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
         for stranger in strangers:
             await stranger.add_roles(family, newbie)
-            await welcome_channel.send(f"Officially welcoming {stranger.mention} to the PCSG Family. Thanks for joining, and we look forward to studying with you.\n\n You are the {(len(humans) - len(strangers)) + i}")
+            await welcome_channel.send(f"Officially welcoming {stranger.mention} to the PCSG Family. Thanks for joining, and we look forward to studying with you.\n\n You are the {(len(humans) - len(strangers)) + i} family member")
+            await welcome_channel.send("https://media.discordapp.net/attachments/813888001775370320/831305455237988402/WELCOME_TO_STUDY_GOALS_E-SCHOOL_4.gif")
             i += 1
 
         await ctx.send(f"Found {len(strangers)} strangers and gave them their roles")
