@@ -412,15 +412,18 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
         humans = [member for member in ctx.guild.members if not member.bot]
         strangers = [human for human in humans if not family in human.roles]
 
+        welcome_channel = ctx.guild.get_channel(channels["WELCOME_CHANNEL"])
+
         newbie = ctx.guild.get_role(all_roles["NEWBIE"])
 
         i = 0
 
         for stranger in strangers:
             await stranger.add_roles(family, newbie)
+            await welcome_channel.send(f"Officially welcoming {stranger.mention} to the PCSG Family. Thanks for joining, and we look forward to studying with you.\n\n You are the {(len(humans) - len(strangers)) + i}")
             i += 1
 
-        await ctx.send(f"Found {i} strangers and gave them their roles")
+        await ctx.send(f"Found {len(strangers)} strangers and gave them their roles")
 
     @commands.command()
     @commands.is_owner()
