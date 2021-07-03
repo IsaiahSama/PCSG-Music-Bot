@@ -407,11 +407,10 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
 
     @commands.command()
     @commands.is_owner()
-    async def find_stranger(self, ctx):
+    async def find_strangers(self, ctx):
         family = ctx.guild.get_role(all_roles["FAMILY"])
-        pending = ctx.guild.get_role(all_roles["PENDING_MEMBER"])
         humans = [member for member in ctx.guild.members if not member.bot]
-        strangers = [human for human in humans if not pending in human.roles and not family in human.roles]
+        strangers = [human for human in humans if not family in human.roles]
 
         newbie = ctx.guild.get_role(all_roles["NEWBIE"])
 
@@ -513,6 +512,14 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
                 await channel.edit(overwrites=overwrites)
             
         await ctx.send("Everything is now private")
+
+    @commands.command()
+    @commands.is_owner()
+    async def f(self, ctx):
+        nicknamed = [member for member in ctx.guild.members if member.nick]
+        targets = [target for target in nicknamed if target.nick.startswith("my name is")]
+        [target.edit(nick=target.nick.split(" ")[-1]) for target in targets]
+        await ctx.send(f"Fixed {len(targets)} people.")
 
     @commands.Cog.listener()
     async def on_message(self, message):
