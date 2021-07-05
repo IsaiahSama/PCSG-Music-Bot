@@ -30,7 +30,8 @@ class Moderator(commands.Cog):
                 WARNER_ID INTEGER NOT NULL,
                 REASON TEXT,
                 STATE TEXT,
-                TIME TEXT""")
+                TIME TEXT
+                )""")
 
             await db.commit()
 
