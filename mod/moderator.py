@@ -74,7 +74,7 @@ class Moderator(commands.Cog):
         offenses = await self.get_warn_logs(member)
         offenses.sort(reverse=True)
         offenses = offenses[:25]
-        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_user(offense[row_dict['WARNER_ID']])} on {offense[row_dict['TIME']]}", value=offense[row_dict['REASON']]) for offense in offenses]
+        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_member(offense[row_dict['WARNER_ID']])} on {offense[row_dict['TIME']]}", value=offense[row_dict['REASON']]) for offense in offenses]
         
         await ctx.send(embed=embed)
 
