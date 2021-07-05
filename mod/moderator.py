@@ -61,7 +61,8 @@ class Moderator(commands.Cog):
             "VICTIM_ID": 0,
             "WARNER_ID": 1,
             "REASON": 2,
-            "STATE": 3
+            "STATE": 3,
+            "TIME": 4
         }
 
         embed = discord.Embed(
@@ -73,7 +74,7 @@ class Moderator(commands.Cog):
         offenses = self.get_warn_logs(member)
         offenses.sort(reverse=True)
         offenses = offenses[:25]
-        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_user(offense[row_dict['WARNER_ID']])}", value=offense[row_dict['REASON']]) for offense in offenses]
+        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_user(offense[row_dict['WARNER_ID']])} on {offense[row_dict['TIME']]}", value=offense[row_dict['REASON']]) for offense in offenses]
         
         await ctx.send(embed=embed)
 
@@ -369,7 +370,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         4) Reason: The reason for the warn"""
         db = await aiosqlite.connect("PCSGDB.sqlite3")
         await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (warns, tag))
-        state = "WARNED" if warns == 0 else "CLEARED"
+        state = "CLEARED" if warns == 0 else "WARNED"
         await db.execute("INSERT INTO WarnLogsTable (VICTIM_ID, WARNER_ID, REASON, STATE, TIME) VALUES (?, ?, ?, ?, ?)", (tag, warner_tag, reason, state, ctime()))
         await db.commit()
         await db.close()
@@ -384,6 +385,7 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
         db = await aiosqlite.connect("PCSGDB.sqlite3")
         cursor = await db.execute("SELECT * FROM WarnLogsTable WHERE (VICTIM_ID) == (?)", (member.id, )) if member else await db.execute("SELECT * FROM WarnLogsTable")
         rows = await cursor.fetchall()
+        await db.close()
         return rows
 
     async def is_monitored(self, member) -> bool:
