@@ -85,7 +85,7 @@ class Moderator(commands.Cog):
         await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user[1]} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
         await log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
-        await self.update_warns(member.id, user[1], ctx.author.id)
+        await self.update_warns(member.id, user[1], ctx.author.id, reason)
         await ctx.guild.get_channel(channels["WARN_LOGS"]).send(f"{member.name} was warned by {ctx.author}. Reason: {reason}")
         
     @commands.command(brief="This resets the warns that a person has back to 0", help="This sets the warns of a user back to 0.", usage="@user")
@@ -95,7 +95,7 @@ class Moderator(commands.Cog):
         user[1] = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
         await log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason)
-        await self.update_warns(member.id, user[1], ctx.author.id)
+        await self.update_warns(member.id, user[1], ctx.author.id, reason)
         await ctx.guild.get_channel(channels["WARN_LOGS"]).send(f"{member.name} just got cleared of their warn crimes because {ctx.author} believes that {reason}")
         
 
