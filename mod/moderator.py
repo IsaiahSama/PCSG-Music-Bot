@@ -23,9 +23,9 @@ class Moderator(commands.Cog):
             )""")
 
             await db.execute("CREATE TABLE IF NOT EXISTS MonitorTable(ID INTEGER PRIMARY KEY UNIQUE NOT NULL)")
-
+            await db.execute("DROP TABLE IF EXISTS WarnLogsTable")
             await db.execute("""CREATE TABLE IF NOT EXISTS WarnLogsTable(
-                ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
+                ID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 VICTIM_ID INTEGER NOT NULL,
                 WARNER_ID INTEGER NOT NULL,
                 REASON TEXT,
@@ -58,11 +58,11 @@ class Moderator(commands.Cog):
         if user[1] == 0: await ctx.send(f"{member.display_name} is as good as they come. Not a single warn on them."); return
 
         row_dict = {
-            "VICTIM_ID": 0,
-            "WARNER_ID": 1,
-            "REASON": 2,
-            "STATE": 3,
-            "TIME": 4
+            "VICTIM_ID": 1,
+            "WARNER_ID": 2,
+            "REASON": 3,
+            "STATE": 4,
+            "TIME": 5
         }
 
         embed = discord.Embed(
@@ -74,10 +74,10 @@ class Moderator(commands.Cog):
         offenses = await self.get_warn_logs(member)
         offenses.sort(reverse=True)
         offenses = offenses[:25]
-        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_user(offense[row_dict['WARNER_ID']])} on {offense[row_dict['TIME']]}", value=offense[row_dict['REASON']]) for offense in offenses]
+        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_member(offense[row_dict['WARNER_ID']])} on {offense[row_dict['TIME']]}", value=offense[row_dict['REASON']]) for offense in offenses]
         
         await ctx.send(embed=embed)
-
+    
     @commands.command(brief="Applies +1 warn to the user mentioned", help="This can be used to warn a user about something that the bot did not catch. Use with disgression", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
