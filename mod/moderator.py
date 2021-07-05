@@ -24,6 +24,14 @@ class Moderator(commands.Cog):
 
             await db.execute("CREATE TABLE IF NOT EXISTS MonitorTable(ID INTEGER PRIMARY KEY UNIQUE NOT NULL)")
 
+            await db.execute("""CREATE TABLE IF NOT EXISTS WarnLogsTable(
+                ID INTEGER PRIMARY KEY UNIQUE NOT NULL,
+                VICTIM_ID INTEGER NOT NULL,
+                WARNER_ID INTEGER NOT NULL,
+                REASON TEXT,
+                STATE TEXT,
+                TIME TEXT""")
+
             await db.commit()
 
         await self.setup()
@@ -46,7 +54,27 @@ class Moderator(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def warnstate(self, ctx, member: discord.Member):
         user = await self.getuser(member)
-        await ctx.send(f"{member.name} has {user[1]}/4 warns")
+        if user[1] == 0: await ctx.send(f"{member.display_name} is as good as they come. Not a single warn on them."); return
+
+        row_dict = {
+            "VICTIM_ID": 0,
+            "WARNER_ID": 1,
+            "REASON": 2,
+            "STATE": 3
+        }
+
+        embed = discord.Embed(
+            title=f"Warn Table for {member.mention}",
+            description=f"{member.name} has {user[1]}/4 warns",
+            color=randint(0, 0xffffff)
+        )
+
+        offenses = self.get_warn_logs(member)
+        offenses.sort(reverse=True)
+        offenses = offenses[:25]
+        [embed.add_field(name=f"{offense[row_dict['STATE']]} by {ctx.guild.get_user(offense[row_dict['WARNER_ID']])}", value=offense[row_dict['REASON']]) for offense in offenses]
+        
+        await ctx.send(embed=embed)
 
     @commands.command(brief="Applies +1 warn to the user mentioned", help="This can be used to warn a user about something that the bot did not catch. Use with disgression", usage="@user reason")
     @commands.has_permissions(administrator=True)
@@ -56,16 +84,19 @@ class Moderator(commands.Cog):
         await member.send(f"You have been warned by {ctx.author.name}. Reason: {reason}\nStrikes: {user[1]} / 4")
         await ctx.send(f"Warned {member.name}. Reason: {reason}. View their warns with p.warnstate")
         await log("Warn", f"{member.name} was warned:", str(ctx.author), reason)
-        await self.update_warns(member.id, user[1])
+        await self.update_warns(member.id, user[1], ctx.author.id)
+        await ctx.guild.get_channel(channels["WARN_LOGS"]).send(f"{member.name} was warned by {ctx.author}. Reason: {reason}")
         
     @commands.command(brief="This resets the warns that a person has back to 0", help="This sets the warns of a user back to 0.", usage="@user")
     @commands.has_permissions(administrator=True)
-    async def resetwarn(self, ctx, member: discord.Member):
+    async def resetwarn(self, ctx, member: discord.Member, *, reason:str):
         user = await self.getuser(member)
         user[1] = 0
         await ctx.send(f"Reset warns on {member.name} to 0")
-        await log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason="None")
-        await self.update_warns(member.id, user[1])
+        await log("Resetwarn", f"{str(member)} had their warns reset", str(ctx.author), reason)
+        await self.update_warns(member.id, user[1], ctx.author.id)
+        await ctx.guild.get_channel(channels["WARN_LOGS"]).send(f"{member.name} just got cleared of their warn crimes because {ctx.author} believes that {reason}")
+        
 
     @commands.command(brief="Mutes a user for x seconds", help="Mutes a user for the specified number of seconds", usage="@user duration_in_seconds reason")
     @commands.has_permissions(administrator=True)
@@ -328,13 +359,36 @@ We look forward to studying with you, Newbie E-Schooler! <a:party:83093938294462
             return list(row)
         return None
 
-    async def update_warns(self, tag, warns):
+    async def update_warns(self, tag: int, warns:int, warner_tag:int, reason:str) -> None:
+        """Connects to the database, and updates the targets warn level. Also logs the reason for the warn in the WarnLogTable
+        Arguments:
+        1) Tag - This is the ID of the person who is being warned
+        2) Warns - This is the amount of warns the person who is being warned has
+        3) warner_tag - This is the user ID of the person who used the warn command.
+        4) Reason: The reason for the warn"""
         db = await aiosqlite.connect("PCSGDB.sqlite3")
         await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (warns, tag))
+        state = "WARNED" if warns == 0 else "CLEARED"
+        await db.execute("INSERT INTO WarnLogsTable (VICTIM_ID, WARNER_ID, REASON, STATE, TIME) VALUES (?, ?, ?, ?, ?)", (tag, warner_tag, reason, state, ctime()))
         await db.commit()
         await db.close()
 
-    async def is_monitored(self, member):
+    async def get_warn_logs(self, member: int=None) -> list:
+        """Queries the WarnLogsTable for offenses that a user was warned, and returns a list of all of them
+        
+        Arguments:
+
+        1) Member - Optional, This will be the id of the member who will be queried"""
+
+        db = await aiosqlite.connect("PCSGDB.sqlite3")
+        cursor = await db.execute("SELECT * FROM WarnLogsTable WHERE (VICTIM_ID) == (?)", (member.id, )) if member else await db.execute("SELECT * FROM WarnLogsTable")
+        rows = await cursor.fetchall()
+        return rows
+
+    async def is_monitored(self, member) -> bool:
+        """Function that queries the database to see if a user is being monitored or not.
+        Arguments:
+        1) Member - This is the member object to be checked."""
         db = await aiosqlite.connect("PCSGDB.sqlite3")
         cursor = await db.execute("SELECT * FROM MonitorTable WHERE (ID) == (?)", (member.id, ))
         row = await cursor.fetchone()
