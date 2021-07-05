@@ -23,7 +23,6 @@ class Moderator(commands.Cog):
             )""")
 
             await db.execute("CREATE TABLE IF NOT EXISTS MonitorTable(ID INTEGER PRIMARY KEY UNIQUE NOT NULL)")
-            await db.execute("DROP TABLE IF EXISTS WarnLogsTable")
             await db.execute("""CREATE TABLE IF NOT EXISTS WarnLogsTable(
                 ID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 VICTIM_ID INTEGER NOT NULL,
