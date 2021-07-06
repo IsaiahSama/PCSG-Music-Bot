@@ -107,14 +107,14 @@ class Notes(commands.Cog):
         if len(notes) == 0: await ctx.send("No notes have been made as yet"); return
         #to_send = [note for note in self.notes if tofind.lower() in [note.title.lower(), note.tags.lower()]]
         tofind = tofind.lower()
-        to_send = [note for note in notes if tofind == note['title'].lower().strip()]
+        to_send = [note for note in notes if tofind == note[columns['title']].lower().strip()]
         if not to_send:
             to_send = [note for note in notes if tofind == str(note[columns['note_id']]) or tofind in note[columns['title']].lower() or tofind in note[columns['tags']].lower() or tofind == note[columns['subject']].lower()]
 
         if not to_send: await ctx.send(f"Could not find a note containing {tofind}"); return
         if len(to_send) > 1: 
             await ctx.send("There is more than one match for your search. Here is a list of their titles and ids")
-            titles = [{note['title']: note[columns["note_id"]]} for note in to_send]
+            titles = [{note[columns['title']]: note[columns["note_id"]]} for note in to_send]
 
             await ctx.send('\n'.join(titles[:25]))
             return
@@ -151,7 +151,7 @@ class Notes(commands.Cog):
         notes = await self.fetch_all()
         if len(notes) == 0: await ctx.send("No notes have been made as yet"); return
         
-        to_del = [note for note in notes if note['title'].lower().strip() == note_to_delete.lower().strip()]
+        to_del = [note for note in notes if note[columns['title']].lower().strip() == note_to_delete.lower().strip()]
         
         if not to_del: await ctx.send("Could not find a note with that title"); return
         
@@ -169,7 +169,7 @@ class Notes(commands.Cog):
         person = discord.utils.get(ctx.guild.members, id=to_del['user_id'])
         if person: name = person.name
         else: name = "Unknown User"
-        await ctx.send(f"Deleted {name}'s note on {to_del['title']}")      
+        await ctx.send(f"Deleted {name}'s note on {to_del[columns['title']]}")      
 
     async def fetch_all(self):
         db = await aiosqlite.connect("PCSGDB.sqlite3")
