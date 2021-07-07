@@ -71,7 +71,6 @@ class Notes(commands.Cog):
         await ctx.send(f"Success. Saved your note as {title}")
 
         await asyncio.sleep(5)
-        await ctx.message.delete()
 
     @commands.command(brief="Shows the titles for all available notes.", help="Shows a list of notes created by your fellow users")
     async def allnotes(self, ctx):
@@ -143,7 +142,7 @@ class Notes(commands.Cog):
         try:
             _, _ = await self.bot.wait_for("reaction_add", timeout=300, check=check)
         except asyncio.TimeoutError:
-            pass
+            return
         await msg.delete()
 
     @commands.command(brief="Deletes a note created by yourself", help="Wish to take down a note belonging to you (or anyone if you are a mod), then you can use this command to do it.", usage="Note Title or ID")
