@@ -77,15 +77,25 @@ class Music(commands.Cog):
             self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
         except:
             print("Already connected, so disconnecting now")
-            await self.bot.voice_clients[0].disconnect()
+            try:
+                await self.bot.voice_clients[0].disconnect()
+            except IndexError:
+                print("Strange... turns out I'm not connected. Will try again later")
+                return
             self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
             print("Reconnected successfully")
+            
+    played_before = 0
 
     async def playtune(self):  
         """Checks if the bot is currently playing a song. If not, then try to play it """      
         if not self.data_dict["VC_OBJECT"].is_playing():
             try:
-                print("Bot isn't playing music. Lets begin this")
+                if played_before == 0:
+                    print("Bot isn't playing music. Lets begin this")
+                    played_before += 1
+                else:
+                    print("Seems like the song is done. Time to replay it")
                 self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
                 print("Playing music")
             except Exception as err:
