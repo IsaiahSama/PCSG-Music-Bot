@@ -91,9 +91,9 @@ class Music(commands.Cog):
         """Checks if the bot is currently playing a song. If not, then try to play it """      
         if not self.data_dict["VC_OBJECT"].is_playing():
             try:
-                if played_before == 0:
+                if self.played_before == 0:
                     print("Bot isn't playing music. Lets begin this")
-                    played_before += 1
+                    self.played_before += 1
                 else:
                     print("Seems like the song is done. Time to replay it")
                 self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
