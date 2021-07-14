@@ -516,7 +516,49 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
                 await channel.edit(overwrites=overwrites)
             
         await ctx.send("Everything is now private")
+        
+    the_dicts = {
+    # Countries
+    700174264782815232: {700230631228964915},
+    # Groups
+    762068609278410752: {833324711516700703},
+    # Proficieny
+    762068938686595152: {833328249622495233},
+    # Cape Sub Select
+    718473529452003329: {765345755505360937, 765345790616141874},
+    # Csec Sub Select
+    755875615587958814: {765345502907596840, 765345536244318220},
+    # Specialties
+    839580152131485696: {840074038688350248}
+    }
 
+    @commands.command()
+    @commands.is_owner():
+    async def track_reactions(self, ctx):
+        for channel_id, message_ids in the_dicts.items():
+          for message_id in message_ids:
+            # Fetches the message
+            m = await ctx.guild.get_channel(channel_id).fetch_message(message_id)
+            # Index my register channels dicts to get my name for the channel
+            channel_name = register_channels[channel_id]
+            for reaction in m.reactions:
+              # Index my reactions dict to get the name of the role
+              # Same line, get the role via discord.utils
+              role = discord.utils.get(ctx.guild.roles, name=reactions[channel_name[str(reaction.emoji)]])
+              # Get a list of all users
+              users = await reaction.users().flatten()
+              # Gets only people currently in the server
+              members = [user for user in users if isinstance(user, discord.Member)]
+              targets = [member for member in members if not role in member.roles]
+              # Adds the role to the Target and tries to dm them. 
+              for target in targets:
+                await target.add_roles(role)
+                try:
+                    await target.send(f"Sorry for being late. I have just given you the {role.name} role")
+                except Exception:
+                    pass
+              await ctx.send(f"Gave the {role.name} role to {len(target)} members.")
+                
     @commands.command()
     @commands.is_owner()
     async def f(self, ctx):
