@@ -557,7 +557,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
                     await target.send(f"Sorry for being late. I have just given you the {role.name} role")
                 except Exception:
                     pass
-              await ctx.send(f"Gave the {role.name} role to {len(target)} members.")
+              await ctx.send(f"Gave the {role.name} role to {len(targets)} members.")
                 
     @commands.command()
     @commands.is_owner()
