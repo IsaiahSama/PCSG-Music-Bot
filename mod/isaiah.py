@@ -535,7 +535,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
     @commands.command()
     @commands.is_owner()
     async def track_reactions(self, ctx):
-        for channel_id, message_ids in the_dicts.items():
+        for channel_id, message_ids in self.the_dicts.items():
           for message_id in message_ids:
             # Fetches the message
             m = await ctx.guild.get_channel(channel_id).fetch_message(message_id)
