@@ -544,7 +544,7 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             for reaction in m.reactions:
               # Index my reactions dict to get the name of the role
               # Same line, get the role via discord.utils
-              role = discord.utils.get(ctx.guild.roles, name=reactions[channel_name[str(reaction.emoji)]])
+              role = discord.utils.get(ctx.guild.roles, name=reactions[channel_name][str(reaction.emoji)])
               # Get a list of all users
               users = await reaction.users().flatten()
               # Gets only people currently in the server
