@@ -82,8 +82,11 @@ class Music(commands.Cog):
             except IndexError:
                 print("Strange... turns out I'm not connected. Will try again later")
                 return
-            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
-            print("Reconnected successfully")
+            try:
+                self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
+                print("Reconnected successfully")
+            except Exception as err:
+                await self.data_dict["ERROR_CHANNEL"].send(f"I got a problem when trying to reconnect:\n{err}")
             
     played_before = 0
 
@@ -101,7 +104,7 @@ class Music(commands.Cog):
             except Exception as err:
                 print(f"An error occurred... Look at this {err}")
                 await self.data_dict["ERROR_CHANNEL"].send(f"An error occurred... Look at this:\n{err}")      
-                if "not connected" in str(err):
+                if "not connected" in str(err).lower():
                     await self.connect_to_bot_vc()
        
     @tasks.loop(minutes=1)
