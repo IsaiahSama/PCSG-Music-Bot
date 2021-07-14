@@ -544,7 +544,10 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
             for reaction in m.reactions:
               # Index my reactions dict to get the name of the role
               # Same line, get the role via discord.utils
-              role = discord.utils.get(ctx.guild.roles, name=reactions[channel_name][str(reaction.emoji)])
+              try:
+                role = discord.utils.get(ctx.guild.roles, name=reactions[channel_name][str(reaction.emoji)])
+              except:
+                continue
               # Get a list of all users
               users = await reaction.users().flatten()
               # Gets only people currently in the server
@@ -557,7 +560,10 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
                     await target.send(f"Sorry for being late. I have just given you the {role.name} role")
                 except Exception:
                     pass
-              await ctx.send(f"Gave the {role.name} role to {len(targets)} members.")
+              if targets:
+                await ctx.send(f"Gave the {role.name} role to {len(targets)} members.")
+              else:
+                await ctx.send(f"We covered everyone for the {role.name} role.")
                 
     @commands.command()
     @commands.is_owner()
