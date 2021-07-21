@@ -1,7 +1,7 @@
 import discord
 from discord.errors import ClientException
 from discord.ext import commands, tasks
-from asyncio import sleep
+from asyncio import sleep, TimeoutError
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -41,7 +41,6 @@ class Music(commands.Cog):
 
         await self.get_bot_vc()
         await self.connect_to_bot_vc()
-        
         await self.playtune()
         self.reconnect.start()
 
@@ -72,44 +71,42 @@ class Music(commands.Cog):
         print("Got the bot's voice channel.")
 
     async def connect_to_bot_vc(self):
-        """Function that tries to create the vc object by connecting to it's voice channel. If this fails, disconnect the bot, then reconnect it"""
-        try:
-            self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
-        except:
-            print("Already connected, so disconnecting now")
+        """Function that connects to the bot vc"""
+        while True:
             try:
-                await self.bot.voice_clients[0].disconnect()
-            except IndexError:
-                print("Strange... turns out I'm not connected. Will try again later")
-                return
-            try:
-                self.data_dict["VC_OBJECT"] = await self.data_dict["VOICE_CHANNEL"].connect()
-                print("Reconnected successfully")
-            except Exception as err:
-                await self.data_dict["ERROR_CHANNEL"].send(f"I got a problem when trying to reconnect:\n{err}")
+                await self.data_dict["VOICE_CHANNEL"].connect(reconnect=True)
+                break
+            except TimeoutError:
+                sleep(60)
+                continue
+            except ClientException:
+                if not self.bot.voice_clients:
+                    sleep(60)
+                    continue
+                [await v_client.disconnect() for v_client in self.bot.voice_clients]
+                return False
             
     played_before = 0
 
     async def playtune(self):  
-        """Checks if the bot is currently playing a song. If not, then try to play it """      
-        if not self.data_dict["VC_OBJECT"].is_playing():
+        """Checks if the bot is currently playing a song. If not, then try to play it """
+
+        if not self.bot.voice_clients[0].is_playing():
+            if self.played_before == 0:
+                print("Bot isn't playing music. Lets begin this")
+                self.played_before += 1
+            else:
+                print("Seems like the song is done. Time to replay it")
             try:
-                if self.played_before == 0:
-                    print("Bot isn't playing music. Lets begin this")
-                    self.played_before += 1
-                else:
-                    print("Seems like the song is done. Time to replay it")
-                self.data_dict["VC_OBJECT"].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
+                self.bot.voice_clients[0].play(discord.FFmpegOpusAudio(self.data_dict["TRACK"]))
                 print("Playing music")
-            except Exception as err:
-                print(f"An error occurred... Look at this {err}")
-                await self.data_dict["ERROR_CHANNEL"].send(f"An error occurred... Look at this:\n{err}")      
+            except ClientException as err:
                 if "not connected" in str(err).lower():
                     await self.connect_to_bot_vc()
        
     @tasks.loop(minutes=1)
     async def reconnect(self):
-        if (not self.bot.voice_clients) or (self.data_dict["VC_OBJECT"].channel != self.data_dict["VOICE_CHANNEL"]):
+        if (not self.bot.voice_clients) or (self.bot.voice_clients[0].channel != self.data_dict["VOICE_CHANNEL"]):
             await self.connect_to_bot_vc()
 
         await self.playtune()
