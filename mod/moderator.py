@@ -139,10 +139,10 @@ class Moderator(commands.Cog):
 
     @commands.command(brief='Bans a user', help="Bans a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
-    async def ban(self, ctx, member:discord.Member, *, reason):
-        await member.ban(reason=reason)
-        await ctx.send(f"{member.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
-        await log("Ban", f"{str(member)} was banned", str(ctx.author), reason)
+    async def ban(self, ctx, user:discord.User, *, reason):
+        await user.ban(reason=reason)
+        await ctx.send(f"{user.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
+        await log("Ban", f"{str(user)} was banned", str(ctx.author), reason)
     
     @commands.command(brief="Puts channel in slowmode", help="Use this to apply or disable a channel's slowmode", usage="duration")
     @commands.has_permissions(administrator=True)
