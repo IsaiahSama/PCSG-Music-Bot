@@ -140,7 +140,7 @@ class Moderator(commands.Cog):
     @commands.command(brief='Bans a user', help="Bans a user from this server", usage="@user reason")
     @commands.has_permissions(administrator=True)
     async def ban(self, ctx, user:discord.User, *, reason):
-        await user.ban(reason=reason)
+        await ctx.guild.ban(user, reason=reason)
         await ctx.send(f"{user.name} was Banned from {ctx.guild.name} by {ctx.author.name}. Reason: {reason}")
         await log("Ban", f"{str(user)} was banned", str(ctx.author), reason)
     
