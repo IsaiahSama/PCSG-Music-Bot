@@ -8,6 +8,7 @@ from random import randint
 import asyncio
 from moderator import aiosqlite
 import traceback
+from aiohttp import ClientSession
 
 class EventHandling(commands.Cog):
     def __init__(self, bot) -> None:
@@ -327,6 +328,35 @@ class EventHandling(commands.Cog):
         """Used to determine if a message has in explicits or rule breaking language. Takes a message object, and then returns a boolean"""
         user = await self.getuser(message)
         if not user: return
+        contains_profanity = ""
+        new_text = ""
+        async with ClientSession() as session:
+            async with session.get(f"https://www.purgomalum.com/service/containsprofanity/?text={message.content}") as response:
+                contains_profanity = await response.text()
+                if contains_profanity == "true":
+                    async with session.get(f"https://www.purgomalum.com/service/json/?text={message.content}&fill_text=[illegal word]") as response:
+                        json = await response.json()
+                        new_text = json["result"]
+
+        if new_text:
+            await message.channel.send(f"{message.author.name}: {new_text}")
+            await message.delete()
+            user[1] += 0.5
+            await message.channel.send(f"{message.author.name} has been warned. Warnstate: {user[1]} / 4 strikes", delete_after=5)
+            async with aiosqlite.conenct("PCSGDB.sqlite3") as db:
+                await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (user[1], user[0]))
+                await db.commit()
+            if user[1] >= 4:
+                try:
+                    await message.author.send(f"You have been muted from PCSG. If you believe it was unfair contact {message.guild.owner}")
+                except:
+                    pass
+                finally:
+                    role = discord.utils.get(message.guild.roles, id=all_roles["MUTED"])
+                    await message.author.add_roles(role)
+                    await message.guild.owner.send(f"{message.author} was muted from PCSG for disobeying rules")
+            return True
+        return False
         found = False
         original = user[1]
 
