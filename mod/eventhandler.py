@@ -343,7 +343,7 @@ class EventHandling(commands.Cog):
             await message.delete()
             user[1] += 0.5
             await message.channel.send(f"{message.author.name} has been warned. Warnstate: {user[1]} / 4 strikes", delete_after=5)
-            async with aiosqlite.conenct("PCSGDB.sqlite3") as db:
+            async with aiosqlite.connect("PCSGDB.sqlite3") as db:
                 await db.execute("UPDATE WarnUser SET WarnLevel = ? WHERE (ID) == ?", (user[1], user[0]))
                 await db.commit()
             if user[1] >= 4:
