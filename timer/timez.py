@@ -19,10 +19,10 @@ class Timer(commands.Cog):
         self.data_dict["BOT_ID"] = self.bot.user.id
         # 45 minute bot
         if self.data_dict["BOT_ID"] == 762840423965392906:
-            target = 762849851557675009
+            target = 925226936085655613
         # 25 minute bot
         elif self.data_dict["BOT_ID"] == 762840289417101352:
-            target = 762849722712064031
+            target = 925227192080809994
         else:
             self.data_dict["ERROR_CHANNEL"].send(f"An {self.bot.user.name} is using MEEEE")
             raise SystemExit
