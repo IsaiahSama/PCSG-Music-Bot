@@ -13,22 +13,22 @@ class Music(commands.Cog):
     bot_dict = {
         755685507907846144: {
             "BOT_NAME": "Lofi Bot",
-            "CHANNEL_ID": 762082834235654164,
+            "CHANNEL_ID": 925227331839209494,
             "TRACK": "lofi.mp3"
         },
         756347306038657085: {
             "BOT_NAME": "Nature Bot",
-            "CHANNEL_ID": 762150460651339806,
+            "CHANNEL_ID": 925227390077108275,
             "TRACK": "nature.mp3"
         },
         762167641334218762: {
             "BOT_NAME": "Piano Bot",
-            "CHANNEL_ID": 762171605244968990,
+            "CHANNEL_ID": 925227439532175431,
             "TRACK": "piano.mp3"
         },
         820792275743014915: {
             "BOT_NAME": "Relax and vibe",
-            "CHANNEL_ID": 820793494419144845,
+            "CHANNEL_ID": 925230490087223296,
             "TRACK": "relax.mp3"
         }
     }
