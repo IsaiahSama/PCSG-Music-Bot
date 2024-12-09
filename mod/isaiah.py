@@ -1,6 +1,7 @@
 import discord
 from discord import utils
 from discord.ext import commands
+from discord.ext.commands import Bot
 import random, re
 from re import compile
 
@@ -9,7 +10,7 @@ from mydicts import *
 import traceback
 
 class Isaiah(commands.Cog, command_attrs=dict(hidden=True)):
-    def __init__(self, bot):
+    def __init__(self, bot:Bot):
         self.bot = bot
         
     @commands.command(hidden=True)
@@ -578,6 +579,53 @@ The Private Caribbean Study Goals is an organsiation founded by {ctx.guild.owner
         if message.content == "UNLOAD ZA WARUDO 493839592835907594":
             for cog in self.bot.extensions.keys():
                 self.bot.unload_extension(cog)
+
+    @commands.command()
+    @commands.is_owner()
+    async def serve_the_queen(self, ctx):
+        csec = list(filter(lambda x: x.name.lower().startswith("csec "), ctx.guild.roles))
+        cape = list(filter(lambda x: x.name.lower().startswith("cape "), ctx.guild.roles))
+
+        message = await ctx.send("Hey master... this is a pretty big thing yk... Check the console to make sure I am only changing the right things... Then react below")
+        await message.add_reaction("✅")
+        print(csec)
+        print(cape)
+
+        print("Examples:")
+        print(csec[0].name.replace("csec ", "5-"))
+        print(cape[0].name.replace("cape ", "6-"))
+
+        r, _ = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r) == "✅" and u == ctx.author)
+        if r:
+            await ctx.send("Confirmation has been given...")
+            print("Starting...")
+            [await role.edit(name=role.name.replace("csec ", "5-")) for role in csec]
+            [await role.edit(name=role.name.replace('cape ', "6-")) for role in cape]
+            await ctx.send("Done :see_no_evil:")
+        await ctx.send("Yea... no.")
+
+    @commands.command()
+    @commands.is_owner()
+    async def show_roles(self, ctx):
+        targets = list(filter(lambda x: x.name.lower().startswith("5") or x.name.lower().startswith("6"), ctx.guild.roles))
+        await ctx.send(f"Found {len(targets)} subjects.")
+        csec = [target for target in targets if target.name.startswith("5")]
+        cape = [target for target in targets if target.name.startswith('6')]
+        csec.sort()
+        cape.sort()
+
+        results = dict(zip(csec, cape))
+        output = [f"{k} : {v}" for k, v in results.items()]
+        await ctx.send("\n".join(sorted(output)))
+
+    @commands.command()
+    @commands.is_owner()
+    async def show_emojis(self, ctx):
+        emojis = []
+        emojis.extend(list(reactions['CSEC'].keys()))
+        emojis.extend(list(reactions['CAPE'].keys()))
+        await ctx.send(emojis)
+        
 
 def setup(bot):
     bot.add_cog(Isaiah(bot))

@@ -237,7 +237,6 @@ class EventHandling(commands.Cog):
         me = guild.get_member(493839592835907594)
         member = payload.member or discord.utils.get(guild.members, id=payload.user_id)
         if member.bot:return
-        bot_channel = guild.get_channel(channels["BOT_ROOM"])
         error_channel = guild.get_channel(channels["ERROR_ROOM"])
         partial_channel = member.guild.get_channel(payload.channel_id)
         partial_message = PartialMessage(channel=partial_channel, id=payload.message_id)
